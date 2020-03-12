@@ -109,6 +109,8 @@
 #define A2D_BAD_CP_TYPE       0xE0  /**< The requested CP Type is not supported. */
 #define A2D_BAD_CP_FORMAT     0xE1  /**< The format of Content Protection Service Capability/Content Protection Scheme Dependent Data is not correct. */
 
+#define A2D_SUCCESS_ONLY      0xF1  /** < CY Specific - Set Status to Success but not to set to route locally. */
+
 typedef uint8_t wiced_bt_a2d_status_t;
 
 /** @} A2D_STATUS */

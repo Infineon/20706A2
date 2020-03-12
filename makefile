@@ -75,6 +75,8 @@ CY_APP_PATH=.
 
 # Path to the root of the BTSDK
 CY_SHARED_PATH=$(CY_APP_PATH)/../../..
+# absolute path to the root of the BTSDK
+CY_SHARED_PATH_ABS=$(CURDIR)/../../..
 
 # Path (absolute or relative) to the base library
 CY_BASELIB_PATH=$(CY_SHARED_PATH)/dev-kit/baselib/$(CY_TARGET_DEVICE)

@@ -86,6 +86,29 @@ typedef void (*wiced_bt_avrc_ct_cmd_cback_t)    ( uint8_t handle, wiced_bt_avrc_
 /** Callback when peer device sends response to AVRCP passthrough commands */
 typedef void (*wiced_bt_avrc_ct_pt_rsp_cback_t) ( uint8_t handle, wiced_bt_avrc_msg_pass_t *avrc_pass_rsp );
 
+#if AVRC_ADV_CTRL_INCLUDED == TRUE
+/* Callback used to indicates some peer features */
+typedef enum
+{
+    /* This event is sent to indicate that the peer device supports Absolute Volume */
+    WICED_BT_AVRC_CT_FEATURES_ABS_VOL_SUPPORTED = 1,
+} wiced_bt_avrc_ct_features_event_t;
+
+/* Data associated with WICED_BT_AVRC_CT_FEATURES_ABS_VOL_SUPPORTED event */
+typedef struct
+{
+    uint8_t handle;
+    wiced_bool_t supported;
+} wiced_bt_avrc_ct_features_abs_vol_t;
+
+typedef union
+{
+    wiced_bt_avrc_ct_features_abs_vol_t abs_vol_supported;
+} wiced_bt_avrc_ct_features_data_t;
+
+typedef void (*wiced_bt_avrc_ct_features_cback_t) (wiced_bt_avrc_ct_features_event_t event,
+        wiced_bt_avrc_ct_features_data_t *p_data);
+#endif /* AVRC_ADV_CTRL_INCLUDED == TRUE */
 
 /******************************************************
  *               Function Declarations
@@ -126,6 +149,20 @@ wiced_result_t wiced_bt_avrc_ct_init(uint32_t local_features,
                     wiced_bt_avrc_ct_cmd_cback_t p_cmd_cb,
                     wiced_bt_avrc_ct_rsp_cback_t p_rsp_cb,
                     wiced_bt_avrc_ct_pt_rsp_cback_t p_ptrsp_cb);
+
+#if AVRC_ADV_CTRL_INCLUDED == TRUE
+/**
+ * Function         wiced_bt_avrc_ct_features_register
+ *
+ *                  Register for AVRC Feature events.
+ *                  This, optional, function must be called after wiced_bt_avrc_ct_init
+ *
+ * @return          wiced_result_t
+ *
+ */
+wiced_result_t wiced_bt_avrc_ct_features_register(
+        wiced_bt_avrc_ct_features_cback_t features_callback);
+#endif
 
 /**
  * Function         wiced_bt_avrc_ct_deinit

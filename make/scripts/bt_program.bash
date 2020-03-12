@@ -12,10 +12,12 @@ set -e
 #					--elf=<app elf file>
 #					--hex=<download hex file>
 #					--verbose
+#					--help
 #
 #######################################################################################################################
 
-USAGE="(-s=|--shell=)<shell path> (-t=|--tools=)<wiced tools path> (-w=|--scripts=)<wiced scripts path> (-x=|--hex=)<hex file> (-e=|--elf=)<elf file>"
+USAGE="(-s=|--shell=)<shell path> (-t=|--tools=)<wiced tools path> (-w=|--scripts=)<wiced scripts path> (-x=|--hex=)<hex file> (-e=|--elf=)<elf file> (-v|--verbose)<verbose output> (-h|--help)<show usage>"
+USAGE+=" (-u=|--uart=)<uart port>"
 if [[ $# -eq 0 ]]; then
 	echo "usage: $0 $USAGE"
 	exit 1
@@ -48,6 +50,10 @@ do
 			CY_APP_HEX_ABS=${CY_APP_HEX_ABS//\\/\/}
 			shift
 			;;
+		-u=*|--uart=*)
+			CY_APP_UART="${i#*=}"
+			shift
+			;;
 		-v|--verbose)
 			VERBOSE=1
 			shift
@@ -76,6 +82,7 @@ if [ "$VERBOSE" != "" ]; then
 	echo "3: CYWICEDSCRIPTS : $CYWICEDSCRIPTS"
 	echo "4: CY_APP_HEX  : $CY_APP_HEX"
 	echo "5: CY_APP_ELF  : $CY_APP_ELF"
+	echo "5: CY_APP_UART  : $CY_APP_UART"
 fi
 
 # intercept this "program" target
@@ -112,6 +119,10 @@ CYWICEDBTP="$dir/"$APPNAME_BASE".btp"
 CYWICEDID="$dir/"$APPNAME_BASE"_hci_id.txt"
 CYWICEDMINI="$dir/minidriver.hex"
 CYWICEDFLAGS="$dir/chipload_flags.txt"
+CYWICEDBAUDFILECMD=
+if [ -e "$dir/"$APPNAME_BASE"_baudrates.txt" ]; then
+CYWICEDBAUDFILECMD="-baudfile $dir/"$APPNAME_BASE"_baudrates.txt"
+fi
 
 set +e
 
@@ -123,10 +134,10 @@ fi
 
 if [ "$VERBOSE" != "" ]; then
 echo "$CY_TOOL_PERL" "$CYWICEDSCRIPTS/ChipLoad.pl" -tools_path $CYWICEDTOOLS -build_path $dir -id $CYWICEDID -btp $CYWICEDBTP \
-                            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS
+                            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS -uart $CY_APP_UART $CYWICEDBAUDFILECMD
 fi
 "$CY_TOOL_PERL" "$CYWICEDSCRIPTS/ChipLoad.pl" -tools_path $CYWICEDTOOLS -build_path $dir -id $CYWICEDID -btp $CYWICEDBTP \
-                            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS
+                            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS -uart $CY_APP_UART $CYWICEDBAUDFILECMD
 
 if [ $? -eq 0 ]; then
    echo "Download succeeded"

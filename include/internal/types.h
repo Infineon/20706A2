@@ -137,6 +137,7 @@ typedef UINT8            BOOL8;
 #define PLACE_IN_DROM1 (section("const_drom_var"))
 //Satya -- need this for seamless debugging..no run time penalty
 #define PLACE_IN_DROM ATTRIBUTE(PLACE_IN_DROM1)
+#define PLACE_TEXT_IN_RAM   // already in RAM by default
 #else // some makefiles may not define COMPILER_GHS
 #define PACKED
 #define ALIGN4      // use #pragma alignvar(4) ... #pragma alignvar(1)

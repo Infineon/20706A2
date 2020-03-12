@@ -30,39 +30,6 @@ my $mem_lut = {
 		"mem_type" => "xip_section",
 		"pre" => ["xip_area_begin"],
 		"post" => ["spar_irom_end","xip_area_end"],},
-	".datagot" => {
-		"sections" => [
-			"*(.got)",
-			"actual_xip_got_end = ABSOLUTE(.);",
-			"*(.got.plt)",
-            "*(.plt)",
-# add 4 bytes for the got signature
-            ". += 0x04;"],
-		"mem_type" => "xip_section",
-		"pre" => ["xip_got_begin"],
-		"post" => ["xip_got_end"],},
-	".dyn_info" => {
-		"sections" => [
-			"*(.dynamic)",
-			"*(.interp)",
-			"*(.dynsym)",
-			"*(.dynstr)",
-			"*(.hash)",
-			"*(.iplt)",
-			"*(.igot.plt)",
-			"*(.rel.got)",
-			"*(.rel.plt)"],
-		"mem_type" => "xip_relo",
-		"pre" => [],
-		"post" => [],},
-	".rel.dyn" => {
-		"sections" => [
-            "*(.rel.dyn)",
-            "*(.rel.data)",
-            "*(.rel.init_patch_table)"],
-		"mem_type" => "xip_relo",
-		"pre" => [],
-		"post" => [],},
 	".setup" => {
 		"sections" => [
 			"*(.init_code)",
@@ -76,6 +43,7 @@ my $mem_lut = {
 			"*(.app_init_code)",
 			"*(.emb_text)",
 			"*(.text)",
+			"*(.text_in_ram)",
 			"*(.text.*)",
             "*(EmHeAacDec)",
 			"*(.gnu.linkonce.t.*)",
@@ -156,7 +124,7 @@ my $mem_lut = {
 		"post" => [],},
 };
 
-my $xip_pi_extra_in = [
+my $xip_extra_in = [
 	"*(.app_init_code)",
 	"*(.emb_text)",
 	"*(.text)",
@@ -181,8 +149,6 @@ my $xip_pi_extra_in = [
 	"*(.rodata.*)",
 	"*(.gnu.linkonce.r.*)",
 	"*(.data.rom)",
-#    "*(.data.rel.ro)",
-#    "*(.data.rel.ro.local)",
 ];
 
 main();
@@ -246,58 +212,26 @@ sub main
 		elsif($arg =~ /^FLASH0_LENGTH=(\w+)/) {
 			$param->{'FLASH0_LENGTH'} = hex($1);
 		}
-		elsif($arg =~ /^XIP_PI$/) {
-			$param->{'xip_pi'} = 1;
-		}
 		elsif($arg =~ /^XIP_DS_OFFSET=(\w+)/) {
 			$param->{'XIP_DS_OFFSET'} = hex($1);
 			$param->{'xip'} = 1;
-			push @{$mem_lut->{'.app_xip_area'}->{sections}}, @{$xip_pi_extra_in};
+			push @{$mem_lut->{'.app_xip_area'}->{sections}}, @{$xip_extra_in};
 		}
 		elsif($arg =~ /^XIP_LEN=(\w+)/) {
 			$param->{'XIP_LEN'} = hex($1);
 		}
 		elsif($arg =~ /^XIP_OBJ=(.*)/) {
-		    # this is not needed for XIP_PI as there are catch-alls like *(.tex.t.*) , etc.
 			my @xip_obj = split ";", $1;
 			my @xip_o;
 			foreach my $obj (@xip_obj) {
 				$obj =~ s/^\./\*/;
-                if ($obj =~/\*\/elf_pi.o/) {
-                    $obj .= "*/elf_pi.o (.sec_*)";
-                }
-                else {
 				$obj .= " (.text.* .gnu.linkonce.t.* .rodata .constdata* .rodata.* .gnu.linkonce.r.*)";
-                }
 				push @xip_o, $obj;
 			}
 			unshift @{$mem_lut->{'.app_xip_area'}->{sections}}, @xip_o;
 		}
         elsif($arg =~ /^APP_DS2_LEN=(\w+)/) {
             $param->{'APP_DS2_LEN'} = hex($1);
-        }
-        elsif($arg =~ /^APP_DS2_OBJ=(.*)/) {
-            $param->{'APP_DS2'} = 1;
-            # this is not needed for XIP_PI as there are catch-alls like *(.tex.t.*) , etc.
-            my @xip_obj = split ";", $1;
-            my @xip_o;
-            foreach my $obj (@xip_obj) {
-                $obj =~ s/^\./\*/;
-                push @xip_o, "KEEP(" . $obj . " (.rodata .rodata.* .constdata* .gnu.linkonce.r.*))";
-                # needed to force ofu_ds2 lib into ds2, is there a better way?
-                if($obj =~ /ofu_ds2_/) {
-                    push @xip_o, $obj . ":*";
-                    next;
-                }
-                push @xip_o, "KEEP(" . $obj . " (.text.* .gnu.linkonce.t.*))";
-                push @xip_d, "KEEP(" . $obj . " (.data .data.* .gnu.linkonce.d.* .bss .bss.* .gnu.linkonce.b.*))";
-            }
-            $mem_lut->{'.app_xip_area_ds2'} = { sections => [], mem_type => "xip_section_ds2", pre => ["ds2_xip_begin"], post => ["ds2_xip_end"] };
-            $mem_lut->{'.app_ram_area_ds2'} = { sections => [], mem_type => "ram", pre => ["ds2_ram_begin"], post => ["ds2_ram_end"] };
-            unshift @{$mem_lut->{'.app_xip_area_ds2'}->{sections}}, @xip_o;
-            unshift @{$mem_lut->{'.app_ram_area_ds2'}->{sections}}, @xip_d;
-            unshift @{$mem_lut->{'.app_xip_area_ds2'}->{sections}}, "KEEP(*(.text.ds2))";
-            unshift @{$mem_lut->{'.app_xip_area_ds2'}->{sections}}, "KEEP(*(.rodata.ds2))";
         }
 		elsif($arg =~ /^overlay=(.*)$/) {
 			$param->{'overlay'} = $1;
@@ -385,22 +319,7 @@ sub output_ld
 		die "Could not locate code ram start in patch elf\n" if !defined $rom_begin;
 		die "Could not locate code ram end in patch elf\n" if !defined $rom_end;
 	}
-	elsif($param->{btp} =~ /20706/) {
-		my $lst_file = $param->{elf};
-		$lst_file =~ s/\.elf$/\.lst/;
-		open(my $LST, "<", $lst_file) or die "Could not open $lst_file, $!\n";
-		while(defined(my $line = <$LST>)) {
-			if($line =~ /Load Region CM3_Ver1 \(Base: 0x([0-9a-f]+), Size: 0x([0-9a-f]+), Max: 0x([0-9a-f]+)/) {
-				$rom_start = hex($1);
-				my $rom_code_len = hex($2);
-				my $rom_max = hex($3);
-				$rom_begin = $rom_start + $rom_code_len;
-				$rom_end = $rom_start + $rom_max;
-				last;
-			}
-		}
-		close $LST;
-	}
+
 	if(defined $sections->{FIRST_FREE_SECTION_IN_AON}) {
 		$aon_begin = $sections->{FIRST_FREE_SECTION_IN_AON}->{sh_addr};
 		$aon_end = $sections->{AON_AREA_END}->{sh_addr};
@@ -453,7 +372,7 @@ sub output_ld
 		print $OUT sprintf "/* FLASH0_DS=0x%06X */\n", $param->{ConfigDSLocation};
 	}
 	if(defined $param->{ConfigDS2Location}) {
-        if(defined $param->{APP_DS2_LEN} && defined $param->{APP_DS2}) {
+        if(defined $param->{APP_DS2_LEN}) {
             $param->{ConfigDS2Location} = $param->{FLASH0_BEGIN_ADDR} + $param->{FLASH0_LENGTH} - $param->{APP_DS2_LEN};
         }
 		print $OUT sprintf "/* FLASH0_DS2=0x%06X */\n", $param->{ConfigDS2Location};
@@ -475,15 +394,7 @@ sub output_ld
 		$xip_start = $param->{ConfigDSLocation} + $param->{XIP_DS_OFFSET};
 		$xip_len = $param->{XIP_LEN};
 		$xip_len = $param->{FLASH0_LENGTH} - ($xip_start - $param->{ConfigDSLocation}) if !defined $xip_len;
-        if(defined $param->{APP_DS2_LEN} && defined $param->{APP_DS2}) {
-            my $xip_ds2_start = $param->{FLASH0_BEGIN_ADDR} + $param->{FLASH0_LENGTH} - $param->{APP_DS2_LEN};
-            $xip_len = ($param->{FLASH0_BEGIN_ADDR} + $param->{FLASH0_LENGTH} - $param->{APP_DS2_LEN}) - $xip_start;
-            print $OUT sprintf "\txip_section_ds2 (rx) : ORIGIN = 0x%X, LENGTH = 0x%X\n", $xip_ds2_start, $param->{APP_DS2_LEN};
-        }
         print $OUT sprintf "\txip_section (rx) : ORIGIN = 0x%X, LENGTH = 0x%X\n", $xip_start, $xip_len;
-	}
-	if(defined $param->{xip_pi}) {
-		print $OUT "\txip_relo (rwx) : ORIGIN = 0xFF000000, LENGTH = 0x100000\n";
 	}
     if(defined $param->{PATCH_RAM_OBJ}) {
         print $OUT sprintf "\tpram (rwx) : ORIGIN = 0x%X, LENGTH = 0x%X\n", $rom_begin, $rom_end - $rom_begin;
@@ -518,15 +429,8 @@ sub output_ld
 		close $OVER;
 	}
 
-    # when we load different apps to ds1 and ds2_ram_begin
-    output_section('.app_xip_area_ds2', $mem_lut, $OUT) if defined $param->{APP_DS2};
-    output_section('.app_ram_area_ds2', $mem_lut, $OUT) if defined $param->{APP_DS2};
-
 	# if objects are assigned to XIP, match their .text and .rodata
 	output_section('.app_xip_area', $mem_lut, $OUT) if defined $param->{xip};
-	output_section('.datagot', $mem_lut, $OUT) if $param->{xip_pi};
-	output_section('.dyn_info', $mem_lut, $OUT) if $param->{xip_pi};
-	output_section('.rel.dyn', $mem_lut, $OUT) if $param->{xip_pi};
 
 	# When direct loading, don't overlap init code with dynamic allocation.
 	if($param->{direct_load})
@@ -534,15 +438,15 @@ sub output_ld
 		output_section('.setup', $mem_lut, $OUT);
 	}
     output_section('.pram_rodata', $mem_lut, $OUT) if defined $param->{PATCH_RAM_OBJ};
-    output_section('.text', $mem_lut, $OUT) if (!defined($param->{xip_pi}) || $param->{xip_pi} == 0);
-    output_section('.rodata', $mem_lut, $OUT) if (!defined($param->{xip_pi}) || $param->{xip_pi} == 0);
+    output_section('.text', $mem_lut, $OUT);
+    output_section('.rodata', $mem_lut, $OUT);
 	output_section('.data', $mem_lut, $OUT);
 
 	# Nothing to load because it is loaded from EEPROM/SF at boot.
 	print $OUT "\tspar_irom_data_begin = spar_iram_data_begin;\n";
 	output_section('.bss', $mem_lut, $OUT);
 
-    if(!$param->{direct_load} && (!defined($param->{xip_pi}) || $param->{xip_pi} == 0)) {
+    if(!$param->{direct_load}) {
 		# Place the setup area after bss so that when dynamic allocation occurs
 		# after spar setup, it will reclaim the RAM taken up by the setup function.
 		output_section('.setup', $mem_lut, $OUT);

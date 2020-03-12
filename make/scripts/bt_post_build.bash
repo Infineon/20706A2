@@ -21,6 +21,7 @@ set -e
 #                       --cgsargs=<cgs tool args>
 #                       --btp=<btp file>
 #                       --id=<hci id>
+#                       --overridebaudfile=<override baud rate list>
 #                       --chip=<chip>
 #                       --target=<target>
 #                       --minidriver=<minidriver file>
@@ -36,7 +37,7 @@ USAGE+=" (-b=|--builddir=)<build dir> (-e=|--elfname=)<elf name>"
 USAGE+=" (-a=|--appname=)<app name> (-d=|--hdf=)<hdf file>"
 USAGE+=" (-n=|--entry=)<app entry function> (-l=|--cgslist=)<cgs file list>"
 USAGE+=" (-f=|--failsafe=)<failsafe cgs file> (-g=|--cgsargs=)<cgs tool arg>"
-USAGE+=" (-p=|--btp=)<btp file> (-i=|--id=)<hci id file>"
+USAGE+=" (-p=|--btp=)<btp file> (-i=|--id=)<hci id file> (-o=|--overridebaudfile=)<override baud rate list>"
 USAGE+=" (-q=|--chip=)<chip> (-r=|--target=)<target>"
 USAGE+=" (-m=|--minidriver=)<minidriver file> (-c=|--clflags=)<chipload tool flags>"
 USAGE+=" (-j=|--extrahex=)<hex file to merge> (-k=|--extras=)<extra build action>"
@@ -109,6 +110,10 @@ do
         CY_APP_HCI_ID="${i#*=}"
         shift
         ;;
+    -o=*|--overridebaudfile=*)
+        CY_APP_BAUDRATE_FILE="${i#*=}"
+        shift
+        ;;
     -q=*|--chip=*)
         CY_CHIP="${i#*=}"
         shift
@@ -119,6 +124,10 @@ do
         ;;
     -m=*|--minidriver=*)
         CY_APP_MINIDRIVER="${i#*=}"
+        shift
+        ;;
+    -2=*|--ds2_app=*)
+        CY_DS2_APP_HEX="${i#*=}"
         shift
         ;;
     -c=*|--clflags=*)
@@ -168,12 +177,14 @@ if [ "$VERBOSE" != "" ]; then
     echo 12: CY_APP_CGS_ARGS      : $CY_APP_CGS_ARGS
     echo 13: CY_APP_BTP           : $CY_APP_BTP
     echo 14: CY_APP_HCI_ID        : $CY_APP_HCI_ID
-    echo 15: CY_CHIP              : $CY_CHIP
-    echo 16: CY_TARGET            : $CY_TARGET
-    echo 17: CY_APP_MINIDRIVER    : $CY_APP_MINIDRIVER
-    echo 18: CY_APP_CHIPLOAD_FLAGS: $CY_APP_CHIPLOAD_FLAGS
-    echo 19: CY_APP_MERGE_HEX_NAME: $CY_APP_MERGE_HEX_NAME
-    echo 20: CY_APP_BUILD_EXTRAS  : $CY_APP_BUILD_EXTRAS
+    echo 15: CY_APP_BAUDRATE_FILE : $CY_APP_BAUDRATE_FILE
+    echo 16: CY_CHIP              : $CY_CHIP
+    echo 17: CY_TARGET            : $CY_TARGET
+    echo 18: CY_APP_MINIDRIVER    : $CY_APP_MINIDRIVER
+    echo 19: CY_DS2_APP_HEX       : $CY_DS2_APP_HEX
+    echo 20: CY_APP_CHIPLOAD_FLAGS: $CY_APP_CHIPLOAD_FLAGS
+    echo 21: CY_APP_MERGE_HEX_NAME: $CY_APP_MERGE_HEX_NAME
+    echo 22: CY_APP_BUILD_EXTRAS  : $CY_APP_BUILD_EXTRAS
 fi
 
 # check that required files are present
@@ -248,9 +259,9 @@ fi
 
 #create app cgs file
 if [ "$VERBOSE" != "" ]; then
-    echo "calling $CY_TOOL_PERL -I $CYWICEDSCRIPTS $CYWICEDSCRIPTS/wiced-gen-cgs.pl $CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST $CY_APP_HDF $CY_APP_LD $CY_APP_ENTRY out=$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+    echo "calling $CY_TOOL_PERL -I $CYWICEDSCRIPTS $CYWICEDSCRIPTS/wiced-gen-cgs.pl $CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST $CY_APP_HDF $CY_APP_LD $CY_APP_BTP $CY_APP_ENTRY out=$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 fi
-"$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-cgs.pl" "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST "$CY_APP_HDF" "$CY_APP_LD" $CY_APP_ENTRY out="$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs" > "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
+"$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-cgs.pl" "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST "$CY_APP_HDF" "$CY_APP_LD" "$CY_APP_BTP" $CY_APP_ENTRY out="$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs" > "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
 "$CY_TOOL_CAT" "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
 
 # copy hdf local for cgs tool, it seems to need it despite -D
@@ -269,33 +280,13 @@ echo "generate hex file:"
 echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 
-# handle APP_XIP, merge the XIP code/data into the hex
-if [[ $CY_APP_BUILD_EXTRAS = *"_XIP_"* ]]; then
-echo "Building in XIP section"
-"$CY_TOOL_MV" $CY_APP_HEX $CY_APP_HEX.temp
-"$CY_TOOL_RM" $CY_APP_HCD
-"$CY_TOOL_SYNC"
-"${CYCROSSPATH}objcopy" -j .app_xip_area -O ihex "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" "$CY_APP_HEX_STATIC"
-"$CYWICEDTOOLS/IntelHexToBin/IntelHexMerge" "$CY_APP_HEX.temp" "$CY_APP_HEX_STATIC" "$CY_APP_HEX"
-"$CYWICEDTOOLS/IntelHexToBin/IntelHexToHCD" "$CY_APP_HEX" "$CY_APP_HCD"
-fi
-if [[ $CY_APP_BUILD_EXTRAS = *"_XIPPI_"* ]]; then
-echo "Building in XIP section"
-"$CY_TOOL_MV" $CY_APP_HEX $CY_APP_HEX.temp
-"$CY_TOOL_RM" $CY_APP_HCD
-"$CY_TOOL_SYNC"
-"${CYCROSSPATH}objcopy" -j .app_xip_area -O ihex "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" "${CY_APP_HEX}.xip.code.hex"
-"${CYCROSSPATH}objcopy" -j .datagot -O ihex "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" "${CY_APP_HEX}.xip.got.hex"
-"$CYWICEDTOOLS/IntelHexToBin/IntelHexMerge" "$CY_APP_HEX.temp" "${CY_APP_HEX}.xip.code.hex" "${CY_APP_HEX}.xip.got.hex" "$CY_APP_HEX"
-"$CYWICEDTOOLS/IntelHexToBin/IntelHexToHCD" "$CY_APP_HEX" "$CY_APP_HCD"
-fi
 if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
 echo "Appending DS2 section"
 "$CY_TOOL_MV" $CY_APP_HEX $CY_APP_HEX.ds1
 "$CY_TOOL_RM" $CY_APP_HCD
 "$CY_TOOL_SYNC"
-"${CYCROSSPATH}objcopy" -j .app_xip_area_ds2 -O ihex "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" "${CY_APP_HEX}.xip.ds2.code.hex"
-"$CYWICEDTOOLS/IntelHexToBin/IntelHexMerge" "$CY_APP_HEX.ds1" "${CY_APP_HEX}.xip.ds2.code.hex" "$CY_APP_HEX"
+#"${CYCROSSPATH}objcopy" -j .app_xip_area_ds2 -O ihex "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" "${CY_APP_HEX}.xip.ds2.code.hex"
+"$CYWICEDTOOLS/IntelHexToBin/IntelHexMerge" "$CY_APP_HEX.ds1" "$CY_DS2_APP_HEX" "$CY_APP_HEX"
 "$CYWICEDTOOLS/IntelHexToBin/IntelHexToHCD" "$CY_APP_HEX" "$CY_APP_HCD"
 fi
 
@@ -406,6 +397,9 @@ fi # end if OTA
 # copy files necessary for download to help launch config find them
 "$CY_TOOL_CP" "$CY_APP_BTP" "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.btp"
 "$CY_TOOL_CP" "$CY_APP_HCI_ID" "$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}_hci_id.txt"
+if [[ -e $CY_APP_BAUDRATE_FILE ]]; then
+"$CY_TOOL_CP" "$CY_APP_BAUDRATE_FILE" "$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}_baudrates.txt"
+fi
 "$CY_TOOL_CP" "$CY_APP_MINIDRIVER" "$CY_MAINAPP_BUILD_DIR/minidriver.hex"
 "$CY_TOOL_ECHO" "$CY_APP_CHIPLOAD_FLAGS" >"$CY_MAINAPP_BUILD_DIR/chipload_flags.txt"
 

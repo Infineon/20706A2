@@ -140,4 +140,29 @@ extern void *GKI_getpoolbuf (UINT8 pool_id);
 
 #define HCI_CMD_POOL_ID     GKI_POOL_ID_1
 #define HCI_ACL_POOL_ID     GKI_POOL_ID_2
+
+extern void *GKI_getpoolbuf (UINT8 pool_id);
+extern void *GKI_getbuf (UINT16);
+
+/* RESERVED buffer pool for OBX */
+/* Ideally there should be 1 buffer for each instance for RX data, and some number
+of TX buffers based on active instances. OBX will only use these if packet size
+requires it. In most cases the large packets are used in only one direction so
+the other direction will use smaller buffers.
+Devices with small amount of RAM should limit the number of active obex objects.
+*/
+/* The size of the buffers in pool 4. */
+#ifndef GKI_BUF4_SIZE
+#define GKI_BUF4_SIZE               0x2000
+#endif
+
+#ifndef OBX_LRG_DATA_POOL_SIZE
+#define OBX_LRG_DATA_POOL_SIZE      GKI_BUF4_SIZE
+#endif
+
+/* Maximum device name length used in btm database. */
+#ifndef BTM_MAX_REM_BD_NAME_LEN
+#define BTM_MAX_REM_BD_NAME_LEN     20
+#endif
+
 #endif /* WICED_DEFS_H */

@@ -48,6 +48,9 @@ extern "C" {
 #define BD_ADDR_LEN     6
 typedef uint8_t         wiced_bt_device_address_t[BD_ADDR_LEN]; /**< Device address length */
 
+#define BD_NAME_LEN     248
+typedef uint8_t wiced_bt_remote_name_t[BD_NAME_LEN + 1];        /* Device name array */
+
 typedef uint8_t *wiced_bt_device_address_ptr_t;                 /**< Device address Pointer */
 
 #define DEV_CLASS_LEN   3

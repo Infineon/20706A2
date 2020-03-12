@@ -57,7 +57,11 @@ CY_OPENOCD_GDB_SERVER_ARGS=$(CY_OPENOCD_SEARCH) $(CY_OPENOCD_CONFIG)
 #
 CY_JLINK_GDB_SERVER_PATH=.
 CY_JLINK_GDB_SERVER=$(CY_JLINK_GDB_SERVER_PATH)/JLinkGDBServerCL
+ifeq ($(CY_TARGET_DEVICE),20706A2)
+CY_JLINK_GDB_SERVER_ARGS=-USB -device Cortex-M3 -endian little -if SWD -speed auto -noir -LocalhostOnly
+else
 CY_JLINK_GDB_SERVER_ARGS=-USB -device Cortex-M4 -endian little -if SWD -speed auto -noir -LocalhostOnly
+endif
 # set to same port as openocd default
 CY_JLINK_GDB_SERVER_ARGS+= -port 3333
 
@@ -74,21 +78,27 @@ GDB_SERVER_COMMAND?=$(CY_OPENOCD_DIR)/bin/openocd $(CY_OPENOCD_GDB_SERVER_ARGS)
 #
 CY_DOWNLOAD_CMD=\
 	bash "$(CY_INTERNAL_BASELIB_PATH)/make/scripts/bt_program.bash"\
-	"--shell=$(CY_MODUS_SHELL_DIR)"\
-	"--tools=$(CY_WICED_TOOLS_DIR)"\
-	"--scripts=$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
-	"--hex=$(CY_CONFIG_DIR)/$(APPNAME)_download.hex"\
-	"--elf=$(CY_CONFIG_DIR)/$(APPNAME).elf"\
+	--shell="$(CY_MODUS_SHELL_DIR)"\
+	--tools="$(CY_WICED_TOOLS_DIR)"\
+	--scripts="$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
+	--hex="$(CY_CONFIG_DIR)/$(APPNAME)_download.hex"\
+	--elf="$(CY_CONFIG_DIR)/$(APPNAME).elf"\
+	--uart=$(UART)\
 	$(if $(VERBOSE),--verbose)
 
 program: build qprogram
 
-qprogram:
+$(CY_CONFIG_DIR)/$(APPNAME).hex: $(CY_CONFIG_DIR)/$(APPNAME).elf
+	$(CY_NOISE)$(CY_RECIPE_POSTBUILD) $(CY_CMD_TERM)
+
 ifeq ($(LIBNAME),)
+qprogram: $(CY_CONFIG_DIR)/$(APPNAME).hex
 	@echo "Programming target device ... "
+	$(if $(VERBOSE),@echo $(CY_DOWNLOAD_CMD))
 	@$(CY_DOWNLOAD_CMD)
 	@echo "Programming complete"
 else
+qprogram:
 	@echo "Library application detected. Skip programming... ";\
 	echo
 endif

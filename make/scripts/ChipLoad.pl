@@ -36,18 +36,24 @@ my $id_file = $params->{id};
 my $btp_file = $params->{btp};
 my $mini_driver = $params->{mini};
 my $config_file = $params->{hex};
+my $com_port = $params->{uart};
+$com_port = undef if $com_port eq "AUTO";
 my $baud_rate = "AUTO";
 my $detected_baud;
 my $addl_flags;
-my $com_port = 0;
+my $baud_file_cmd;
 
+
+if(defined $params->{baudfile} && -f $params->{baudfile}) {
+    $baud_file_cmd = "-BAUDRATEFILE \"" . $params->{baudfile} . "\"";
+}
 if(defined $params->{flags} && -f $params->{flags}) {
   open(my $FLAGS, "<", $params->{flags}) or die "Could not open file: $!";
   $addl_flags = <$FLAGS>;
   $addl_flags =~ s/\r|\n//g;
   if($addl_flags =~ /-PORT (\S+)/) {
-	$com_port = $1;
-	$addl_flags =~ s/-PORT (\S+)//;
+    $com_port = $1;
+    $addl_flags =~ s/-PORT (\S+)//;
   }
   close $FLAGS;
 }
@@ -93,8 +99,10 @@ else
 
     my $det_id_log_path = $build_loc . "/det_and_id.log";
     # Call DetectAndId to identify the board
-	#print "$detect_and_id -TRAN UART -BAUDRATE $baud_rate -IDFILE $id_file\n";
-    $output = `"$detect_and_id" -TRAN UART -BAUDRATE $baud_rate -IDFILE "$id_file" 2> $det_id_log_path`;
+    #print "$detect_and_id -TRAN UART -BAUDRATE $baud_rate -IDFILE $id_file $baud_file_cmd\n";
+    # enable for debug output from detect_and_id:
+    #$output = `"$detect_and_id" -TRAN UART -BAUDRATE $baud_rate -IDFILE "$id_file" $baud_file_cmd -DEBUG 2 2> $det_id_log_path`;
+    $output = `"$detect_and_id" -TRAN UART -BAUDRATE $baud_rate -IDFILE "$id_file" $baud_file_cmd 2> $det_id_log_path`;
 
     # Expected string
     ($expected_str) = qr/(.*\S)\s+HCI\s+$chip_id/;

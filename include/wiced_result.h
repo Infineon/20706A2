@@ -73,7 +73,8 @@ extern "C" {
     RESULT_ENUM( prefix, CORRUPT_PACKET_BUFFER,         27 ),   /**< Packet buffer is corrupted */     \
     RESULT_ENUM( prefix, UNKNOWN_NETWORK_STACK_ERROR,   28 ),   /**< Unknown network stack error */    \
     RESULT_ENUM( prefix, NO_STORED_AP_IN_DCT,           29 ),   /**< DCT contains no AP credentials */ \
-    RESULT_ENUM( prefix, STA_JOIN_FAILED,               30 ),   /**< Join failed */
+    RESULT_ENUM( prefix, STA_JOIN_FAILED,               30 ),   /**< Join failed */ \
+    RESULT_ENUM( prefix, NO_MEMORY,                   0x10 ),   /**< NO_MEMORY */
 /* WICED result list */
 
 

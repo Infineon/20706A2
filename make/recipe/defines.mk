@@ -66,7 +66,7 @@ CY_CORE_CGS_ARGS+=-O DLConfigTargeting:RAM runtime
 CY_CORE_CGS_ARGS+=-O DLMaxWriteSize:249
 else
 # Base address
-CY_CORE_CGS_ARGS+=-A 0xFF000000
+CY_CORE_CGS_ARGS+=-A $(CY_FLASH0_BEGIN_ADDR)
 endif
 
 # BT Device address
@@ -82,13 +82,6 @@ ifeq ($(TRANSPORT),UART)
 CY_APP_DEFINES+=-DWICED_HCI_TRANSPORT=1
 else
 CY_APP_DEFINES+=-DWICED_HCI_TRANSPORT=2
-endif
-
-# UART port for program
-ifneq ($(UART),)
-ifneq ($(UART),AUTO)
-CY_CORE_APP_CHIPLOAD_FLAGS+=-PORT $(UART)
-endif
 endif
 
 # use btp file to determine flash layout
@@ -127,9 +120,9 @@ CY_CORE_DEFINES+=\
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=2 \
-	-DWICED_SDK_MINOR_VER=1 \
+	-DWICED_SDK_MINOR_VER=3 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=4425
+	-DWICED_SDK_BUILD_NUMBER=5811
 
 #
 # Set the output file paths
@@ -182,7 +175,7 @@ else
   CY_OPEN_TYPE_LIST+=$(CY_BT_APP_TOOLS)
   CY_SUPPORTED_TOOL_TYPES+=$(CY_BT_APP_TOOLS)
 endif
-CY_BT_APP_TOOLS_DIR=$(CY_SHARED_PATH)/tools
+CY_BT_APP_TOOLS_DIR=$(CY_SHARED_PATH_ABS)/tools
 
 ifneq ($(filter BTSpy,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
@@ -192,7 +185,7 @@ else
     CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/BTSpy/$(CY_OS_DIR)/RunBtSpy.sh
   else
     CY_OPEN_BTSpy_TOOL=open
-    CY_OPEN_BTSpy_TOOL_ARGS=-a bt_spy.app
+    CY_OPEN_BTSpy_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR)/btsdk-utils/BTSpy/$(CY_OS_DIR)/bt_spy.app
   endif
 endif
 CY_OPEN_BTSpy_tool_EXT=
@@ -209,7 +202,7 @@ else
     CY_OPEN_ClientControl_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/RunClientControl.sh
   else
     CY_OPEN_ClientControl_TOOL=open
-    CY_OPEN_ClientControl_TOOL_ARGS=-a ClientControl.app
+    CY_OPEN_ClientControl_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/ClientControl.app
   endif
 endif
 endif
@@ -228,7 +221,7 @@ else
     CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-mesh/Qt_ClientControl/$(CY_OS_DIR)/RunClientControl.sh
   else
     CY_OPEN_ClientControlMesh_TOOL=open
-    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a mesh_client.app
+    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-mesh/Qt_ClientControl/$(CY_OS_DIR)/mesh_client.app
   endif
 endif
 endif

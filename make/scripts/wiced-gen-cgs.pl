@@ -4,50 +4,19 @@
 #use strict;
 use READELF;
 
-my $dynamic_entry_lut = {
-	# see glibc elf.h for definitions of .dynamic entries
-	# only subset of items is included so far
-	0x00 => { 'type' => 'DT_NULL', 'next' => 'ignore' },
-	0x01 => { 'type' => 'DT_NEEDED', 'next' => 'val' },
-	0x02 => { 'type' => 'DT_PLTRELSZ', 'next' => 'val' },
-	0x03 => { 'type' => 'DT_PLTGOT', 'next' => 'ptr' },
-	0x04 => { 'type' => 'DT_HASH', 'next' => 'ptr' },
-	0x05 => { 'type' => 'DT_STRTAB', 'next' => 'ptr' },
-	0x06 => { 'type' => 'DT_SYMTAB', 'next' => 'ptr' },
-	0x07 => { 'type' => 'DT_RELA', 'next' => 'ptr' },
-	0x08 => { 'type' => 'DT_RELASZ', 'next' => 'val' },
-	0x09 => { 'type' => 'DT_RELAENT', 'next' => 'val' },
-	0x0a => { 'type' => 'DT_STRSZ', 'next' => 'val' },
-	0x0b => { 'type' => 'DT_SYMENT', 'next' => 'val' },
-	0x0c => { 'type' => 'DT_INIT', 'next' => 'ptr' },
-	0x0d => { 'type' => 'DT_FINI', 'next' => 'ptr' },
-	0x0e => { 'type' => 'DT_SONAME', 'next' => 'ignore' },
-	0x0f => { 'type' => 'DT_RPATH', 'next' => 'val' },
-	0x10 => { 'type' => 'DT_SYMBOLIC', 'next' => 'ignore' },
-	0x11 => { 'type' => 'DT_REL', 'next' => 'ptr' },
-	0x12 => { 'type' => 'DT_RELSZ', 'next' => 'val' },
-	0x13 => { 'type' => 'DT_RELENT', 'next' => 'val' },
-	0x14 => { 'type' => 'DT_PLTREL', 'next' => 'val' },
-	0x15 => { 'type' => 'DT_DEBUG', 'next' => 'ptr' },
-	0x16 => { 'type' => 'DT_TEXTREL', 'next' => 'ignore' },
-	0x17 => { 'type' => 'DT_JMPREL', 'next' => 'ptr' },
-	0x6ffffff9 => { 'type' => 'DT_RELACOUNT', 'next' => 'val' },
-	0x6ffffffa => { 'type' => 'DT_RELCOUNT', 'next' => 'val' },
-	0x6ffffffb => { 'type' => 'DT_FLAGS_1', 'next' => 'val', 'map' => { 0x08000000 => 'DF_1_PIE' }, },
-};
-
 main();
 
 sub main
 {
-	my ($app_elf, $hdf_in);
-	my $hdf = {};
-	my $entry2code = {};
-	my $cgs_list = [];
-	my $app_entry_function;
-	my $outfile;
-	my $direct_load;
-	my $OUT;
+    my ($app_elf, $hdf_in);
+    my $hdf = {};
+    my $entry2code = {};
+    my $cgs_list = [];
+    my $app_entry_function;
+    my $outfile;
+    my $btp_file;
+    my $direct_load;
+    my $OUT;
 
 	foreach my $arg (@ARGV) {
 		#print "# ----- $arg\n";
@@ -66,6 +35,9 @@ sub main
 		elsif($arg =~ /\.ld$/) {
 			$app_ld = $arg;
 		}
+		elsif($arg =~ /\.btp$/) {
+			$btp_file = $arg;
+		}
 		elsif($arg =~ /(\w+)\.entry$/) {
 			$app_entry_function = $1;
 		}
@@ -80,15 +52,19 @@ sub main
 	my $symbol_entries = [];
 	parse_elf($app_elf, $sections, $stringtable, $sym_str_tbl, $symbol_entries, 0);
 
-	parse_hdf($hdf_in, $hdf, $entry2code);
-#	output_cgs_cfg($cfg_prep, $entry2code, $hdf_out, $symbol_entries);
-	if(defined $outfile) {
+    parse_hdf($hdf_in, $hdf, $entry2code);
+#    output_cgs_cfg($cfg_prep, $entry2code, $hdf_out, $symbol_entries);
+    if(defined $outfile) {
         open($OUT, ">", $outfile) || die "Could not open $outfile, $!\n";
-		select $OUT;
-	}
+        select $OUT;
+    }
 
-	# combine the cgs files
+    my $btp = {};
+    parse_btp($btp_file, $btp);
+
+    # combine the cgs files
     my @cgs_records;
+    my $got_xip_skip_cgs = 0;
     foreach my $cgs (@{$cgs_list}) {
         my $cgs_record = {};
         # transport cgs
@@ -100,6 +76,11 @@ sub main
         elsif($cgs =~ /patch\.cgs$/) {
             $cgs_record->{'type'} = 'patch';
             $cgs_record->{'order'} = 2;
+        }
+        elsif($cgs =~ /add_xip_skip_config\.cgs$/) {
+            $cgs_record->{'type'} = 'skip_xip';
+            $cgs_record->{'order'} = 4;
+            $got_xip_skip_cgs = 1;
         }
         # platform cgs
         elsif(($cgs =~ /platforms\/[^\.]+.cgs$/) || ($cgs =~ /TARGET_.*\/.*.cgs$/)) {
@@ -116,6 +97,10 @@ sub main
         close $CGS;
         post_process_cgs($cgs_record);
         push @cgs_records, $cgs_record;
+    }
+    # merge cgs that enables xip skip with patch cgs, then embed xip
+    if($got_xip_skip_cgs) {
+        post_process_cgs_for_xip(\@cgs_records, $sections, $btp->{ConfigDSLocation});
     }
     @cgs_records = sort { $a->{order} <=> $b->{order} } @cgs_records;
     dump_cgs(\@cgs_records);
@@ -140,8 +125,8 @@ sub dump_cgs
         print "\n\n############### dump $cgs_record->{file}\n";
         foreach my $line (@{$cgs_record->{lines}}) {
             print $line;
-		}
-	}
+        }
+    }
 }
 
 sub post_process_cgs
@@ -161,8 +146,8 @@ sub post_process_cgs
             push @{$cgs_record->{tca_lines}}, $line;
             if (index($line, '}') != -1) {
                 $in_tca_entry = 0;
+            }
         }
-    }
         else {
             if (index($line, 'ENTRY "Temperature Correction Algorithm Config"') != -1
             || index($line, 'ENTRY "BR TCA Table"') != -1
@@ -178,6 +163,186 @@ sub post_process_cgs
             }
         }
     }
+}
+
+sub post_process_cgs_for_xip
+{
+    my ($cgs_list, $patch_elf_sections, $ds_start) = @_;
+    die "DS location not defined in btp\n" if !defined $ds_start;
+    my $add_config_cgs;
+    my $first_cgs = $cgs_list->[0]; # has include <hdf>
+    my $index = 0;
+    my $remove_index;
+
+    # find patch cgs and skip xip cgs
+    foreach my $cgs (@{$cgs_list}) {
+        if($cgs->{order} < $first_cgs->{order}) {
+            $first_cgs = $cgs;
+        }
+        if($cgs->{type} eq 'skip_xip') {
+            $add_config_cgs = $cgs;
+            $remove_index = $index;
+        }
+        $index++;
+    }
+    return if !defined $remove_index;
+    die "unexpected cgs type sorts as first\n" if $first_cgs->{type} ne 'patch';
+
+    # locate xip section in elf
+    my $xip_section;
+    foreach my $section (@{$patch_elf_sections}) {
+        next if !defined $section->{name};
+        # .app_xip_area will be merged into XIP Skip Block
+        if( $section->{name} eq '.app_xip_area') {
+            $xip_section = $section;
+            last;
+        }
+    }
+    warn "expected to find elf section named \".app_xip_area\"\n" if !defined $xip_section;
+    return if !defined $xip_section;
+
+    # merge skip xip cgs into patch cgs
+    my @updated_lines;
+    my $merged = 0;
+    # keep track of where the config data will be located in DS
+    # then we can pad as needed up to the actual XIP start address
+    my $ds_addr = $ds_start + 16; # signature
+    while(defined (my $line = shift @{$first_cgs->{lines}})) {
+        # find entry we want to merge before
+        if(!$merged && $line =~ /^\s*ENTRY\s+\"([^\"]+)/) {
+            my $entry_name = $1;
+            # merge after Local Name and Config Data Version
+            if($entry_name =~ /(Local Name|Config Data Version)/) {
+                $ds_addr += get_ds_size($entry_name, $first_cgs->{lines});
+            }
+            else {
+                # add merge cgs lines before this line
+                while(defined(my $new_line = shift @{$add_config_cgs->{lines}})) {
+                    push @updated_lines, $new_line;
+                    if($new_line =~ /^\s*ENTRY\s+\"([^\"]+)/) {
+                        $entry_name = $1;
+                        if($entry_name eq 'Data') {
+                            $ds_addr += get_ds_size($entry_name, $add_config_cgs->{lines});
+                        }
+                        elsif($entry_name eq 'Function Call') {
+                            $ds_addr += get_ds_size($entry_name, $add_config_cgs->{lines});
+                        }
+                    }
+                }
+                # now insert Skip Block type (010B) with embedded xip
+                if($xip_section->{sh_addr} < ($ds_addr+5)) {
+                    warn sprintf "xip start 0x%x overlaps with DS data\n", $xip_section->{sh_addr};
+                    warn sprintf "check ConfigDSLocation 0x%x in *.btp and CY_CORE_APP_SPECIFIC_DS_LEN in <TARGET>.mk\n", $ds_start;
+                    die "\n";
+                }
+                # determine leb128 encoded length to add (2 or 3 bytes) along with 2-byte type
+                $ds_addr += get_ds_size("Skip Block", undef, $xip_section, $ds_addr);
+                my @data = unpack "C*", $xip_section->{data};
+                # now pad Skip block cgs data up to XIP start
+                for(my $i = $ds_addr; $i < $xip_section->{sh_addr}; $i++) {
+                    unshift @data, 0;
+                }
+
+                # print skip block into cgs file
+                push @updated_lines, "ENTRY \"Skip Block\"\n";
+                push @updated_lines, "{\n";
+                push @updated_lines, "\t\"Data\" = \n";
+                push @updated_lines, "\tCOMMENTED_BYTES\n";
+                push @updated_lines, "\t{\n";
+                push @updated_lines, "\t\t<hex>";
+                for(my $i=0; $i < scalar(@data); $i++) {
+                    if(($i & 0xf) == 0) {
+                        push @updated_lines, sprintf("\n\t\t%02x", $data[$i]);
+                    }
+                    else {
+                        push @updated_lines, sprintf(" %02x", $data[$i]);
+                    }
+                }
+                push @updated_lines, "\n\t} END_COMMENTED_BYTES\n";
+                push @updated_lines, "}\n";
+                $merged = 1;
+            }
+        }
+        push @updated_lines, $line;
+    }
+    $first_cgs->{lines} = [];
+    push @{$first_cgs->{lines}}, @updated_lines;
+    # drop add_config cgs from list
+    splice @{$cgs_list}, $remove_index, 1;
+}
+
+sub get_ds_size
+{
+    my ($entry_name, $lines, $xip_section, $ds_addr) = @_;
+    my $len = 0;
+    if($entry_name eq 'Local Name') {
+        $len = 3;
+        foreach my $line (@{$lines}) {
+            $line =~ s/\s+$//;
+            if($line =~ /\"Name\"\s*=\s*\"([^\"]+)\"/) {
+                $len += length($1) + 1;
+                last;
+            }
+        }
+    }
+    elsif($entry_name eq 'Config Data Version') {
+        $len = 3 + 2;
+    }
+    elsif($entry_name eq 'Function Call') {
+        $len = 3 + 4;
+    }
+    elsif($entry_name eq 'Data') {
+        $len += 3 + 4;
+        foreach my $line (@{$lines}) {
+            $line =~ s/\s+$//;
+            if($line =~ /^\s*[0-9A-Fa-f ]+$/) {
+                my @bytes = split " ", $line;
+                foreach my $byte (@bytes) {
+                    $len++;
+                }
+            }
+            elsif($line =~ /^\}$/) {
+                last;
+            }
+        }
+    }
+    elsif($entry_name eq 'Skip Block') {
+        $len += 2;
+        # gap is diff between xip start and current position in DS, minus leb128 len (2 or 3 bytes)
+        my $gap = $xip_section->{sh_addr} - $ds_addr - $len - 2;
+        my $xip_len = length($xip_section->{data});
+        # gap decreases if leb128 is 3 bytes
+        if(($xip_len+$gap) >= 0x4000) {
+            $xip_section->{data} .= pack("C",0) if ($xip_len+$gap) == 0x4000;
+            $gap--;
+        }
+        # leb128 takes 2 bytes up to 0x3fff, then 3
+        # there is a leb128 length for xip len plus gap that can't be compensated for by adjusting gap
+        $len +=  2;
+        if(($xip_len+$gap) >= 0x4000) {
+            $len++;
+        }
+    }
+    else {
+        die "Unexpected cgs entry $entry_name\n";
+    }
+
+    return $len;
+}
+
+sub parse_btp
+{
+    my ($btp, $btp_param) = @_;
+    open(my $BTP, "<", $btp) || die "Could not open *.btp file \"$btp\", $!";
+    while(defined(my $line = <$BTP>)) {
+        if($line =~ /(\w+)\s*\=\s*(0x[0-9A-Fa-f]+)/) {
+            $btp_param->{$1} = hex($2);
+        }
+        elsif($line =~ /(\w+)\s*\=\s*(.*)$/) {
+            $btp_param->{$1} = $2;
+        }
+    }
+    close $BTP;
 }
 
 sub post_app_cgs
@@ -709,23 +874,7 @@ sub preview_sections
 		else {
 			push @non_pie_sections, $section;
 		}
-		if($section->{sh_type} == 9) {
-			# fix up relocation data section offsets, assume only R_ARM_RELATIVE allowed
-			my $d_off = 0;
-			my $data;
-			while($d_off < length($section->{data})) {
-				my ($d_offset, $d_type, $d_sym, $d_info) = unpack "LCCS", substr($section->{data}, $d_off, 8);
-				die "encountered relocation record not of type R_ARM_RELATIVE (type $d_type != 23)\n" if $d_type != 0x17; # 0x17 is R_ARM_RELATIVE
-				$d_off += 8;
-				$data .= pack "L", $d_offset;
-			#	warn sprintf "  %08x %02x %02x %04x\n", $d_offset, $d_type, $d_sym, $d_info;
-			#	my $sym = find_symbol_with_address($symbol_entries, $d_offset, "^[A-Za-z]");
-			#	warn "   $sym->{name}\n" if defined $sym->{name};
-			}
-			$section_info->{'relo_data'} = pack "S", $d_off/8;
-			$section_info->{'relo_data'} .= $data;
-		}
-		# .app_xip_area will be merged as hex section going into ocf, not to be in cgs config records
+		# .app_xip_area will be merged into XIP Skip Block
 		if( $section->{name} eq '.app_xip_area') {
 			# note text start
 			$section_info->{'xip_text_start'} = $section->{sh_addr};
@@ -739,48 +888,7 @@ sub preview_sections
             $section_info->{'ds2_ram_start'} = $section->{sh_addr};
             $section_info->{'ds2_ram_end'} = $section->{sh_addr} + $section->{sh_size};
         }
-
-		if($section->{sh_addr} >= 0xFF000000) {
-			next if $section->{name} ne '.dyn_info';
-			# this code is just exploratory, not used in builds
-			my $d_off = 0;
-			while($d_off < length($section->{data})) {
-				my $r = {};
-				($r->{'d_tag'}, $r->{'ptr_or_val'}) = unpack "LL", substr($section->{data}, $d_off, 8);
-				last if $r->{d_tag} == 0; # exit at DT_NULL
-				my $d_lut = $dynamic_entry_lut->{$r->{d_tag}};
-				die "unhandled dynamic tag type $d_lut\n" if !defined $d_lut;
-				$r->{'d_type'} = $d_lut->{next};
-				$r->{'d_tag_type'} = $d_lut->{type};
-				#warn sprintf "dynamic section %08x %s type %s %08x\n", $r->{d_tag}, $r->{d_tag_type}, $r->{d_type}, $r->{ptr_or_val};
-				# DF_1_PIE = 0x08000000
-				$d_off += 8;
-				if($r->{d_tag_type} eq 'DT_RELCOUNT') {
-					$dyn_info->{'DT_RELCOUNT'} = $r->{ptr_or_val};
-				}
-				if(0) { #$r->{d_tag_type} eq 'DT_HASH') {
-					#skip to after
-					warn "  looking into dyn info...\n";
-					my $relo_offset = $r->{ptr_or_val} - $section->{sh_addr};
-					my $addr;
-					do {
-						$addr = unpack "L", substr($section->{data}, $relo_offset, 4);
-						$relo_offset += 4;
-					} while($addr <= 3 && $relo_offset < length($section->{data}));
-					do {
-						my $sym = find_symbol_at_address($symbol_entries, $addr, "");
-						warn sprintf "relo at %08x, symbol %s\n", $addr, $sym->{name};
-						$kind = unpack "L", substr($section->{data}, $relo_offset, 4);
-						$relo_offset += 4;
-						die "bad relocation record\n" unless $kind == 0x17;
-						$addr = unpack "L", substr($section->{data}, $relo_offset, 4);
-						$relo_offset += 4;
-					} while($relo_offset < length($section->{data}));
-				}
-				# push @{$dynamic}, $r;
-			}
-		}
-		}
+	}
 	if(scalar( @overlay_sections)) {
 		push @{$sorted_sections}, @nonoverlay_sections;
 		push @{$sorted_sections}, @overlay_sections;
@@ -840,35 +948,6 @@ sub output_cgs_elf
 			elsif($section->{name} eq '.aon') {
 				$name = "AON Data";
 			}
-			elsif($section->{name} eq '.datagot') {
-				# command to update GOT in OCF, walks table adjusting addrs for values referencing pic xip code range
-				# reads payload into FOUNDATION_CONFIG_DYN_LINK_GOT_t gotTable
-				# copy GOT from OCF table to ram, using gotAddr = this_command_got_offset + active DS
-				# update each got value (-= gotTable.textAddress, += active DS + gotTable.textAddressOffset) and copy back to flash
-				my $got_end = find_symbol($symbol_entries, "actual_xip_got_end");
-				die "could not find actual_xip_got_end\n" unless defined $got_end;
-				my $got_size = $section->{sh_size};
-				my $got_num_addr = 0;
-				my @got = unpack "L*", $section->{data};
-				foreach my $got_entry (@got) {
-					$got_num_addr++ if $got_entry >= $section_info->{xip_text_start} && $got_entry < $section_info->{xip_text_end};
-				}
-				$name = "Dynamic Linker GOT";
-				$data = pack "L", $section_info->{xip_text_start}; 				# Text Address
-				$data .= pack "L", $section_info->{xip_text_start} - $ds; 		# Text Address Offset
-				$data .= pack "L", $section->{sh_addr};			# GOT Address
-				$data .= pack "L", $section->{sh_addr} - $ds; 	# GOT Address Offset
-                $data .= pack "L", $got_size - 0x04;                             # GOT Length - subtract 4 for the signature (We dont want it processed)
-				$data .= pack "S", $got_num_addr;					# Total Number of Addresses
-				$xip_pie = 1;
-			}
-			elsif($section->{sh_type} == 9) {
-				# this command provides addresses that need to be fixed up based on the active DS
-				# addresses need to be sorted smallest to largest
-				$name = "Dynamic Linker RELO";
-				$data = pack "L", $ds;
-				$section->{data} = $section_info->{relo_data};
-			}
 			my $chunk = length($section->{data}) - $offset;
 			$chunk = 0xff00 if $chunk > 0xff00;
 			$data .= substr($section->{data}, $offset, $chunk);
@@ -888,11 +967,6 @@ sub output_cgs_elf
         next if $name ne $entry_function;
 	    my $data = pack "L", $sym->{st_value};
 		my $entry_name = 'Function Call';
-		# for pie need 'PIC DS Function Call'- firmware adds active DS base to addr
-		if($xip_pie &&  $sym->{st_value} > $ds) {
-			$entry_name = 'PIC DS Function Call' ;
-			$data = pack "L", $sym->{st_value} - $ds;
-		}
 		output_hdf_cfg_command($sym, undef, $hdf->{$entry2code->{$entry_name}}, $data);
 		last;
 	}
