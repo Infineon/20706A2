@@ -60,7 +60,7 @@ CY_RECIPE_LDFLAGS?=\
     $(CY_TOOLCHAIN_LDFLAGS)\
     $(CY_CORE_LDFLAGS)\
     -Wl,--entry=$(CY_CORE_APP_ENTRY)\
-	-Wl,-z,muldefs\
+    -Wl,-z,muldefs\
     -Wl,--no-warn-mismatch\
     -Wl,--just-symbols="$(CY_CORE_PATCH_SYMBOLS)"\
     -T$(CY_CONFIG_DIR)/$(APPNAME).ld
@@ -83,6 +83,10 @@ CY_RECIPE_DEFINES?=\
 #
 # Includes construction
 #
+# macro to remove duplicate paths from INC lists, but preserve order of 1st instances
+define f_uniq_paths
+$(eval seen :=)$(foreach _,$1,$(if $(filter $(abspath $_),$(abspath ${seen})),,$(eval seen += $_)))${seen}
+endef
 # build COMPONENT includes with proper directory prefix
 CY_COMPONENT_PATHS=$(addprefix COMPONENT_,$(COMPONENTS))
 CY_COMPONENT_DISABLE_FILTERS=$(addprefix %/COMPONENT_,$(filter-out CY_DEFAULT_COMPONENT,$(DISABLE_COMPONENTS)))
@@ -98,7 +102,7 @@ CY_RECIPE_INCLUDES?=\
     $(CY_TOOLCHAIN_INCLUDES)\
     $(addprefix -I,$(INCLUDES))\
     $(addprefix -I,$(CY_SEARCH_APP_INCLUDES))\
-    $(addprefix -I,$(CY_COMPONENT_INCLUDES))
+    $(addprefix -I,$(call f_uniq_paths,$(CY_COMPONENT_INCLUDES)))
 #$(info CY_RECIPE_INCLUDES $(CY_RECIPE_INCLUDES))
 
 #
@@ -135,12 +139,13 @@ ifeq ($(LIBNAME),)
 CY_RECIPE_PREBUILD?=\
     bash --norc --noprofile\
     "$(CY_INTERNAL_BASELIB_PATH)/make/scripts/bt_pre_build.bash"\
-    "--shell=$(CY_MODUS_SHELL_DIR)"\
-    "--scripts=$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
-    "--defs=$(CY_CORE_LD_DEFS)"\
-    "--patch=$(CY_CORE_PATCH_SYMBOLS)"\
-    "--ld=$(CY_CONFIG_DIR)/$(APPNAME).ld"\
-    $(if $(VERBOSE),"--verbose"); CY_CMD_TERM=;
+    --shell="$(CY_MODUS_SHELL_DIR)"\
+    --scripts="$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
+    --defs="$(CY_CORE_LD_DEFS)"\
+    --patch="$(CY_CORE_PATCH_SYMBOLS)"\
+    --ld="$(CY_CONFIG_DIR)/$(APPNAME).ld"\
+    $(if $(findstring 1,$(DIRECT_LOAD)),--direct)\
+    $(if $(VERBOSE),--verbose); CY_CMD_TERM=;
 endif
 
 #
@@ -173,3 +178,28 @@ CY_RECIPE_POSTBUILD?=\
     --extras=$(CY_APP_OTA)$(APP_STATIC_DATA)$(CY_CORE_APP_XIP_EXTRA)$(CY_CORE_DS2_EXTRA)$(CY_CORE_DIRECT_LOAD)\
     $(if $(VERBOSE),"--verbose"); CY_CMD_TERM=;
 endif
+
+#
+# add dependency to ensure configurator sources generated before BSP projects are built
+#
+$(SEARCH_LIBS_AND_INCLUDES): gen_config
+
+#
+# add vscode informational message
+#
+ifeq ($(LIBNAME),)
+ifeq ($(CY_SECONDSTAGE),)
+vscode: vscode_bt_information
+endif
+endif
+
+vscode_bt_information:
+	@echo;\
+	echo "VSCode for $(TARGET) hardware debugging:";\
+	echo; \
+	echo " - Edit makefile (or override with command line) to build for hardware debug";\
+	echo "   by setting ENABLE_DEBUG=1.";\
+	echo " - Rebuild application, program, attach debugger.";\
+	echo " - Launch debugger with Run->Start debugging, or F5.";\
+	echo "See document \"WICED Hardware Debugging for Bluetooth Kits\" for details.";\
+	echo;

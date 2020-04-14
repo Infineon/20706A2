@@ -251,7 +251,11 @@ fi
 if [[ $CY_APP_BUILD_EXTRAS = *"DIRECT"* ]]; then
 echo "building image for direct ram load (*.hcd)"
 CY_APP_DIRECT_LOAD="DIRECT_LOAD=1"
-#CY_APP_CHIPLOAD_FLAGS="$CY_APP_CHIPLOAD_FLAGS -DIRECT_LOAD -NOERASE"
+CY_APP_CGS_ARGS+=" -O \"DLConfigTargeting:RAM runtime\""
+CY_APP_CGS_ARGS+=" -O DLConfigVSLocation:0"
+CY_APP_CGS_ARGS+=" -O DLConfigVSLength:0"
+CY_APP_CGS_ARGS+=" -O DLWriteVerifyMode:Write"
+CY_APP_CGS_ARGS+=" -O \"DLSectorEraseMode:Written sectors only\""
 fi
 
 # generate asm listing
@@ -270,9 +274,6 @@ fi
 # set up BDADDR if random or default
 CY_APP_CGS_ARGS_ORIG=$CY_APP_CGS_ARGS
 CY_APP_CGS_ARGS=$("$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-bdaddr.pl" ${CY_CHIP} "$CY_APP_BTP" ${CY_APP_CGS_ARGS})
-
-# fancy arg fixup for RAM_runtime, could check more generally for args with spaces that need to be quoted
-CY_APP_CGS_ARGS="${CY_APP_CGS_ARGS/-O DLConfigTargeting:RAM runtime/-O \"DLConfigTargeting:RAM runtime\"}"
 
 # for flash downloads of non-HomeKit, this is the download file, done
 # generate hex download file, use eval because of those darn quotes needed around "DLConfigTargeting:RAM runtime"
@@ -324,6 +325,10 @@ fi
 
 # make OTA image
 if [[ $CY_APP_BUILD_EXTRAS = *"OTA"* ]]; then
+
+if [[ $CY_APP_BUILD_EXTRAS = *"DIRECT"* ]]; then
+echo "Warning: skipping OTA upgrade image build because DIRECT_LOAD=1"
+else
 
 # add fail safe if present
 if [[ $CY_APP_FAILSAFE = *"cgs" ]]; then
@@ -381,7 +386,7 @@ if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
     CY_APP_HEX="$CY_APP_HEX.ds1"
 fi
 # convert hex to bin
-DS_ADDR=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS length \d+ \(0x[0-9A-Fa-f]+\) at (0x[0-9A-Fa-f]+)/' "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt")
+DS_ADDR=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available \d+ \(0x[0-9A-Fa-f]+\) at (0x[0-9A-Fa-f]+)/' "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt")
 if [[ $CY_APP_CGS_ARGS_ORIG = *"-A 0xFF000000"* ]]; then
     DS_ADDR=$(printf "0x%08X" $((${DS_ADDR}+0xFF000000)))
 fi
@@ -389,9 +394,11 @@ fi
 # print size
 FILESIZE=$("$CY_TOOL_WC" -c < "$CY_APP_OTA_BIN")
 echo "OTA Upgrade file size is $FILESIZE"
-DS_LENGTH=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS length (\d+)/' "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt")
-echo "DS length $DS_LENGTH, OTA image size $FILESIZE"
+DS_LENGTH=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available (\d+)/' "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt")
+echo "Upgrade storage available $DS_LENGTH"
 [ "$FILESIZE" -gt "$DS_LENGTH" ] && echo "WARNING: OTA image exceeds DS area"
+
+fi # DIRECT_LOAD check
 fi # end if OTA
 
 # copy files necessary for download to help launch config find them

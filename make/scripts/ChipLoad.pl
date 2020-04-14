@@ -36,6 +36,7 @@ my $id_file = $params->{id};
 my $btp_file = $params->{btp};
 my $mini_driver = $params->{mini};
 my $config_file = $params->{hex};
+my $direct_load = $params->{direct};
 my $com_port = $params->{uart};
 $com_port = undef if $com_port eq "AUTO";
 my $baud_rate = "AUTO";
@@ -138,8 +139,15 @@ else
     print "\nFound serial port : $com_port\n\nDownloading FW ...\n";
     my $download_log_path = $build_loc . "/download.log";
 
+
     #Download FW
-    #print "$chip_load -BLUETOOLMODE -PORT $com_port -LAUNCHADDRESS 0x00000000 -BAUDRATE $detected_baud -NOVERIFY -CHECKCRC -MINIDRIVER $mini_driver -BTP $btp_file -CONFIG $config_file ${addl_flags}\n";
-    qx{"$chip_load" -BLUETOOLMODE -PORT $com_port -LAUNCHADDRESS 0x00000000 -BAUDRATE $detected_baud -NOVERIFY -CHECKCRC -MINIDRIVER "${mini_driver}" -BTP "${btp_file}" -CONFIG ${config_file} -LOGTO "$download_log_path" ${addl_flags}};
+    if($direct_load == 1) {
+        # print "$chip_load -BLUETOOLMODE -PORT $com_port -BAUDRATE $detected_baud -BTP $btp_file -NOERASE -CONFIG $config_file ${addl_flags}\n";
+        qx{"$chip_load" -BLUETOOLMODE -PORT $com_port -BAUDRATE $detected_baud -BTP "${btp_file}" -NOERASE -CONFIG ${config_file} -LOGTO "$download_log_path" ${addl_flags}};
+    }
+    else {
+        # print "$chip_load -BLUETOOLMODE -PORT $com_port -LAUNCHADDRESS 0x00000000 -BAUDRATE $detected_baud -NOVERIFY -CHECKCRC -MINIDRIVER $mini_driver -BTP $btp_file -CONFIG $config_file ${addl_flags}\n";
+        qx{"$chip_load" -BLUETOOLMODE -PORT $com_port -LAUNCHADDRESS 0x00000000 -BAUDRATE $detected_baud -NOVERIFY -CHECKCRC -MINIDRIVER "${mini_driver}" -BTP "${btp_file}" -CONFIG ${config_file} -LOGTO "$download_log_path" ${addl_flags}};
+    }
 	exit ($? >> 8);
 }

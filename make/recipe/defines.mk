@@ -62,7 +62,6 @@ DIRECT_LOAD?=0
 ifeq ($(DIRECT_LOAD),1)
 CY_CORE_DIRECT_LOAD=_DIRECT_
 CY_CORE_CGS_ARGS+=-O DLConfigSSLocation:$(PLATFORM_DIRECT_LOAD_BASE_ADDR)
-CY_CORE_CGS_ARGS+=-O DLConfigTargeting:RAM runtime
 CY_CORE_CGS_ARGS+=-O DLMaxWriteSize:249
 else
 # Base address
@@ -120,9 +119,9 @@ CY_CORE_DEFINES+=\
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=2 \
-	-DWICED_SDK_MINOR_VER=3 \
+	-DWICED_SDK_MINOR_VER=4 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=5811
+	-DWICED_SDK_BUILD_NUMBER=6698
 
 #
 # Set the output file paths
@@ -132,25 +131,6 @@ CY_APP_ELF_FILE?=$(CY_INTERNAL_BUILD_LOCATION)/$(APPNAME)/$(TARGET)/$(CONFIG)/$(
 else
 CY_APP_ELF_FILE?=\$$\{cy_prj_path\}/$(notdir $(CY_INTERNAL_BUILD_LOC))/$(TARGET)/$(CONFIG)/$(APPNAME).elf
 endif
-
-#
-# IDE specifics for program/debug
-#
-CY_PROJECT_BASELIB_PATH=bt-sdk/wiced-baselib/$(CY_TARGET_DEVICE)
-CY_OPENOCD_ARG =-s $(CY_INTERNAL_BASELIB_PATH)/platforms
-CY_OPENOCD_ARG+=-f CYW$(CY_TARGET_DEVICE)_openocd.cfg
-
-CY_JLINK_DEVICE_CFG=Cortex-M3
-
-CY_VSCODE_ARGS="s|&&MODUSPATH&&|$(CY_INTERNAL_TOOLS)|;"\
-				"s|&&RELEASETARGET&&|build/$(TARGET)/Release/$(APPNAME).elf|;"\
-				"s|&&DEBUGTARGET&&|build/$(TARGET)/Debug/$(APPNAME).elf|;"\
-				"s|&&MODUSSHELL&&|$(CY_MODUS_SHELL_DIR)|;"
-
-CY_ECLIPSE_ARGS="s|&&CY_OPENOCD_ARG&&|$(CY_OPENOCD_ARG)|;"\
-				"s|&&CY_JLINK_DEVICE&&|$(CY_JLINK_DEVICE_CFG)|;"\
-				"s|&&CY_APPNAME&&|$(CY_IDE_PRJNAME)|;"\
-				"s|&&CY_PROG_FILE&&|$(CY_APP_ELF_FILE)|;"
 
 #
 # Tools specifics
@@ -175,7 +155,8 @@ else
   CY_OPEN_TYPE_LIST+=$(CY_BT_APP_TOOLS)
   CY_SUPPORTED_TOOL_TYPES+=$(CY_BT_APP_TOOLS)
 endif
-CY_BT_APP_TOOLS_DIR=$(CY_SHARED_PATH_ABS)/tools
+CY_BT_APP_TOOLS_DIR=$(CY_SHARED_PATH)/tools
+CY_BT_APP_TOOLS_DIR_ABS=$(CY_SHARED_PATH_ABS)/tools
 
 ifneq ($(filter BTSpy,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
@@ -185,7 +166,7 @@ else
     CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/BTSpy/$(CY_OS_DIR)/RunBtSpy.sh
   else
     CY_OPEN_BTSpy_TOOL=open
-    CY_OPEN_BTSpy_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR)/btsdk-utils/BTSpy/$(CY_OS_DIR)/bt_spy.app
+    CY_OPEN_BTSpy_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR_ABS)/btsdk-utils/BTSpy/$(CY_OS_DIR)/bt_spy.app
   endif
 endif
 CY_OPEN_BTSpy_tool_EXT=
@@ -202,7 +183,7 @@ else
     CY_OPEN_ClientControl_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/RunClientControl.sh
   else
     CY_OPEN_ClientControl_TOOL=open
-    CY_OPEN_ClientControl_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/ClientControl.app
+    CY_OPEN_ClientControl_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR_ABS)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/ClientControl.app
   endif
 endif
 endif
@@ -221,7 +202,7 @@ else
     CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-mesh/Qt_ClientControl/$(CY_OS_DIR)/RunClientControl.sh
   else
     CY_OPEN_ClientControlMesh_TOOL=open
-    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-mesh/Qt_ClientControl/$(CY_OS_DIR)/mesh_client.app
+    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR_ABS)/btsdk-host-apps-mesh/Qt_ClientControl/$(CY_OS_DIR)/mesh_client.app
   endif
 endif
 endif
@@ -229,7 +210,7 @@ endif
 # need to add ota image file
 ifneq ($(filter WsOtaUpgrade,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-CY_OPEN_WsOtaUpgrade_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-peer-apps-ota/$(CY_OS_DIR)/WsOtaUpgrade/Release/x64/WsOtaUpgrade
+CY_OPEN_WsOtaUpgrade_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-peer-apps-ota/$(CY_OS_DIR)/WsOtaUpgrade/Release/x64/WsOtaUpgrade.exe
 CY_OPEN_WsOtaUpgrade_TOOL_ARGS=$(CY_CONFIG_DIR)/$(APPNAME)_$(TARGET).ota.bin
 endif
 endif
@@ -254,9 +235,53 @@ CY_OPEN_WMBT_TOOL=explorer.exe
 CY_OPEN_WMBT_TOOL_ARGS=/separate /e $(subst /,\,$(CY_INTERNAL_APPLOC)/tools/btsdk-utils/wmbt)
 endif
 
-# need to add ota image file
+# hello client peer app
 ifneq ($(filter hello_client,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
 CY_OPEN_hello_client_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-peer-apps-ble/hello_sensor/$(CY_OS_DIR)/HelloClient/Release/x64/HelloClient.exe
 endif
 endif
+
+#
+# vscode app launchers
+#
+define tool_launch_json
+{\
+ \"label\": \"Tool: $(1)\",\
+ \"type\": \"process\",\
+ \"command\": \"$(CY_OPEN_$(1)_TOOL)\",\
+ \"args\": [$(foreach tool_arg,$(CY_OPEN_$(1)_TOOL_ARGS),\"$(tool_arg)\",)],\
+ \"problemMatcher\": \"\$$gcc\",\
+},
+endef
+CY_BT_APP_TOOLS_JSON=$(foreach tool,$(CY_BT_APP_TOOLS),$(call tool_launch_json,$(tool)))
+
+#
+# IDE specifics for program/debug
+#
+CY_OPENOCD_ARG =-s $(CY_INTERNAL_BASELIB_PATH)/platforms
+CY_OPENOCD_ARG+=-f CYW$(CY_TARGET_DEVICE)_openocd.cfg
+
+CY_JLINK_DEVICE_CFG=Cortex-M4
+CY_OPENOCD_DEVICE_CFG=$(CY_INTERNAL_BASELIB_PATH)/platforms/CYW$(CY_TARGET_DEVICE)_openocd.cfg
+
+CY_VSCODE_ARGS="s|&&RELEASETARGET&&|build/$(TARGET)/Release/$(APPNAME).elf|g;"\
+                "s|&&DEBUGTARGET&&|build/$(TARGET)/Debug/$(APPNAME).elf|g;"\
+                "s|&&MODUSSHELL&&|$(CY_MODUS_SHELL_DIR)|g;"\
+                "s|&&TARGET&&|$(TARGET)|g;"\
+                "s|&&OPENOCDSEARCH&&|$(CY_INTERNAL_BASELIB_PATH)/platforms|g;"\
+                "s|&&OPENOCDFILE&&|$(CY_OPENOCD_DEVICE_CFG)|g;"\
+                "s|&&MODUSTOOLCHAIN&&|$(subst ",,$(CY_COMPILER_DIR))|g;"\
+                "s|&&MODUSTOOLCHAINVERSION&&|$(subst ",,$(subst gcc-,,$(notdir $(CY_COMPILER_DIR))))|g;"\
+                "s|&&CFLAGS&&|$(CY_RECIPE_CFLAGS)|g;"\
+                "s|&&MODUSOPENOCD&&|$(CY_OPENOCD_DIR)|g;"\
+                "s|&&DEVICEATTACH&&|$(CY_JLINK_DEVICE_CFG)|g;"\
+                "s|&&MODUSLIBMANAGER&&|$(CY_LIBRARY_MANAGER_DIR)|g;"\
+                "s|&&GDBPATH&&|$(CY_COMPILER_DIR)|g;"\
+                "s|&&CLIENTCONTROLMESH&&|$(CY_CLIENT_CONTROL_MESH)|g;"\
+                "s|&&BTAPPTOOLS&&|$(CY_BT_APP_TOOLS_JSON)|g;"\
+
+CY_ECLIPSE_ARGS="s|&&CY_OPENOCD_ARG&&|$(CY_OPENOCD_ARG)|;"\
+                "s|&&CY_JLINK_DEVICE&&|$(CY_JLINK_DEVICE_CFG)|;"\
+                "s|&&CY_APPNAME&&|$(CY_IDE_PRJNAME)|;"\
+                "s|&&CY_PROG_FILE&&|$(CY_APP_ELF_FILE)|;"

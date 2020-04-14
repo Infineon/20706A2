@@ -230,9 +230,15 @@ sub main
 			}
 			unshift @{$mem_lut->{'.app_xip_area'}->{sections}}, @xip_o;
 		}
-        elsif($arg =~ /^APP_DS2_LEN=(\w+)/) {
-            $param->{'APP_DS2_LEN'} = hex($1);
-        }
+		elsif($arg =~ /^APP_DS2_LEN=(\w+)/) {
+			$param->{'APP_DS2_LEN'} = hex($1);
+		}
+		elsif($arg =~ /^DS_LOCATION=(\w+)/) {
+			$param->{'DS_LOCATION'} = hex($1);
+		}
+		elsif($arg =~ /^OTA_UPGRADE_STORE=(\w+)/) {
+			$param->{'OTA_UPGRADE_STORE'} = $1;
+		}
 		elsif($arg =~ /^overlay=(.*)$/) {
 			$param->{'overlay'} = $1;
 			warn "overlay is $1\n";
@@ -253,6 +259,10 @@ sub main
 			}
 		}
 		close $BTP;
+	}
+	# override ConfigDSLocation if DS_LOCATION provided on command line
+	if(defined $param->{ConfigDSLocation} && defined $param->{DS_LOCATION}) {
+		$param->{ConfigDSLocation} = $param->{DS_LOCATION};
 	}
 
 	my $section_lut = {};
@@ -357,7 +367,7 @@ sub output_ld
 		print $OUT sprintf "/* aon_patch_begin=0x%06X aon_patch_end=0x%06X aon_end=0x%06X */\n", $sections->{AON_AREA}->{sh_addr}, $aon_begin, $aon_end;
 	}
     if(defined $aon_len) {
-        print $OUT sprintf "/* app_patch_ram=0x%06X aon_patch_end=0x%06X aon_end=0x%06X */\n", $sections->{AON_AREA}->{sh_addr}, $aon_begin, $aon_end;
+        print $OUT sprintf "/* app_ram_begin=0x%06X app_ram_end=0x%06X */\n", $ram_start, $ram_start+$ram_len;
     }
 	if(defined $param->{FLASH0_BEGIN_ADDR} && defined $param->{FLASH0_LENGTH}) {
 		print $OUT sprintf "/* FLASH0_BEGIN_ADDR=0x%06X FLASH0_LENGTH=0x%06X */\n", $param->{FLASH0_BEGIN_ADDR}, $param->{FLASH0_LENGTH};
@@ -377,6 +387,12 @@ sub output_ld
         }
 		print $OUT sprintf "/* FLASH0_DS2=0x%06X */\n", $param->{ConfigDS2Location};
 	}
+    if(defined $param->{ConfigDSLocation}) {
+        my $store = $param->{ConfigDS2Location} - $param->{ConfigDSLocation};
+        $param->{'OTA_UPGRADE_STORE'} = 'off_chip_sflash' if !defined $param->{OTA_UPGRADE_STORE};
+        $store /=2 if $param->{OTA_UPGRADE_STORE} eq 'on_chip_flash';
+        print $OUT sprintf "/* UPGRADE_STORAGE_LENGTH=0x%06X (%s) */\n", $store, $param->{OTA_UPGRADE_STORE};
+    }
 
 	print $OUT "MEMORY\n";
 	print $OUT "{\n";

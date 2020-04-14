@@ -1,13 +1,12 @@
 ################################################################################
 # \file target.mk
-# \version 1.0
 #
 # \brief
 # Finds available targets in the design.
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2019 Cypress Semiconductor Corporation
+# Copyright 2018-2020 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +26,13 @@ ifeq ($(WHICHFILE),true)
 $(info Processing $(lastword $(MAKEFILE_LIST)))
 endif
 
+#
+# Underscored variant of TARGET
+#
+CY_TARGET_UNDERSCORE=$(subst -,_,$(TARGET))
+CY_TARGET_MAKEFILE_UNDERSCORE_SEARCH:=$(call CY_MACRO_SEARCH,$(CY_TARGET_UNDERSCORE).mk,$(CY_INTERNAL_APP_PATH))\
+                    $(if $(CY_INTERNAL_EXTAPP_PATH),$(call CY_MACRO_SEARCH,$(CY_TARGET_UNDERSCORE).mk,$(CY_INTERNAL_EXTAPP_PATH)))\
+                    $(if $(SEARCH_LIBS_AND_INCLUDES),$(foreach d,$(SEARCH_LIBS_AND_INCLUDES),$(call CY_MACRO_SEARCH,$(CY_TARGET_UNDERSCORE).mk,$(d))))
 
 #
 # Search for target make files and BSPs. Use := assignment for better performance.
@@ -39,11 +45,12 @@ CY_TARGET_AVAILABLE_SEARCH:=$(call CY_MACRO_SEARCH,.mk,$(CY_INTERNAL_APP_PATH))\
                     $(if $(SEARCH_LIBS_AND_INCLUDES),$(foreach d,$(SEARCH_LIBS_AND_INCLUDES),$(call CY_MACRO_SEARCH,.mk,$(d))))\
 
 # Gather and filter the found files
-CY_SEARCH_PRUNED_MAKE_FILES:=$(filter-out $(foreach d,$(CY_IGNORE_DIRS),$(filter $(d)%,$(CY_TARGET_MAKEFILE_SEARCH))),$(CY_TARGET_MAKEFILE_SEARCH))
+CY_SEARCH_PRUNED_MAKE_FILES:=$(filter-out $(foreach d,$(CY_IGNORE_DIRS),$(filter $(d)%,$(CY_TARGET_MAKEFILE_SEARCH) $(CY_TARGET_MAKEFILE_UNDERSCORE_SEARCH))),\
+                    $(CY_TARGET_MAKEFILE_SEARCH) $(CY_TARGET_MAKEFILE_UNDERSCORE_SEARCH))
 CY_SEARCH_PRUNED_AVAILABLEMAKE_FILES:=$(filter-out $(foreach d,$(CY_IGNORE_DIRS),$(filter $(d)%,$(CY_TARGET_AVAILABLE_SEARCH))),$(CY_TARGET_AVAILABLE_SEARCH))
 
 # Target makefile
-CY_TARGET_MAKEFILE=$(call CY_MACRO_FILTER_FILES,MAKE)
+CY_TARGET_MAKEFILE=$(sort $(call CY_MACRO_FILTER_FILES,MAKE))
 
 # Check if the TARGET.mk was brought in through CY_EXTRA_INCLUDES or directly in the app makefile
 CY_TARGET_EXTRA_INCLUDES=$(filter %/$(TARGET).mk,$(MAKEFILE_LIST))
@@ -77,3 +84,6 @@ $(call CY_MACRO_ERROR,Found multiple identical targets:$(CY_TARGET_MAKEFILE))
 endif
 
 endif
+
+# Directory used for TARGET generation in "bsp" target
+CY_TARGET_GEN_DIR=$(CY_INTERNAL_APP_PATH)/TARGET_$(TARGET_GEN)

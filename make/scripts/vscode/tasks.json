@@ -4,15 +4,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "GetLibs",
+            "label": "Utility: getlibs",
             "type": "shell",
             "windows" : {
                 "command": "&&MODUSSHELL&&/bin/bash.exe" ,
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin ; &&MODUSSHELL&&/bin/make.exe getlibs"
-                ],
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe getlibs"
+                ]
             },
             "linux" : {
                 "command": "bash",
@@ -20,7 +20,7 @@
                     "--norc",
                     "-c",
                     "make getlibs"
-                ],
+                ]
             },
             "osx" : {
                 "command": "bash",
@@ -28,41 +28,41 @@
                     "--norc",
                     "-c",
                     "make getlibs"
-                ],
+                ]
             },
             "problemMatcher": []
         },
         {
-            "label": "Refresh",
+            "label": "Utility: refresh",
             "type": "shell",
             "windows" : {
                 "command": "&&MODUSSHELL&&/bin/bash.exe" ,
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin ; &&MODUSSHELL&&/bin/make.exe vscode"
-                ],
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe TARGET=&&TARGET&& vscode"
+                ]
             },
             "linux" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make vscode"
-                ],
+                    "make TARGET=&&TARGET&& vscode"
+                ]
             },
             "osx" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make vscode"
-                ],
+                    "make TARGET=&&TARGET&& vscode"
+                ]
             },
             "problemMatcher": []
         },
         {
-            "label": "Build Debug",
+            "label": "Build: Build [Debug]",
             "type": "shell",
 
             "windows" : {
@@ -70,24 +70,24 @@
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin ; &&MODUSSHELL&&/bin/make.exe CONFIG=Debug"
-                ],
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& build"
+                ]
             },
             "linux" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Debug"
-                ],
+                    "make -j CONFIG=Debug TARGET=&&TARGET&& build"
+                ]
             },
             "osx" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Debug"
-                ],
+                    "make -j CONFIG=Debug TARGET=&&TARGET&& build"
+                ]
             },
             "problemMatcher": "$gcc",
             "group": {
@@ -96,7 +96,7 @@
             }
         },
         {
-            "label": "Program Debug",
+            "label": "Build: Clean and Rebuild [Debug]",
             "type": "shell",
 
             "windows" : {
@@ -104,24 +104,24 @@
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin ; &&MODUSSHELL&&/bin/make.exe CONFIG=Debug program"
-                ],
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& clean ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& build"
+                ]
             },
             "linux" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Debug"
-                ],
+                    "make -j CONFIG=Debug TARGET=&&TARGET&& clean ; make -j CONFIG=Debug TARGET=&&TARGET&& build"
+                ]
             },
             "osx" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Debug"
-                ],
+                    "make -j CONFIG=Debug TARGET=&&TARGET&& clean ; make -j CONFIG=Debug TARGET=&&TARGET&& build"
+                ]
             },
             "problemMatcher": "$gcc",
             "group": {
@@ -130,31 +130,32 @@
             }
         },
         {
-            "label": "Build Release",
+            "label": "Build: Clean [Debug]",
             "type": "shell",
+
             "windows" : {
                 "command": "&&MODUSSHELL&&/bin/bash.exe" ,
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin ; &&MODUSSHELL&&/bin/make.exe CONFIG=Release"
-                ],
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& clean"
+                ]
             },
             "linux" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Release"
-                ],
+                    "make -j CONFIG=Debug TARGET=&&TARGET&& clean"
+                ]
             },
             "osx" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Release"
-                ],
+                    "make -j CONFIG=Debug TARGET=&&TARGET&& clean"
+                ]
             },
             "problemMatcher": "$gcc",
             "group": {
@@ -163,32 +164,31 @@
             }
         },
         {
-            "label": "Program Release",
+            "label": "Build: Build [Release]",
             "type": "shell",
-
             "windows" : {
                 "command": "&&MODUSSHELL&&/bin/bash.exe" ,
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin ; &&MODUSSHELL&&/bin/make.exe CONFIG=Release program"
-                ],
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& build"
+                ]
             },
             "linux" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Debug"
-                ],
+                    "make -j CONFIG=Release TARGET=&&TARGET&& build"
+                ]
             },
             "osx" : {
                 "command": "bash",
                 "args": [
                     "--norc",
                     "-c",
-                    "make CONFIG=Debug"
-                ],
+                    "make -j CONFIG=Release TARGET=&&TARGET&& build"
+                ]
             },
             "problemMatcher": "$gcc",
             "group": {
@@ -196,5 +196,262 @@
                 "isDefault": true
             }
         },
+        {
+            "label": "Build: Clean and Rebuild [Release]",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& clean ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& build"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j CONFIG=Release TARGET=&&TARGET&& clean ; make -j CONFIG=Release TARGET=&&TARGET&& build"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j CONFIG=Release TARGET=&&TARGET&& clean ; make -j CONFIG=Release TARGET=&&TARGET&& build"
+                ]
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build: Clean [Release]",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& clean"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j CONFIG=Release TARGET=&&TARGET&& clean"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j CONFIG=Release TARGET=&&TARGET&& clean"
+                ]
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Program: build and download app [Release]",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j TARGET=&&TARGET&& CONFIG=Release program"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Release program"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Release program"
+                ]
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Program: build and download app [Debug]",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j TARGET=&&TARGET&& CONFIG=Debug program"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Debug program"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Debug program"
+                ]
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Program: just download app [Release]",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j TARGET=&&TARGET&& CONFIG=Release qprogram"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Release qprogram"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Release qprogram"
+                ]
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Program: just download app [Debug]",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe -j TARGET=&&TARGET&& CONFIG=Debug qprogram"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Debug qprogram"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make -j TARGET=&&TARGET&& CONFIG=Debug qprogram"
+                ]
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Tool: bluetooth-configurator",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe config_bt"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make config_bt"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make config_bt"
+                ]
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Tool: device-configurator",
+            "type": "shell",
+            "windows" : {
+                "command": "&&MODUSSHELL&&/bin/bash.exe" ,
+                "args": [
+                    "--norc",
+                    "-c",
+                    "export PATH=/bin:/usr/bin:$PATH ; &&MODUSSHELL&&/bin/make.exe config"
+                ]
+            },
+            "linux" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make config"
+                ]
+            },
+            "osx" : {
+                "command": "bash",
+                "args": [
+                    "--norc",
+                    "-c",
+                    "make config"
+                ]
+            },
+            "problemMatcher": "$gcc"
+        },
+        &&BTAPPTOOLS&&
     ]
 }

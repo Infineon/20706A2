@@ -1,13 +1,12 @@
 ################################################################################
 # \file utils.mk
-# \version 1.0
 #
 # \brief
 # Global utilities used across the application recipes and BSPs
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2019 Cypress Semiconductor Corporation
+# Copyright 2018-2020 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,9 +35,9 @@ endif
 # VFP-specific component
 #
 ifeq ($(VFP_SELECT),hardfp)
-CY_COMPONENT_VFP=HARDFP
+CY_COMPONENT_VFP:=HARDFP
 else
-CY_COMPONENT_VFP=SOFTFP
+CY_COMPONENT_VFP:=SOFTFP
 endif
 
 #
@@ -55,11 +54,11 @@ CY_COMPONENT_LIST?=$(sort $(filter-out $(DISABLE_COMPONENTS),$(CY_COMPONENT_LIST
 ################################################################################
 
 # Create a make variable that contains a space
-CY_SPACE= 
+CY_SPACE:= 
 CY_SPACE+=
 
 # Create a make variable that contains a soft tab
-CY_INDENT=$(CY_SPACE)$(CY_SPACE)$(CY_SPACE)$(CY_SPACE)
+CY_INDENT:=$(CY_SPACE)$(CY_SPACE)$(CY_SPACE)$(CY_SPACE)
 
 # Create a make variable that contains a line break
 define CY_NEWLINE
@@ -68,24 +67,32 @@ define CY_NEWLINE
 endef
 
 # Create a make variable that contains a comma
-CY_COMMA=,
+CY_COMMA:=,
 
 # Displays/Hides the build steps
 ifneq (,$(filter $(VERBOSE),true 1))
-CY_NOISE=
-CY_CMD_TERM=
+CY_NOISE:=
+CY_CMD_TERM:=
 else
-CY_NOISE=@
-CY_CMD_TERM= > /dev/null 2>&1
+CY_NOISE:=@
+CY_CMD_TERM:= > /dev/null 2>&1
 endif
 
+
+################################################################################
+# Environment check
+################################################################################
+
 # Set the location of the find utility (Avoid conflict with Windows system32/find.exe)
-CY_QUERY_FIND=$(findstring /usr/bin/find,$(shell whereis find))
-ifeq ($(CY_QUERY_FIND),)
-CY_FIND=find
+ifeq ($(findstring /usr/bin/find,$(shell whereis find)),)
+CY_FIND:=find
 else
-CY_FIND=/usr/bin/find
+CY_FIND:=/usr/bin/find
 endif
+
+################################################################################
+# Macros
+################################################################################
 
 #
 # Prints for bypassing TARGET/DEVICE checks
@@ -96,11 +103,6 @@ CY_MACRO_ERROR=$(error $(1))
 else
 CY_MACRO_ERROR=$(info WARNING: $(1))
 endif
-
-
-################################################################################
-# Search macros
-################################################################################
 
 # 
 # Macros to find all COMPONENTS not listed in the component list.
@@ -138,7 +140,8 @@ CY_MACRO_FILTER_COMPONENT=$(call CY_MACRO_REMOVE_COMPONENT,$(1)) $(call CY_MACRO
 CY_MACRO_MATCH_CONFIGURATION=$(strip $(foreach item,$(1),$(if $(findstring $(2),/$(item)/),$(item),)))
 CY_MACRO_REMOVE_CONFIGURATION=$(strip $(foreach item,$(1),$(if $(findstring $(2),/$(item)),,$(item))))
 CY_MACRO_FILTER_CONFIGURATION=$(call CY_MACRO_REMOVE_CONFIGURATION,$(1),/$(strip $(2))_)\
-							$(call CY_MACRO_MATCH_CONFIGURATION,$(1),/$(strip $(2))_$($(strip $(2)))/)
+							$(call CY_MACRO_MATCH_CONFIGURATION,$(1),/$(strip $(2))_$($(strip $(2)))/)\
+							$(call CY_MACRO_MATCH_CONFIGURATION,$(1),/$(strip $(2))_$(subst -,_,$($(strip $(2))))/)
 
 #
 # Filter for defined components and configurations 
@@ -169,16 +172,17 @@ CY_MACRO_FILTER_FILES=$(call CY_MACRO_FILTER,$(CY_SEARCH_PRUNED_$(1)_FILES))
 CY_MACRO_EQUALITY=$(if $(and $(findstring $1,$2),$(findstring $2,$1)),TRUE)
 
 #
-# Recursively search for the parent directories up to the project root directory
+# Recursively search for the parent directories up to the given base directory
 # $(1) : Directories containing header files
+# $(2) : Base directory
 #
 CY_MACRO_SEARCH_PARENT=\
 $(foreach item,$(1),\
-    $(if $(call CY_MACRO_EQUALITY,.,$(item)),\
-        .\
+    $(if $(call CY_MACRO_EQUALITY,$(2),$(item)),\
+        $(2)\
     ,\
         $(call CY_MACRO_DIR,$(item))\
-        $(call CY_MACRO_SEARCH_PARENT,$(call CY_MACRO_DIR,$(item)))\
+        $(call CY_MACRO_SEARCH_PARENT,$(call CY_MACRO_DIR,$(item)),$(2))\
     )\
 )
 
@@ -202,79 +206,32 @@ CY_MACRO_UC=$(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst 
 
 
 ################################################################################
-# IDE-specifc targets
+# Utility targets
 ################################################################################
 
-CY_VSCODE_OUT_PATH=$(CY_INTERNAL_APP_PATH)/.vscode
-CY_VSCODE_OUT_TEMPLATE_PATH=$(CY_VSCODE_OUT_PATH)/cytemplates
-CY_VSCODE_BACKUP_PATH=$(CY_VSCODE_OUT_PATH)/backup
-CY_VSCODE_TEMPLATE_PATH=$(CY_INTERNAL_BASELIB_PATH)/make/scripts/vscode
-CY_VSCODE_TEMPFILE=$(CY_CONFIG_DIR)/vscode_launch.temp
+# Used to determine locations of dirs and files relative to devicesupport.xml
+CY_DEVICESUPPORT_SEARCH_PATH:=$(call CY_MACRO_SEARCH,devicesupport.xml,$(CY_INTERNAL_APP_PATH))\
+                    $(if $(CY_INTERNAL_EXTAPP_PATH),$(call CY_MACRO_SEARCH,devicesupport.xml,$(CY_INTERNAL_EXTAPP_PATH)))\
+                    $(if $(SEARCH_LIBS_AND_INCLUDES),$(foreach d,$(SEARCH_LIBS_AND_INCLUDES),$(call CY_MACRO_SEARCH,devicesupport.xml,$(d))))
 
-CY_ECLIPSE_OUT_PATH=$(CY_INTERNAL_APP_PATH)/.mtbLaunchConfigs
-CY_ECLIPSE_TEMPLATE_PATH=$(CY_INTERNAL_BASELIB_PATH)/make/scripts/eclipse
-CY_ECLIPSE_TEMPFILE=$(CY_CONFIG_DIR)/eclipse_launch.temp
-CY_ECLIPSE_TEMPLATES_WILDCARD?=*
-
-ifeq ($(CY_IDE_PRJNAME),)
-CY_IDE_PRJNAME=$(APPNAME)
-endif
-
-vscode:
-ifeq ($(LIBNAME),)
-	@mkdir -p $(CY_CONFIG_DIR);\
-	mkdir -p $(CY_VSCODE_OUT_TEMPLATE_PATH);\
-	mkdir -p $(CY_VSCODE_BACKUP_PATH);\
-	echo $(CY_VSCODE_ARGS) > $(CY_VSCODE_TEMPFILE);\
-	echo "s|&&JSONINCLUDELIST&&|$(foreach onedef,$(subst -I,,$(CY_RECIPE_INCLUDES)),\"$(onedef)\",)|" >> $(CY_VSCODE_TEMPFILE);\
-	echo "s|&&JSONDEFINELIST&&|$(foreach onedef,$(subst -D,,$(CY_RECIPE_DEFINES)),\"$(onedef)\",)|" >> $(CY_VSCODE_TEMPFILE);\
-	for json in $(CY_VSCODE_TEMPLATE_PATH)/*; do\
-		jsonFile="$${json##*/}";\
-		if [[ $$jsonFile == *"c_cpp_properties"* ]] && [[ $$jsonFile != *"c_cpp_properties_$(TOOLCHAIN).json" ]]; then\
-			continue;\
-		fi;\
-		sed -f $(CY_VSCODE_TEMPFILE) $(CY_VSCODE_TEMPLATE_PATH)/$$jsonFile > $(CY_VSCODE_OUT_TEMPLATE_PATH)/$$jsonFile;\
-		jsonFiles="$$jsonFiles $$jsonFile";\
-		if [ -f $(CY_VSCODE_OUT_PATH)/$$jsonFile ] && [[ $$jsonFile == *"settings.json" ]]; then\
-			echo "Modifying existing settings.json file";\
-			mv $(CY_VSCODE_OUT_PATH)/$$jsonFile $(CY_VSCODE_BACKUP_PATH)/$$jsonFile;\
-			sed \
-				-e /cortex-debug\\.armToolchainPath/s%:.*%:\ \"$(CY_COMPILER_DIR)/bin\",% \
-				-e /cortex-debug\\.openocdPath/s%:.*%:\ \"$(CY_OPENOCD_DIR)/bin/openocd\",% \
-				$(CY_VSCODE_BACKUP_PATH)/$$jsonFile > $(CY_VSCODE_OUT_PATH)/$$jsonFile;\
-		else\
-			cp $(CY_VSCODE_OUT_TEMPLATE_PATH)/$$jsonFile $(CY_VSCODE_OUT_PATH)/$$jsonFile;\
-		fi;\
-	done;\
-	mv $(CY_VSCODE_OUT_PATH)/c_cpp_properties_$(TOOLCHAIN).json $(CY_VSCODE_OUT_PATH)/c_cpp_properties.json;\
-	mv $(CY_VSCODE_OUT_PATH)/openocd.tcl $(CY_INTERNAL_APP_PATH)/openocd.tcl;\
-	rm $(CY_VSCODE_TEMPFILE);\
-	rm -rf $(CY_VSCODE_OUT_TEMPLATE_PATH);\
-	echo;\
-	echo Generated Visual Studio Code files: $$jsonFiles;\
-	echo;\
-	echo WARNING: The vscode target is preliminary...
+bsp:
+ifeq ($(TARGET_GEN),)
+	$(error TARGET_GEN variable must be specified to generate a BSP)
 else
-	@echo 
-endif
-
-CY_HELP_eclipse=Generates eclipse IDE launch configs.
-eclipse:
-ifeq ($(LIBNAME),)
-	@mkdir -p $(CY_CONFIG_DIR);\
-	mkdir -p $(CY_ECLIPSE_OUT_PATH);\
-	echo $(CY_ECLIPSE_ARGS) > $(CY_ECLIPSE_TEMPFILE);\
-	for launch in $(CY_ECLIPSE_TEMPLATE_PATH)/$(CY_ECLIPSE_TEMPLATES_WILDCARD); do\
-		launchFile="$${launch##*/}";\
-		launchFileName="$${launchFile%.*}";\
-		sed -f $(CY_ECLIPSE_TEMPFILE) "$(CY_ECLIPSE_TEMPLATE_PATH)/$$launchFileName.xml" > "$(CY_ECLIPSE_OUT_PATH)/$(CY_IDE_PRJNAME) $$launchFileName.launch";\
-		launchConfigs="$$launchConfigs \"$(CY_IDE_PRJNAME) $$launchFileName.launch"\";\
-	done;\
-	rm $(CY_ECLIPSE_TEMPFILE);\
-	echo;\
-	echo Generated Eclipse launch config files: "$$launchConfigs"
-else
-	@echo
+	$(info $(CY_NEWLINE)Creating $(TARGET_GEN) TARGET from $(TARGET)...)
+	$(CY_NOISE)if [ -d $(CY_TARGET_GEN_DIR) ]; then\
+		echo "ERROR: "$(TARGET_GEN)" TARGET already exists at "$(CY_TARGET_GEN_DIR)"";\
+		exit 1;\
+	else\
+		cp -rf $(CY_TARGET_DIR) $(CY_TARGET_GEN_DIR);\
+		rm -rf $(CY_TARGET_GEN_DIR)/.git;\
+		sed -e s/$(TARGET)/"$(TARGET_GEN)"/g -e /DEVICE/s%=.*%="$(DEVICE_GEN)"\% -e /ADDITIONAL_DEVICES/s%=.*%="$(ADDITIONAL_DEVICES_GEN)"\% \
+			$(CY_TARGET_GEN_DIR)/$(TARGET).mk > $(CY_TARGET_GEN_DIR)/$(TARGET_GEN).mk;\
+		rm -rf $(CY_TARGET_GEN_DIR)/$(TARGET).mk;\
+		$(CY_BSP_TEMPLATES_CMD)\
+		$(CY_BSP_DEVICES_CMD)\
+		echo ""$(TARGET_GEN)" TARGET created at "$(CY_TARGET_GEN_DIR)"";\
+	fi
 endif
 
 ifneq ($(SEARCH_LIBS_AND_INCLUDES),)
@@ -283,9 +240,36 @@ CY_SHARED_USED_LIB_NAMES=$(foreach item,$(SEARCH_LIBS_AND_INCLUDES),$(notdir $(i
 CY_SHARED_USED_LIB_FILES=$(foreach name,$(CY_SHARED_USED_LIB_NAMES),$(filter %/$(name),$(CY_SHARED_ALL_LIB_FILES)))
 endif
 
-CY_HELP_get_app_info=Prints the app info for the eclipse IDE.
+
 get_app_info:
-	@echo;\
+ifeq ($(CY_PROTOCOL),2)
+	$(CY_NOISE)echo;\
+	echo "=======================================";\
+	echo " IDE variables";\
+	echo "=======================================";\
+	echo "CY_PROTOCOL=$(CY_PROTOCOL)";\
+	echo "APP_NAME=$(APPNAME)";\
+	echo "LIB_NAME=$(LIBNAME)";\
+	echo "TARGET=$(TARGET)";\
+	echo "TARGET_DEVICE=$(DEVICE)";\
+	echo "CONFIGURATOR_FILES=$(CY_CONFIG_FILES)";\
+	echo "SUPPORTED_TOOL_TYPES=$(CY_OPEN_FILTERED_SUPPORTED_TYPES)";\
+	echo "CY_TOOLS_PATH=$(CY_TOOLS_DIR)";\
+	echo "CY_GETLIBS_OFFLINE=$(CY_GETLIBS_OFFLINE)";\
+	echo "CY_GETLIBS_PATH=$(CY_INTERNAL_GETLIBS_PATH)";\
+	echo "CY_GETLIBS_DEPS_PATH=$(CY_INTERNAL_GETLIBS_DEPS_PATH)";\
+	echo "CY_GETLIBS_CACHE_PATH=$(CY_INTERNAL_GETLIBS_CACHE_PATH)";\
+	echo "CY_GETLIBS_OFFLINE_PATH=$(CY_INTERNAL_GETLIBS_OFFLINE_PATH)";\
+	echo "SHAREDLIBS_ROOT=$(CY_SHARED_PATH)";\
+	echo "SHAREDLIBS=$(SEARCH_LIBS_AND_INCLUDES)";\
+	echo "SHAREDLIBS_FILES=$(CY_SHARED_USED_LIB_FILES)";\
+	echo "CY_DEPENDENT_PROJECTS=$(CY_DEPENDENT_PROJECTS)";
+else
+# Default scenario. Covers CY_PROTOCOL=1 and CY_PROTOCOL=""
+	$(CY_NOISE)echo;\
+	echo "=======================================";\
+	echo " IDE variables";\
+	echo "=======================================";\
 	echo "APP_NAME=$(APPNAME)";\
 	echo "LIB_NAME=$(LIBNAME)";\
 	echo "TARGET=$(TARGET)";\
@@ -297,7 +281,96 @@ get_app_info:
 	echo "SHAREDLIBS_ROOT=$(CY_SHARED_PATH)";\
 	echo "SHAREDLIBS=$(SEARCH_LIBS_AND_INCLUDES)";\
 	echo "SHAREDLIBS_FILES=$(CY_SHARED_USED_LIB_FILES)";\
-	echo "CY_DEPENDENT_PROJECTS=$(CY_DEPENDENT_PROJECTS)"
+	echo "CY_DEPENDENT_PROJECTS=$(CY_DEPENDENT_PROJECTS)";
+endif
+# General debug info
+	$(CY_NOISE)echo;\
+	echo "=======================================";\
+	echo " User: Basic configuration variables";\
+	echo "=======================================";\
+	echo "TARGET=$(TARGET)";\
+	echo "APPNAME=$(APPNAME)";\
+	echo "LIBNAME=$(LIBNAME)";\
+	echo "TOOLCHAIN=$(TOOLCHAIN)";\
+	echo "CONFIG=$(CONFIG)";\
+	echo "VERBOSE=$(VERBOSE)";\
+	echo;\
+	echo "=======================================";\
+	echo " User: Advanced configuration variables";\
+	echo "=======================================";\
+	echo "SOURCES=$(SOURCES)";\
+	echo "INCLUDES=$(INCLUDES)";\
+	echo "DEFINES=$(DEFINES)";\
+	echo "VFP_SELECT=$(VFP_SELECT)";\
+	echo "CFLAGS=$(CXXFLAGS)";\
+	echo "ASFLAGS=$(ASFLAGS)";\
+	echo "LDFLAGS=$(LDFLAGS)";\
+	echo "LDLIBS=$(LDLIBS)";\
+	echo "LINKER_SCRIPT=$(LINKER_SCRIPT)";\
+	echo "PREBUILD=$(PREBUILD)";\
+	echo "POSTBUILD=$(POSTBUILD)";\
+	echo "COMPONENTS=$(COMPONENTS)";\
+	echo "DISABLE_COMPONENTS=$(DISABLE_COMPONENTS)";\
+	echo "DEPENDENT_LIB_PATHS=$(DEPENDENT_LIB_PATHS)";\
+	echo "DEPENDENT_APP_PATHS=$(DEPENDENT_APP_PATHS)";\
+	echo;\
+	echo "=======================================";\
+	echo " User: BSP variables";\
+	echo "=======================================";\
+	echo "DEVICE=$(DEVICE)";\
+	echo "ADDITIONAL_DEVICES=$(ADDITIONAL_DEVICES)";\
+	echo "TARGET_GEN=$(TARGET_GEN)";\
+	echo "DEVICE_GEN=$(DEVICE_GEN)";\
+	echo "ADDITIONAL_DEVICES_GEN=$(ADDITIONAL_DEVICES_GEN)";\
+	echo;\
+	echo "=======================================";\
+	echo " User: Getlibs variables";\
+	echo "=======================================";\
+	echo "CY_GETLIBS_NO_CACHE=$(CY_GETLIBS_NO_CACHE)";\
+	echo "CY_GETLIBS_OFFLINE=$(CY_GETLIBS_OFFLINE)";\
+	echo "CY_GETLIBS_PATH=$(CY_INTERNAL_GETLIBS_PATH)";\
+	echo "CY_GETLIBS_DEPS_PATH=$(CY_INTERNAL_GETLIBS_DEPS_PATH)";\
+	echo "CY_GETLIBS_CACHE_PATH=$(CY_INTERNAL_GETLIBS_CACHE_PATH)";\
+	echo "CY_GETLIBS_OFFLINE_PATH=$(CY_INTERNAL_GETLIBS_OFFLINE_PATH)";\
+	echo "CY_GETLIBS_SEARCH_PATH=$(CY_INTERNAL_GETLIBS_SEARCH_PATH)";\
+	echo;\
+	echo "=======================================";\
+	echo " User: Path variables";\
+	echo "=======================================";\
+	echo "CY_APP_PATH=$(CY_APP_PATH)";\
+	echo "CY_BASELIB_PATH=$(CY_BASELIB_PATH)";\
+	echo "CY_EXTAPP_PATH=$(CY_EXTAPP_PATH)";\
+	echo "CY_DEVICESUPPORT_PATH=$(CY_DEVICESUPPORT_PATH)";\
+	echo "CY_SHARED_PATH=$(CY_SHARED_PATH)";\
+	echo "CY_COMPILER_PATH=$(CY_COMPILER_PATH)";\
+	echo "CY_TOOLS_DIR=$(CY_TOOLS_DIR)";\
+	echo "CY_BUILD_LOCATION=$(CY_BUILD_LOCATION)";\
+	echo "CY_PYTHON_PATH=$(CY_PYTHON_PATH)";\
+	echo "TOOLCHAIN_MK_PATH=$(TOOLCHAIN_MK_PATH)";\
+	echo;\
+	echo "=======================================";\
+	echo " User: Miscellaneous variables";\
+	echo "=======================================";\
+	echo "CY_IGNORE=$(CY_IGNORE_DIRS)";\
+	echo "CY_SKIP_RECIPE=$(CY_SKIP_RECIPE)";\
+	echo "CY_EXTRA_INCLUDES=$(CY_EXTRA_INCLUDES)";\
+	echo "CY_LIBS_SEARCH_DEPTH=$(CY_LIBS_SEARCH_DEPTH)";\
+	echo "CY_UTILS_SEARCH_DEPTH=$(CY_UTILS_SEARCH_DEPTH)";\
+	echo "CY_IDE_PRJNAME=$(CY_IDE_PRJNAME)";\
+	echo "CY_CONFIG_FILE_EXT=$(CY_CONFIG_FILE_EXT)";\
+	echo "CY_SUPPORTED_TOOL_TYPES=$(CY_SUPPORTED_TOOL_TYPES)";\
+	echo;\
+	echo "=======================================";\
+	echo " Internal variables";\
+	echo "=======================================";\
+	echo "CY_INTERNAL_BUILD_LOC=$(CY_INTERNAL_BUILD_LOC)";\
+	echo "CY_INTERNAL_APPLOC=$(CY_INTERNAL_APPLOC)";\
+	echo "CY_DEVICESUPPORT_SEARCH_PATH=$(strip $(CY_DEVICESUPPORT_SEARCH_PATH))";\
+	echo "CC="$(CC)"";\
+	echo "CXX="$(CXX)"";\
+	echo "AS="$(AS)"";\
+	echo "AR="$(AR)"";\
+	echo "LD="$(LD)""
 
 
 ################################################################################
@@ -306,11 +379,10 @@ get_app_info:
 
 CY_TOOLS_LIST+=bash git find ls cp mkdir rm cat sed awk perl file whereis
 
-CY_HELP_check=Checks for the necessary tools.
 check:
 	$(info )
 	$(foreach tool,$(CY_TOOLS_LIST),$(if $(shell which $(tool)),,$(error "$(tool) was not found in user's PATH")))
-	@if [ ! -d $(CY_BT_CONFIGURATOR_DIR) ]; then toolsTest+=("bt-configurator could not be found"); fi;\
+	$(CY_NOISE)if [ ! -d $(CY_BT_CONFIGURATOR_DIR) ]; then toolsTest+=("bt-configurator could not be found"); fi;\
 	if [ ! -d $(CY_CAPSENSE_CONFIGURATOR_DIR) ]; then toolsTest+=("capsense-configurator could not be found"); fi;\
 	if [ ! -d $(CY_CFG_BACKEND_CLI_DIR) ]; then toolsTest+=("cfg-backend-cli could not be found"); fi;\
 	if [ ! -d $(CY_MCUELFTOOL_DIR) ]; then toolsTest+=("cymcuelftool could not be found"); fi;\
@@ -335,9 +407,8 @@ check:
 		printf '  %s\n' "$${toolsTest[@]}";\
 	fi;
 
-CY_HELP_get_env_info=Prints the make, git, and app repo info.
 get_env_info:
-	@echo;\
+	$(CY_NOISE)echo;\
 	echo "make location :" $$(which make);\
 	echo "make version  :" $(MAKE_VERSION);\
 	echo "git location  :" $$(which git);\
@@ -346,13 +417,15 @@ get_env_info:
 	git remote -v;\
 	echo "git rev-parse :" $$(git rev-parse HEAD)
 
+printlibs:
+
+# Defined in recipe's program.mk
+progtool:
+
 # Empty libs on purpose. May be defined by the application
 shared_libs:
-
-CY_HELP_printlibs=Prints the status of the library repos.
-printlibs:
 
 #
 # Identify the phony targets
 #
-.PHONY: help help_default vscode eclipse check shared_libs get_env_info get_app_info
+.PHONY: bsp check get_env_info printlibs shared_libs

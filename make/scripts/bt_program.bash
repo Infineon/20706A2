@@ -17,7 +17,7 @@ set -e
 #######################################################################################################################
 
 USAGE="(-s=|--shell=)<shell path> (-t=|--tools=)<wiced tools path> (-w=|--scripts=)<wiced scripts path> (-x=|--hex=)<hex file> (-e=|--elf=)<elf file> (-v|--verbose)<verbose output> (-h|--help)<show usage>"
-USAGE+=" (-u=|--uart=)<uart port>"
+USAGE+=" (-u=|--uart=)<uart port> (-d=|--direct=[1 if direct load])"
 if [[ $# -eq 0 ]]; then
 	echo "usage: $0 $USAGE"
 	exit 1
@@ -54,6 +54,10 @@ do
 			CY_APP_UART="${i#*=}"
 			shift
 			;;
+		-d=*|--direct=*)
+			DIRECT_LOAD="${i#*=}"
+			shift
+			;;
 		-v|--verbose)
 			VERBOSE=1
 			shift
@@ -82,7 +86,8 @@ if [ "$VERBOSE" != "" ]; then
 	echo "3: CYWICEDSCRIPTS : $CYWICEDSCRIPTS"
 	echo "4: CY_APP_HEX  : $CY_APP_HEX"
 	echo "5: CY_APP_ELF  : $CY_APP_ELF"
-	echo "5: CY_APP_UART  : $CY_APP_UART"
+	echo "6: CY_APP_UART  : $CY_APP_UART"
+	echo "7: DIRECT_LOAD  : $DIRECT_LOAD"
 fi
 
 # intercept this "program" target
@@ -107,9 +112,11 @@ if [ ! -e "$CY_APP_HEX" ]; then
 fi
 
 dir=${CY_APP_HEX%/*}
-if [ "$DIRECT_LOAD" = "true" ]; then
+if [ "$DIRECT_LOAD" = "1" ]; then
 	echo "downloading image for direct ram load (*.hcd)"
-	CY_APP_HEX=$(CY_APP_HEX//.hex/.hcd)
+	CY_APP_HEX=${CY_APP_HEX//.hex/.hcd}
+else
+    DIRECT_LOAD="0"
 fi
 
 # Extract the app name from the elf
@@ -134,10 +141,10 @@ fi
 
 if [ "$VERBOSE" != "" ]; then
 echo "$CY_TOOL_PERL" "$CYWICEDSCRIPTS/ChipLoad.pl" -tools_path $CYWICEDTOOLS -build_path $dir -id $CYWICEDID -btp $CYWICEDBTP \
-                            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS -uart $CY_APP_UART $CYWICEDBAUDFILECMD
+            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS -uart $CY_APP_UART $CYWICEDBAUDFILECMD -direct $DIRECT_LOAD
 fi
 "$CY_TOOL_PERL" "$CYWICEDSCRIPTS/ChipLoad.pl" -tools_path $CYWICEDTOOLS -build_path $dir -id $CYWICEDID -btp $CYWICEDBTP \
-                            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS -uart $CY_APP_UART $CYWICEDBAUDFILECMD
+            -mini $CYWICEDMINI -hex $CY_APP_HEX -flags $CYWICEDFLAGS -uart $CY_APP_UART $CYWICEDBAUDFILECMD -direct $DIRECT_LOAD
 
 if [ $? -eq 0 ]; then
    echo "Download succeeded"

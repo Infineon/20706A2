@@ -1,13 +1,12 @@
 ################################################################################
 # \file help.mk
-# \version 1.0
 #
 # \brief
 # Default help documentation
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2019 Cypress Semiconductor Corporation
+# Copyright 2018-2020 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,48 +27,98 @@ $(info Processing $(lastword $(MAKEFILE_LIST)))
 endif
 
 #
-# General Targets
+# General targets
 #
+CY_HELP_all=Same as build. i.e. Builds the application.
 CY_HELP_all_VERBOSE=This target is equivalent to the "build" target.
+CY_HELP_getlibs=Clones the repositories, and checks out the identified commit.
 CY_HELP_getlibs_VERBOSE=The repos are cloned to the libs directory. By default, this directory is\
 					created in the application directory. It may be directed to other locations using\
 					the CY_GETLIBS_PATH variable.
+CY_HELP_build=Builds the application.
 CY_HELP_build_VERBOSE=The build process involves source auto-discovery, code generation, prebuilds, and postbuilds.\
 					For faster incremental builds, use the "qbuild" target to skip the auto-generation step. 
+CY_HELP_qbuild=Builds the application using the previous build's source list.
 CY_HELP_qbuild_VERBOSE=When no other sources need to be auto-discovered, this target can be used to skip\
 					the auto-discovery step for a faster incremental build.
+CY_HELP_program=Builds the application and programs it to the target device.
 CY_HELP_program_VERBOSE=The build process performs the same operations as the "build" target. Upon completion,\
 					the artifact is programmed to the board.
+CY_HELP_qprogram=Programs a built application to the target device without rebuilding.
 CY_HELP_qprogram_VERBOSE=This target allows programming an existing artifact to the board without a build step.
+CY_HELP_debug=Builds and programs. Then launches a GDB server.
 CY_HELP_debug_VERBOSE=Once the GDB server is launched, another shell should be opened to launch a GDB client.
+CY_HELP_qdebug=Skips the build and program step. Launches a GDB server.
 CY_HELP_qdebug_VERBOSE=Once the GDB server is launched, another shell should be opened to launch a GDB client.
+CY_HELP_attach=Used to attach to a target for debugging.
+CY_HELP_attach_VERBOSE=Run in a separate shell before starting the debug target.
+CY_HELP_clean=Cleans the /build/<TARGET> directory.
 CY_HELP_clean_VERBOSE=The directory and all its contents are deleted from disk.
+CY_HELP_help=Prints the help documentation.
 CY_HELP_help_VERBOSE=Use the CY_HELP=<NAME of target of variable> to see the verbose documentation for a\
 					particular target or a variable.
 
 #
-# Configurator Targets
+# IDE targets
 #
+CY_HELP_eclipse=Generates eclipse IDE launch configs (preliminary: eclipse project).
+CY_HELP_eclipse_VERBOSE=This target expects the CY_IDE_PRJNAME variable to be set to the name of the project\
+					as defined in the eclipse IDE. E.g. "make eclipse CY_IDE_PRJNAME=AppV1". If this variable\
+					is not defined, it will use the APPNAME for the launch configs. This target also generates\
+					a .cproject and a .project if they do not exist in the application root directory.
+CY_HELP_vscode=Generates VSCode IDE json files (preliminary).
+CY_HELP_vscode_VERBOSE=This target generates VSCode json files for debug/program launches, intellisense, and custom tasks.\
+					These overwrite the existing files in the application directory except for settings.json.
+CY_HELP_ewarm8=Generates IAR-EW v8 IDE .ipcf file (preliminary).
+CY_HELP_ewarm8_VERBOSE=This target generates an IAR Embedded Workbench v8.x compatible .ipcf file that can be imported\
+					into IAR-EW. The .ipcf file is overwritten every time this target is run.\
+					$(CY_NEWLINE)Note: Project generation requires python3 to be installed and present in the PATH variable.
+CY_HELP_uvision5=Generates Keil uVision5 IDE .cpdsc and .gpdsc files (preliminary).
+CY_HELP_uvision5_VERBOSE=This target generates a CMSIS compatible .cpdsc and .gpdsc files that can be imported\
+					into Keil uVision 5. Both files are overwritten every time this target is run.\
+					$(CY_NEWLINE)Note: Project generation requires python3 to be installed and present in the PATH variable.
+
+#
+# Tool targets
+#
+CY_HELP_modlibs=Launches the library-manager for updating libraries.
+CY_HELP_modlibs_VERBOSE=The library manager can be used to add/remove libraries and to upgrade/downgrade existing libraries.
+CY_HELP_open=Opens/launches a specified tool.
 CY_HELP_open_VERBOSE=This target accepts two variables – CY_OPEN_TYPE and CY_OPEN_FILE. At least one of\
 					these must be provided. The tool can be specified by setting the CY_OPEN_TYPE variable.\
 					A specific file can also be passed using the CY_OPEN_FILE variable. If only CY_OPEN_FILE is given,\
-					the build system will launch the default tool associated with the file’s extension.
+					the build system will launch the default tool associated with the file’s extension.\
+					$(CY_NEWLINE)Note: This command is intended for the Eclipse IDE to open/launch a specific tool.\
+					For configurators, the preferred method is to use config, config_bt and config_usbdev targets.
+CY_HELP_config=Runs the device-configurator on the target .modus file.
 CY_HELP_config_VERBOSE=If no existing device-configuration files are found, the configurator is launched to create one.
+CY_HELP_config_bt=Runs the bt-configurator on the target .cybt file.
 CY_HELP_config_bt_VERBOSE=If no existing bt-configuration files are found, the configurator is launched to create one.
+CY_HELP_config_usbdev=Runs the usbdev-configurator on the target .cyusbdev file.
 CY_HELP_config_usbdev_VERBOSE=If no existing usbdev-configuration files are found, the configurator is launched to create one.
 
 #
-# Utility Targets
+# Utility targets
 #
-CY_HELP_eclipse_VERBOSE=This target expects the CY_IDE_PRJNAME variable to be set to the name of the project\
-					as defined in the eclipse IDE. E.g. "make eclipse CY_IDE_PRJNAME=AppV1". If this variable\
-					is not defined, it will use the APPNAME for the launch configs.
+CY_HELP_bsp=Generates a TARGET_GEN board/kit from TARGET.
+CY_HELP_bsp_VERBOSE=This target generates a new Board Support Package with the name provided in TARGET_GEN based on the current\
+					TARGET. The TARGET_GEN variable must be populated with the name of the new TARGET. Optionally, you may\
+					define the target device (DEVICE_GEN) and additional devices (ADDITIONAL_DEVICES_GEN) such as radios. E.g.\
+					$(CY_NEWLINE)$(CY_NEWLINE)make bsp TARGET_GEN=NewBoard DEVICE_GEN=CY8C624ABZI-D44 ADDITIONAL_DEVICES_GEN=CYW4343WKUBG
+CY_HELP_progtool=Performs specified operations on the programmer/firmware-loader
+CY_HELP_progtool_VERBOSE=This target expects user-interaction on the shell while running it. When prompted, the user must specify the\
+					command(s) to run for the tool.
+CY_HELP_check=Checks for the necessary tools.
 CY_HELP_check_VERBOSE=Not all tools are necessary for every build recipe. This target allows the user\
 					to get an idea of which tools are missing if a build fails in an unexpected way.
+CY_HELP_get_app_info=Prints the app info for the ModusToolbox IDE.
 CY_HELP_get_app_info_VERBOSE=The file types can be specified by setting the\
-					CY_CONFIG_FILE_EXT variable. E.g. "make get_app_info "CY_CONFIG_FILE_EXT=modus cybt cyusbdev"".
+					CY_CONFIG_FILE_EXT variable. E.g.\
+					$(CY_NEWLINE)$(CY_NEWLINE)make get_app_info CY_CONFIG_FILE_EXT="modus cybt cyusbdev".
+CY_HELP_get_env_info=Prints the make, git, and app repo info.
 CY_HELP_get_env_info_VERBOSE=This allows a quick printout of the current app repo and the "make" and "git"\
 					tool locations and versions.
+CY_HELP_printlibs=Prints the status of the library repos.
 CY_HELP_printlibs_VERBOSE=This target parses through the library repos and prints the SHA1 commit id for each library.\
 					It also shows whether the repo is clean (no changes) or dirty (modified or new files).
 
@@ -78,14 +127,17 @@ CY_HELP_printlibs_VERBOSE=This target parses through the library repos and print
 #
 CY_HELP_TARGET=Specifies the target board/kit. E.g. CY8CPROTO-062-4343W.
 CY_HELP_TARGET_VERBOSE=Currently available target(s) in this application is/are, [ $(CY_TARGET_AVAILABLE) ].
-CY_HELP_APPNAME=Specifies the name of the application. E.g. AppV1.
-CY_HELP_APPNAME_VERBOSE=This variable signifies that the application will build an artifact that is\
-				intended for a target board. For applications that need to build into an archive (library),\
-				use the LIBNAME variable.
-CY_HELP_LIBNAME=Specifies the name of the library application. E.g. LibV1.
-CY_HELP_LIBNAME_VERBOSE=This variable signifies that the application will build an archive (library).\
-				These library applications can be added as a dependency to an artifact producing application\
-				using the SEARCH_LIBS_AND_INCLUDES variable.
+CY_HELP_APPNAME=Specifies the name of the app. E.g. "AppV1" -> AppV1.elf
+CY_HELP_APPNAME_VERBOSE=This variable is used to set the name of the application artifact (programmable image).\
+				It also signifies that the application will build for a programmable image artifact that is\
+				intended for a target board. For applications that need to build to an archive (library),\
+				use the LIBNAME variable.\
+				$(CY_NEWLINE)Note: This variable may also be used when generating launch configs when invoking the "eclipse" target.
+CY_HELP_LIBNAME=Specifies the name of the library app. E.g. "LibV1" -> LibV1.a
+CY_HELP_LIBNAME_VERBOSE=This variable is used to set the name of the application artifact (prebuilt library).\
+				It also signifies that the application will build an archive (library) that is intended to be linked\
+				to another application. These library applications can be added as a dependency to an artifact producing application\
+				using the DEPENDENT_LIB_PATHS variable.
 CY_HELP_TOOLCHAIN=Specifies the toolchain for building the application. E.g. GCC_ARM.
 CY_HELP_TOOLCHAIN_VERBOSE=Supported toolchains for this target are, [ $(CY_SUPPORTED_TOOLCHAINS) ].
 CY_HELP_CONFIG=Specifies the configuration option for the build [Debug Release].
@@ -143,18 +195,81 @@ CY_HELP_COMPONENTS_VERBOSE=Create a directory named COMPONENT_<VALUE> and place 
 					be included in the build. E.g. Create a directory named COMPONENT_ACCELEROMETER.\
 					Then include it in the make variable. COMPONENT=ACCELEROMETER. If the make variable\
 					does not include the <VALUE>, then that library will not be included in the build.\
-					$(CY_NEWLINE)Note: If the default COMPONENT list must be overridden, defined the CY_COMPONENT_LIST\
+					$(CY_NEWLINE)Note: If the default COMPONENT list must be overridden, define the CY_COMPONENT_LIST\
 					make variable with the list of component values.
 CY_HELP_DISABLE_COMPONENTS=Removes component-specific files from the build.
 CY_HELP_DISABLE_COMPONENTS_VERBOSE=Include a <VALUE> to this make variable to have that feature library\
 					be excluded in the build. E.g. To exclude the contents of COMPONENT_BSP_DESIGN_MODUS\
 					directory, set DISABLE_COMPONENTS=BSP_DESIGN_MODUS.
-CY_HELP_SEARCH_LIBS_AND_INCLUDES=List of dependent library application paths. E.g. ../bspLib.
+CY_HELP_SEARCH_LIBS_AND_INCLUDES=List of dependent library application paths. E.g. ../bspLib. Note: This variable is superseded by DEPENDENT_LIB_PATHS.
 CY_HELP_SEARCH_LIBS_AND_INCLUDES_VERBOSE=An artifact producing application (Defined by setting APPNAME),\
 					can have a dependency on library applications (Defined by setting LIBNAME). This variable\
 					defines those dependencies for the artifact producing application. The actual build invocation\
 					of those libraries are handled at the application level by defining the "shared_libs" target. E.g.\
 					$(CY_NEWLINE)$(CY_NEWLINE)shared_libs: $(CY_NEWLINE)$(CY_INDENT)make -C ../bspLib build -j
+CY_HELP_DEPENDENT_LIB_PATHS=List of dependent library application paths. E.g. ../bspLib.
+CY_HELP_DEPENDENT_LIB_PATHS_VERBOSE=Note: This variable replaces the SEARCH_LIBS_AND_INCLUDES variable.\
+					$(CY_NEWLINE)An artifact producing application (Defined by setting APPNAME),\
+					can have a dependency on library applications (Defined by setting LIBNAME). This variable\
+					defines those dependencies for the artifact producing application. The actual build invocation\
+					of those libraries are handled at the application level by defining the "shared_libs" target. E.g.\
+					$(CY_NEWLINE)$(CY_NEWLINE)shared_libs: $(CY_NEWLINE)$(CY_INDENT)make -C ../bspLib build -j
+CY_HELP_DEPENDENT_APP_PATHS=List of dependent application paths. E.g. ../cy_m0p_image.
+CY_HELP_DEPENDENT_APP_PATHS_VERBOSE=The main application can have a dependency on other artifact producing\
+					applications (Defined by setting APPNAME). This variable defines those dependencies for the main\
+					application. The artifacts of these dependent applications are translated to c-arrays and are brought\
+					into the main application as regular c-files and are compiled and linked. The main application also generates\
+					a "standalone" variant of the main app that does not include the dependent apps.
+
+#
+# BSP variables
+#
+CY_HELP_DEVICE=Device ID for the primary MCU on the target board/kit.
+CY_HELP_DEVICE_VERBOSE=The device identifier is mandatory for all board/kits.
+CY_HELP_ADDITIONAL_DEVICES=IDs for additional devices on the target board/kit.
+CY_HELP_ADDITIONAL_DEVICES_VERBOSE=These include devices such as radios on the board/kit. This variable is optional.
+CY_HELP_TARGET_GEN=Name of the new target board/kit.
+CY_HELP_TARGET_GEN_VERBOSE=This is a mandatory variable when calling the "bsp" make target. It is used to\
+					name the board/kit files and directory.
+CY_HELP_DEVICE_GEN=(Optional) Device ID for the primary MCU on the new target board/kit.
+CY_HELP_DEVICE_GEN_VERBOSE=This is an optional variable when calling the "bsp" make target to replace the primary\
+					MCU on the board (overwrites DEVICE). If it is not defined, the new board/kit will use the existing\
+					DEVICE from the board/kit that it is copying from.
+CY_HELP_ADDITIONAL_DEVICES_GEN=(Optional) IDs for additional devices on the new target board/kit.
+CY_HELP_ADDITIONAL_DEVICES_GEN_VERBOSE=This is an optional variable when calling the "bsp" make target to replace the\
+					additional devices on the board (overwrites ADDITIONAL_DEVICES). If it is not defined, the new \
+					board/kit will use the existing ADDITIONAL_DEVICES from the board/kit that it is copying from.
+
+#
+# Getlibs variables
+#
+CY_HELP_CY_GETLIBS_NO_CACHE=Disables the cache when running getlibs. 
+CY_HELP_CY_GETLIBS_NO_CACHE_VERBOSE=To improve the library creation time, the getlibs target uses a cache\
+					located in the user's home directory ($$HOME for macOS/Linux and $$USERPROFILE for Windows). Disabling the\
+					cache will result in slower application creation time but may be necessary for bringing in non-Cypress libraries.
+CY_HELP_CY_GETLIBS_OFFLINE=Use the offline location as the library source.
+CY_HELP_CY_GETLIBS_OFFLINE_VERBOSE=Setting this variable signals to the build system to use the offline location (Default: <HOME>/.modustoolbox/offline)\
+					when running the "getlibs" target. The location of the offline content can be changed by defining the CY_GETLIBS_OFFLINE_PATH variable.
+CY_HELP_CY_GETLIBS_PATH=Absolute path to the intended location of libs directory.
+CY_HELP_CY_GETLIBS_PATH_VERBOSE=The library repos are cloned into a directory named, /libs (Default: <CY_APP_PATH>/libs).\
+					Setting this variable allows specifying the location of the libs directory to elsewhere on disk. 
+CY_HELP_CY_GETLIBS_DEPS_PATH=Absolute path to where the library-manager stores .lib files.
+CY_HELP_CY_GETLIBS_DEPS_PATH_VERBOSE=Setting this path allows relocating the directory that the library-manager uses to store\
+					the .lib files in your application. The default location is in a directory named /deps (Default: <CY_APP_PATH>/deps).\
+					$(CY_NEWLINE)Note: This variable requires ModusToolbox tools_2.1 or higher.
+CY_HELP_CY_GETLIBS_CACHE_PATH=Absolute path to the cache directory.
+CY_HELP_CY_GETLIBS_CACHE_PATH_VERBOSE=The build system caches all cloned repos in a directory named /cache \
+					(Default: <HOME>/.modustoolbox/cache). Setting this variable allows the cache to be relocated to\
+					elsewhere on disk. To disable the cache entirely, set the CY_GETLIBS_NO_CACHE variable to [true].\
+					$(CY_NEWLINE)Note: This variable requires ModusToolbox tools_2.1 or higher.
+CY_HELP_CY_GETLIBS_OFFLINE_PATH=Absolute path to the offline content directory.
+CY_HELP_CY_GETLIBS_OFFLINE_PATH_VERBOSE=The offline content is used to create/update applications when not connected\
+					to the internet (Default: <HOME>/.modustoolbox/offline). Setting this variable allows to relocate the\
+					offline content to elsewhere on disk.\
+					$(CY_NEWLINE)Note: This variable requires ModusToolbox tools_2.1 or higher.
+CY_HELP_CY_GETLIBS_SEARCH_PATH=Relative path to the top directory for "getlibs" operation.
+CY_HELP_CY_GETLIBS_SEARCH_PATH_VERBOSE=The getlibs operation by default executes at the location of the CY_APP_PATH. This can\
+					be overridden by specifying this variable to point to a specific location.
 
 #
 # Path variables
@@ -168,12 +283,6 @@ CY_HELP_CY_BASELIB_PATH=Relative path to the base library. E.g. ./libs/psoc6make
 CY_HELP_CY_BASELIB_PATH_VERBOSE=This directory must be relative to CY_APP_PATH. It defines the location\
 					of the library containing the recipe make files, where the expected directory structure\
 					is <CY_BASELIB_PATH>/make. All applications must set the location of the base library.
-CY_HELP_CY_GETLIBS_PATH=Absolute path to the intended location of libs directory.
-CY_HELP_CY_GETLIBS_PATH_VERBOSE=The library repos are cloned into a directory named, libs (Default: <CY_APP_PATH>/libs).\
-					Setting this variable allows specifying the location of the libs directory to elsewhere on disk. 
-CY_HELP_CY_GETLIBS_SEARCH_PATH=Relative path to the top directory for "getlibs" operation.
-CY_HELP_CY_GETLIBS_SEARCH_PATH_VERBOSE=The getlibs operation by default executes at the location of the CY_APP_PATH. This can\
-					be overridden by specifying this variable to point to a specific location.
 CY_HELP_CY_DEVICESUPPORT_PATH=Relative path to the devicesupport.xml file.
 CY_HELP_CY_DEVICESUPPORT_PATH_VERBOSE=This path specifies the location of the devicesupport.xml file for device-configurators.\
 					It is used when the configurator needs to be run in a multi-app scenario.
@@ -196,7 +305,15 @@ CY_HELP_CY_EXTAPP_PATH_VERBOSE=This directory must be relative to CY_APP_PATH. S
 					allows incorporating files external to CY_APP_PATH. E.g. CY_EXTAPP_PATH=../external\
 					lets the auto-discovery to pull in the contents of ../external directory into the build.\
 					$(CY_NEWLINE)Note: This variable is only supported in CLI. Use the shared_libs mechanism and\
-					CY_HELP_SEARCH_LIBS_AND_INCLUDES for tools and IDE support.
+					DEPENDENT_LIB_PATHS for tools and IDE support.
+CY_HELP_TOOLCHAIN_MK_PATH=Specifies the location of a custom TOOLCHAIN makefile.
+CY_HELP_TOOLCHAIN_MK_PATH_VERBOSE=Defining this path allows the build system to use a custom TOOLCHAIN.mk\
+					pointed to by this variable.\
+					$(CY_NEWLINE)Note: The make variables in this file should match the\
+					variables used in existing TOOLCHAIN.mk files.  
+CY_HELP_CY_PYTHON_PATH=Specifies the path to the Python executable.
+CY_HELP_CY_PYTHON_PATH_VERBOSE=For make targets that depend on Python, the build system looks for a Python 3 in the user's PATH\
+					and uses that to invoke python. If however CY_PYTHON_PATH is defined, it will use that python executable.
 
 #
 # Miscellaneous variables
@@ -211,7 +328,7 @@ CY_HELP_CY_CONFIG_FILE_EXT=Specifies the configurator file extension. E.g. modus
 CY_HELP_CY_CONFIG_FILE_EXT_VERBOSE=This variable accepts a space-separated list of configurator file extensions\
 					that should be searched for when running the "get_app_info" target.
 CY_HELP_CY_SKIP_RECIPE=Skip including the recipe make files.
-CY_HELP_CY_SKIP_RECIPE_VERBOSE=This allows the application to not include any recipe makefiles and only\
+CY_HELP_CY_SKIP_RECIPE_VERBOSE=Setting this to [true/1] allows the application to not include any recipe makefiles and only\
 					include the start.mk file from the tools install.
 CY_HELP_CY_SUPPORTED_TOOL_TYPES=Defines the supported tools for a BSP.
 CY_HELP_CY_SUPPORTED_TOOL_TYPES_VERBOSE=BSPs can define the supported tools that can be launched using the\
@@ -226,39 +343,39 @@ CY_HELP_CY_UTILS_SEARCH_DEPTH_VERBOSE=This variable controls how deep (directory
 CY_HELP_CY_EXTRA_INCLUDES=Specifies additional makefiles to add to the build.
 CY_HELP_CY_EXTRA_INCLUDES_VERBOSE=The application Makefile cannot add additional make files directly. Instead, use\
 					this variable to include these in the build. E.g. CY_EXTRA_INCLUDES=./custom1.mk ./custom2.mk
-CY_HELP_TOOLCHAIN_MK_PATH=Specifies the location of a custom TOOLCHAIN makefile.
-CY_HELP_TOOLCHAIN_MK_PATH_VERBOSE=Defining this path allows the build system to use a custom TOOLCHAIN.mk\
-					pointed to by this variable.\
-					$(CY_NEWLINE)Note: The make variables in this file should match the\
-					variables used in existing TOOLCHAIN.mk files.  
 
 # Pass these to CY_HELP to get the full verbose info
-CY_HELP_TARGETS_ALL=all getlibs build qbuild program qprogram debug qdebug clean help open config config_bt config_usbdev \
-					eclipse check get_app_info get_env_info printlibs
+CY_HELP_TARGETS_ALL=all getlibs build qbuild program qprogram debug qdebug attach clean help eclipse vscode ewarm8 uvision5 open modlibs \
+					config config_bt config_usbdev bsp progtool check get_app_info get_env_info printlibs
 CY_HELP_BASIC_CFG_ALL=TARGET APPNAME LIBNAME TOOLCHAIN CONFIG VERBOSE
 CY_HELP_ADVANCED_CFG_ALL=SOURCES INCLUDES DEFINES VFP_SELECT CFLAGS CXXFLAGS ASFLAGS LDFLAGS LDLIBS LINKER_SCRIPT \
-					PREBUILD POSTBUILD COMPONENTS DISABLE_COMPONENTS SEARCH_LIBS_AND_INCLUDES
-CY_HELP_PATHS_ALL=CY_APP_PATH CY_BASELIB_PATH CY_EXTAPP_PATH CY_GETLIBS_PATH CY_GETLIBS_SEARCH_PATH CY_DEVICESUPPORT_PATH \
-					CY_SHARED_PATH CY_COMPILER_PATH CY_TOOLS_DIR CY_BUILD_LOCATION
+					PREBUILD POSTBUILD COMPONENTS DISABLE_COMPONENTS SEARCH_LIBS_AND_INCLUDES DEPENDENT_LIB_PATHS DEPENDENT_APP_PATHS
+CY_HELP_BSP_ALL=DEVICE ADDITIONAL_DEVICES TARGET_GEN DEVICE_GEN ADDITIONAL_DEVICES_GEN
+CY_HELP_GETLIBS_ALL=CY_GETLIBS_NO_CACHE CY_GETLIBS_OFFLINE CY_GETLIBS_PATH CY_GETLIBS_DEPS_PATH CY_GETLIBS_CACHE_PATH \
+					CY_GETLIBS_OFFLINE_PATH CY_GETLIBS_SEARCH_PATH
+CY_HELP_PATHS_ALL=CY_APP_PATH CY_BASELIB_PATH CY_EXTAPP_PATH CY_GETLIBS_SEARCH_PATH CY_DEVICESUPPORT_PATH \
+					CY_SHARED_PATH CY_COMPILER_PATH CY_TOOLS_DIR CY_BUILD_LOCATION TOOLCHAIN_MK_PATH CY_PYTHON_PATH 
 CY_HELP_MISC_ALL=CY_IGNORE CY_IDE_PRJNAME CY_CONFIG_FILE_EXT CY_SKIP_RECIPE CY_SUPPORTED_TOOL_TYPES CY_LIBS_SEARCH_DEPTH \
-					CY_UTILS_SEARCH_DEPTH CY_EXTRA_INCLUDES TOOLCHAIN_MK_PATH
-CY_HELP_PRINT_ALL=$(CY_HELP_TARGETS_ALL) $(CY_HELP_BASIC_CFG_ALL) $(CY_HELP_ADVANCED_CFG_ALL) $(CY_HELP_PATHS_ALL) $(CY_HELP_MISC_ALL)
+					CY_UTILS_SEARCH_DEPTH CY_EXTRA_INCLUDES
+CY_HELP_PRINT_ALL=$(CY_HELP_TARGETS_ALL) $(CY_HELP_BASIC_CFG_ALL) $(CY_HELP_ADVANCED_CFG_ALL) $(CY_HELP_BSP_ALL) \
+					$(CY_HELP_GETLIBS_ALL) $(CY_HELP_PATHS_ALL) $(CY_HELP_MISC_ALL)
 
+help: help_default
 
 help_default:
 ifneq ($(CY_HELP),)
-	@echo 
+	$(CY_NOISE)echo 
 	$(foreach topic,$(CY_HELP),\
 	$(info $(CY_NEWLINE)Topic-specific help for "$(topic)")\
 	$(info $(CY_SPACE)$(CY_SPACE)Brief: $(CY_HELP_$(topic)))\
-	$(info $(CY_SPACE)$(CY_SPACE)Verbose: $(CY_HELP_$(topic)_VERBOSE)))
+	$(info $(CY_NEWLINE)$(CY_HELP_$(topic)_VERBOSE)))
 else
-	@echo 
+	$(CY_NOISE)echo 
 	$(info                                                                                    )
 	$(info ==============================================================================     )
 	$(info $(CY_SPACE)Cypress Build System                                                    )
 	$(info ==============================================================================     )
-	$(info $(CY_SPACE)Copyright 2018-2019 Cypress Semiconductor Corporation                   )
+	$(info $(CY_SPACE)Copyright 2018-2020 Cypress Semiconductor Corporation                   )
 	$(info $(CY_SPACE)SPDX-License-Identifier: Apache-2.0                                     )
 	$(info                                                                                    )
 	$(info $(CY_SPACE)Licensed under the Apache License, Version 2.0 (the "License");         )
@@ -291,13 +408,23 @@ else
 	$(info $(CY_SPACE)qprogram            $(CY_HELP_qprogram))
 	$(info $(CY_SPACE)debug               $(CY_HELP_debug))
 	$(info $(CY_SPACE)qdebug              $(CY_HELP_qdebug))
+	$(info $(CY_SPACE)attach              $(CY_HELP_attach))
 	$(info $(CY_SPACE)clean               $(CY_HELP_clean))
 	$(info $(CY_SPACE)help                $(CY_HELP_help))
+	$(info                                                               )
+	$(info =======================================                       )
+	$(info $(CY_SPACE)IDE make targets                                   )
+	$(info =======================================                       )
+	$(info $(CY_SPACE)eclipse             $(CY_HELP_eclipse))
+	$(info $(CY_SPACE)vscode              $(CY_HELP_vscode))
+	$(info $(CY_SPACE)ewarm8              $(CY_HELP_ewarm8))
+	$(info $(CY_SPACE)uvision5            $(CY_HELP_uvision5))
 	$(info                                                               )
 	$(info =======================================                       )
 	$(info $(CY_SPACE)Tools make targets                                 )
 	$(info =======================================                       )
 	$(info $(CY_SPACE)open                $(CY_HELP_open))
+	$(info $(CY_SPACE)modlibs             $(CY_HELP_modlibs))
 	$(info $(CY_SPACE)config              $(CY_HELP_config))
 	$(info $(CY_SPACE)config_bt           $(CY_HELP_config_bt))
 	$(info $(CY_SPACE)config_usbdev       $(CY_HELP_config_usbdev))
@@ -305,7 +432,8 @@ else
 	$(info =======================================                       )
 	$(info $(CY_SPACE)Utility make targets                               )
 	$(info =======================================                       )
-	$(info $(CY_SPACE)eclipse             $(CY_HELP_eclipse))
+	$(info $(CY_SPACE)progtool            $(CY_HELP_progtool))
+	$(info $(CY_SPACE)bsp                 $(CY_HELP_bsp))
 	$(info $(CY_SPACE)check               $(CY_HELP_check))
 	$(info $(CY_SPACE)get_app_info        $(CY_HELP_get_app_info))
 	$(info $(CY_SPACE)get_env_info        $(CY_HELP_get_env_info))
@@ -338,7 +466,28 @@ else
 	$(info $(CY_SPACE)POSTBUILD           $(CY_HELP_POSTBUILD))
 	$(info $(CY_SPACE)COMPONENTS          $(CY_HELP_COMPONENTS))
 	$(info $(CY_SPACE)DISABLE_COMPONENTS  $(CY_HELP_DISABLE_COMPONENTS))
-	$(info $(CY_SPACE)SEARCH_LIBS_AND_INCLUDES  $(CY_HELP_SEARCH_LIBS_AND_INCLUDES))
+	$(info $(CY_SPACE)DEPENDENT_LIB_PATHS  $(CY_HELP_DEPENDENT_LIB_PATHS))
+	$(info $(CY_SPACE)DEPENDENT_APP_PATHS  $(CY_HELP_DEPENDENT_APP_PATHS))
+	$(info                                                               )
+	$(info =======================================                       )
+	$(info $(CY_SPACE)BSP make variables                                 )
+	$(info =======================================                       )
+	$(info $(CY_SPACE)DEVICE              $(CY_HELP_DEVICE))
+	$(info $(CY_SPACE)ADDITIONAL_DEVICES  $(CY_HELP_ADDITIONAL_DEVICES))
+	$(info $(CY_SPACE)TARGET_GEN          $(CY_HELP_TARGET_GEN))
+	$(info $(CY_SPACE)DEVICE_GEN          $(CY_HELP_DEVICE_GEN))
+	$(info $(CY_SPACE)ADDITIONAL_DEVICES_GEN  $(CY_HELP_ADDITIONAL_DEVICES_GEN))
+	$(info                                                               )
+	$(info =======================================                       )
+	$(info $(CY_SPACE)Getlibs make variables                             )
+	$(info =======================================                       )
+	$(info $(CY_SPACE)CY_GETLIBS_NO_CACHE $(CY_HELP_CY_GETLIBS_NO_CACHE))
+	$(info $(CY_SPACE)CY_GETLIBS_OFFLINE  $(CY_HELP_CY_GETLIBS_OFFLINE))
+	$(info $(CY_SPACE)CY_GETLIBS_PATH     $(CY_HELP_CY_GETLIBS_PATH))
+	$(info $(CY_SPACE)CY_GETLIBS_DEPS_PATH  $(CY_HELP_CY_GETLIBS_DEPS_PATH))
+	$(info $(CY_SPACE)CY_GETLIBS_CACHE_PATH   $(CY_HELP_CY_GETLIBS_CACHE_PATH))
+	$(info $(CY_SPACE)CY_GETLIBS_OFFLINE_PATH  $(CY_HELP_CY_GETLIBS_OFFLINE_PATH))
+	$(info $(CY_SPACE)CY_GETLIBS_SEARCH_PATH  $(CY_HELP_CY_GETLIBS_SEARCH_PATH))
 	$(info                                                               )
 	$(info =======================================                       )
 	$(info $(CY_SPACE)Path make variables                                )
@@ -346,26 +495,25 @@ else
 	$(info $(CY_SPACE)CY_APP_PATH         $(CY_HELP_CY_APP_PATH))
 	$(info $(CY_SPACE)CY_BASELIB_PATH     $(CY_HELP_CY_BASELIB_PATH))
 	$(info $(CY_SPACE)CY_EXTAPP_PATH      $(CY_HELP_CY_EXTAPP_PATH))
-	$(info $(CY_SPACE)CY_GETLIBS_PATH     $(CY_HELP_CY_GETLIBS_PATH))
-	$(info $(CY_SPACE)CY_GETLIBS_SEARCH_PATH  $(CY_HELP_CY_GETLIBS_SEARCH_PATH))
 	$(info $(CY_SPACE)CY_DEVICESUPPORT_PATH  $(CY_HELP_CY_DEVICESUPPORT_PATH))
 	$(info $(CY_SPACE)CY_SHARED_PATH      $(CY_HELP_CY_SHARED_PATH))
 	$(info $(CY_SPACE)CY_COMPILER_PATH    $(CY_HELP_CY_COMPILER_PATH))
 	$(info $(CY_SPACE)CY_TOOLS_DIR        $(CY_HELP_CY_TOOLS_DIR))
 	$(info $(CY_SPACE)CY_BUILD_LOCATION   $(CY_HELP_CY_BUILD_LOCATION))
+	$(info $(CY_SPACE)CY_PYTHON_PATH      $(CY_HELP_CY_PYTHON_PATH))
+	$(info $(CY_SPACE)TOOLCHAIN_MK_PATH   $(CY_HELP_TOOLCHAIN_MK_PATH))
 	$(info                                                               )
 	$(info =======================================                       )
 	$(info $(CY_SPACE)Miscellaneous make variables                       )
 	$(info =======================================                       )
 	$(info $(CY_SPACE)CY_IGNORE           $(CY_HELP_CY_IGNORE))
-	$(info $(CY_SPACE)CY_IDE_PRJNAME      $(CY_HELP_CY_IDE_PRJNAME))
-	$(info $(CY_SPACE)CY_CONFIG_FILE_EXT  $(CY_HELP_CY_CONFIG_FILE_EXT))
 	$(info $(CY_SPACE)CY_SKIP_RECIPE      $(CY_HELP_CY_SKIP_RECIPE))
-	$(info $(CY_SPACE)CY_SUPPORTED_TOOL_TYPES  $(CY_HELP_CY_SUPPORTED_TOOL_TYPES))
+	$(info $(CY_SPACE)CY_EXTRA_INCLUDES   $(CY_HELP_CY_EXTRA_INCLUDES))
 	$(info $(CY_SPACE)CY_LIBS_SEARCH_DEPTH  $(CY_HELP_CY_LIBS_SEARCH_DEPTH))
 	$(info $(CY_SPACE)CY_UTILS_SEARCH_DEPTH  $(CY_HELP_CY_UTILS_SEARCH_DEPTH))
-	$(info $(CY_SPACE)CY_EXTRA_INCLUDES   $(CY_HELP_CY_EXTRA_INCLUDES))
-	$(info $(CY_SPACE)TOOLCHAIN_MK_PATH   $(CY_HELP_TOOLCHAIN_MK_PATH))
+	$(info $(CY_SPACE)CY_IDE_PRJNAME      $(CY_HELP_CY_IDE_PRJNAME))
+	$(info $(CY_SPACE)CY_CONFIG_FILE_EXT  $(CY_HELP_CY_CONFIG_FILE_EXT))
+	$(info $(CY_SPACE)CY_SUPPORTED_TOOL_TYPES  $(CY_HELP_CY_SUPPORTED_TOOL_TYPES))
 endif
 
 #

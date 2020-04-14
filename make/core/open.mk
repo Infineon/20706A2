@@ -1,13 +1,12 @@
 ################################################################################
 # \file open.mk
-# \version 1.0
 #
 # \brief
 # Opens/launches a specified tool 
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2019 Cypress Semiconductor Corporation
+# Copyright 2018-2020 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +26,39 @@ ifeq ($(WHICHFILE),true)
 $(info Processing $(lastword $(MAKEFILE_LIST)))
 endif
 
+
+################################################################################
+# Additional tools
+################################################################################
+
+CY_OPEN_TYPE_LIST+=\
+	library-manager\
+	project-creator
+
+##########################
+# library-manager
+##########################
+
+CY_OPEN_library_manager_EXT=
+CY_OPEN_library_manager_FILE=
+CY_OPEN_library_manager_TOOL=$(CY_LIBRARY_MANAGER_DIR)/library-manager
+CY_OPEN_library_manager_TOOL_FLAGS=--target-dir $(CY_INTERNAL_APPLOC)
+CY_OPEN_library_manager_TOOL_NEWCFG_FLAGS=
+
+##########################
+# project-creator
+##########################
+
+CY_OPEN_project_creator_EXT=
+CY_OPEN_project_creator_FILE=
+CY_OPEN_project_creator_TOOL=$(CY_PROJECT_CREATOR_DIR)/project-creator
+CY_OPEN_project_creator_TOOL_FLAGS=
+CY_OPEN_project_creator_TOOL_NEWCFG_FLAGS=
+
+
+################################################################################
+# Data verification
+################################################################################
 
 # Verify that the tool is supported
 ifneq ($(CY_OPEN_TYPE),)
@@ -50,7 +82,7 @@ ifneq ($(filter get_app_info open,$(MAKECMDGOALS)),)
 
 # Look for tools that DISALLOW new configurations
 CY_OPEN_NEWCFG_XML_TYPES+=$(shell \
-	xmlFileArray=($$(find $(CY_INTERNAL_TOOLS) -maxdepth 2 -name "configurator.xml" \
+	xmlFileArray=($$($(CY_FIND) $(CY_INTERNAL_TOOLS) -maxdepth 2 -name "configurator.xml" \
 					-exec grep "<new_configuration_enabled>false</new_configuration_enabled>" {} +));\
 	for xmlFile in "$${xmlFileArray[@]}"; do\
 		if [[ "$$xmlFile" == *"configurator.xml"* ]]; then\
@@ -119,6 +151,10 @@ else
 	$(info $(CY_NEWLINE)Launching $(notdir $(CY_OPEN_TOOL_LAUNCH)) tool on $(CY_OPEN_TOOL_FILE))
 	$(CY_NOISE) $(CY_OPEN_TOOL_LAUNCH) $(CY_OPEN_TOOL_ARGS) $(CY_OPEN_TOOL_FLAGS) $(CY_OPEN_TOOL_FILE) $(CY_OPEN_STDOUT) &
 endif
+
+modlibs:
+	$(info Launching library-manager)
+	$(CY_NOISE) $(CY_OPEN_library_manager_TOOL) $(CY_OPEN_library_manager_TOOL_FLAGS) &
 
 #
 # Identify the phony targets

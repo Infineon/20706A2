@@ -35,9 +35,6 @@ ifeq ($(DEBUG),true)
 $(info Processing $(lastword $(MAKEFILE_LIST)))
 endif
 
-# Cypress internal build hook (optional include)
--include $(CY_BASELIB_CORE_PATH)/make/recipe/internal_lib.mk
-
 #
 # gdb command line launch
 #
@@ -84,6 +81,7 @@ CY_DOWNLOAD_CMD=\
 	--hex="$(CY_CONFIG_DIR)/$(APPNAME)_download.hex"\
 	--elf="$(CY_CONFIG_DIR)/$(APPNAME).elf"\
 	--uart=$(UART)\
+	--direct=$(DIRECT_LOAD)\
 	$(if $(VERBOSE),--verbose)
 
 program: build qprogram
@@ -91,6 +89,12 @@ program: build qprogram
 $(CY_CONFIG_DIR)/$(APPNAME).hex: $(CY_CONFIG_DIR)/$(APPNAME).elf
 	$(CY_NOISE)$(CY_RECIPE_POSTBUILD) $(CY_CMD_TERM)
 
+$(CY_CONFIG_DIR)/$(APPNAME).hcd: $(CY_CONFIG_DIR)/$(APPNAME).elf
+	$(CY_NOISE)$(CY_RECIPE_POSTBUILD) $(CY_CMD_TERM)
+
+#
+# only program if it is not a lib project, and if not DIRECT_LOAD
+#
 ifeq ($(LIBNAME),)
 qprogram: $(CY_CONFIG_DIR)/$(APPNAME).hex
 	@echo "Programming target device ... "

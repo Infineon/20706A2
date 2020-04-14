@@ -67,8 +67,8 @@ if(!defined $bdaddr_mask) {
 
 # if default or , use host MAC address as suffix (os dependent)
 if($bdaddr_setting eq 'default') {
-    if($^O =~ /MSWin32/ || $^O =~ /cygwin/) {
-        my $ip = `ipconfig /all`;
+    if($^O =~ /(MSWin32|cygwin|msys|MINGW64)/) {
+        my $ip = `ipconfig -all`;
         my @lines = split "\n", $ip;
         while(defined(my $line = shift @lines)) {
             next if $line !~ /(Ethernet\s*[0-9]?|Wi-Fi|Local Area Connection):/;
@@ -104,7 +104,7 @@ if($bdaddr_setting eq 'default') {
             }
         }
     }
-    warn "could not determine host mac on which to base bluetooth mac address\n" if !defined $mac;
+    warn "could not determine host mac on which to base bluetooth mac address $^O\n" if !defined $mac;
     $mac = "000000000000" if !defined $mac;
 }
 elsif($bdaddr_setting eq 'random') {

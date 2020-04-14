@@ -99,7 +99,7 @@ CY_TOOL_PERL=$CYMODUSSHELL/bin/perl
 fi
 
 #create ld file
-"$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-ld.pl" $CY_APP_LD_DEFS $CY_APP_DIRECT_LOAD "$CY_APP_PATCH" "$CY_APP_OVERLAY" out="$CY_APP_LD"
+"$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-ld.pl" $CY_APP_LD_DEFS DIRECT_LOAD=$CY_APP_DIRECT_LOAD "$CY_APP_PATCH" "$CY_APP_OVERLAY" out="$CY_APP_LD"
 if [ $? -eq 0 ]; then
    echo "generated $CY_APP_LD"
 else

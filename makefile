@@ -120,6 +120,13 @@ ifeq ($(CY_TARGET_DEVICE)$(TARGET),)
 CY_SKIP_RECIPE=1
 endif
 
+# added as work around until make/core 'make vscode' always creates rsp files
+ifneq ($(filter vscode,$(MAKECMDGOALS)),)
+VSCODE_WA:=$(shell $(foreach listfile,inclist.rsp liblist.rsp artifact.rsp,\
+     mkdir -p $(CY_BASELIB_PATH)/build/$(TARGET)/$(CONFIG)/$(dir $(listfile));\
+     touch $(CY_BASELIB_PATH)/build/$(TARGET)/$(CONFIG)/$(listfile);))
+endif
+
 include $(CY_TOOLS_DIR)/make/start.mk
 
 # if not coming from app makefile (IDE), stub out all: target

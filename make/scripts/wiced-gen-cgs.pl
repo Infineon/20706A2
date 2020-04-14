@@ -62,6 +62,10 @@ sub main
     my $btp = {};
     parse_btp($btp_file, $btp);
 
+    my $load_regions = {};
+    my $ld_info = {};
+    scan_ld_file($app_ld, $ld_info, $load_regions);
+
     # combine the cgs files
     my @cgs_records;
     my $got_xip_skip_cgs = 0;
@@ -95,27 +99,27 @@ sub main
         open(my $CGS, "<", $cgs) or die "could not open \"$cgs\"\n";
         push @{$cgs_record->{lines}}, <$CGS>;
         close $CGS;
-        post_process_cgs($cgs_record);
+        post_process_cgs($cgs_record, $direct_load);
         push @cgs_records, $cgs_record;
     }
     # merge cgs that enables xip skip with patch cgs, then embed xip
     if($got_xip_skip_cgs) {
-        post_process_cgs_for_xip(\@cgs_records, $sections, $btp->{ConfigDSLocation});
+        post_process_cgs_for_xip(\@cgs_records, $sections, $ld_info->{flash_ds});
     }
     @cgs_records = sort { $a->{order} <=> $b->{order} } @cgs_records;
     dump_cgs(\@cgs_records);
 
-	my $sym = find_symbol($symbol_entries, $app_entry_function);
-	my $addr = $sym->{st_value} if defined $sym;
-#	output_hex_elf($app_elf, $sections, $addr);
-	output_cgs_elf($app_elf, $sections, $symbol_entries, $stringtable, $hdf, $entry2code, $app_entry_function, $direct_load);
+    my $sym = find_symbol($symbol_entries, $app_entry_function);
+    my $addr = $sym->{st_value} if defined $sym;
+    #	output_hex_elf($app_elf, $sections, $addr);
+    output_cgs_elf($app_elf, $sections, $symbol_entries, $stringtable, $hdf, $entry2code, $app_entry_function, $direct_load);
 
     post_app_cgs(\@cgs_records);
 
-	if(defined $outfile) {
-		select STDOUT;
-	}
-	report_resource_usage($sections, $app_ld);
+    if(defined $outfile) {
+        select STDOUT;
+    }
+    report_resource_usage($sections, $ld_info, $load_regions);
 }
 
 sub dump_cgs
@@ -131,13 +135,22 @@ sub dump_cgs
 
 sub post_process_cgs
 {
-    my ($cgs_record) = @_;
+    my ($cgs_record, $direct_load) = @_;
+    my @lines;
     return if $cgs_record->{type} ne 'patch';
+
+    if($direct_load == 1 && $cgs_record->{file} !~ /43012C0/) {
+        push @lines, @{$cgs_record->{lines}};
+        $cgs_record->{lines} = [];
+        foreach my $line (@lines) {
+            $line =~ s/^ENTRY \"Data\"/DIRECT_LOAD/;
+            push @{$cgs_record->{lines}}, $line;
+        }
+    }
 
     # for now just need to split TCA records from patch.cgs to end of combined cgs
     return if $cgs_record->{file} !~ /(20721B2|20719B2)/;
-
-    my @lines;
+    @lines = ();
     push @lines, @{$cgs_record->{lines}};
     $cgs_record->{lines} = [];
     my $in_tca_entry = 0;
@@ -353,48 +366,47 @@ sub post_app_cgs
         next if !defined $cgs_record->{tca_lines};
         print "\n\n############### dump TCA entries from $cgs_record->{file}\n";
         foreach my $line (@{$cgs_record->{tca_lines}}) {
-		print $line;
-	}
+            print $line;
+        }
         last;
     }
 }
 
-sub report_resource_usage
+sub scan_ld_file
 {
-	my ($sections, $ld_file) = @_;
-	my $load_regions = {};
-    my $mem_type_names = { ram => "SRAM", aon => "Battery backed RAM", static_section => "Static Data", xip_section => "Flash", xip_section_ds2 => "Flash", pram => "Patch RAM"};
-
-	my $total;
-	my ($ram_patch_begin, $ram_patch_end, $ram_end);
-	my ($flash_begin, $flash_len, $flash_ds, $flash_ds2);
-	print "\n";
-
+	my ($ld_file, $ld_info, $load_regions) = @_;
+	my $mem_type_names = { ram => "SRAM", aon => "Battery backed RAM", static_section => "Static Data", xip_section => "Flash", xip_section_ds2 => "Flash", pram => "Patch RAM"};
 	open(my $LD, "<", $ld_file) || die "Could not read $ld_file, $!\n";
 	while(defined(my $line = <$LD>)) {
+		if($line =~ /pram_patch_begin=0x([0-9A-F]+)/) {
+			$ld_info->{'pram_patch_begin'} = hex($1);
+		}
+		if($line =~ /pram_patch_end=0x([0-9A-F]+)/) {
+			$ld_info->{'pram_patch_end'} = hex($1);
+		}
 		if($line =~ /ram_patch_begin=0x([0-9A-F]+)/) {
-			$ram_patch_begin = hex($1);
-			printf "Patch ram starts at          0x%06X (RAM address)\n", $ram_patch_begin;
+			$ld_info->{'ram_patch_begin'} = hex($1);
 		}
 		if($line =~ /ram_patch_end=0x([0-9A-F]+)/) {
-			$ram_patch_end = hex($1);
-			printf "Patch ram ends at            0x%06X (RAM address)\n", $ram_patch_end;
+			$ld_info->{'ram_patch_end'} = hex($1);
 		}
 		if($line =~ /ram_end=0x([0-9A-F]+)/) {
-			$ram_end = hex($1);
-			#printf "RAM ends at                  0x%06X (RAM address)\n", $ram_end;
+			$ld_info->{'ram_end'} = hex($1);
 		}
 		if($line =~ /FLASH0_BEGIN_ADDR=0x([0-9A-F]+)/) {
-			$flash_begin = hex($1);
+			$ld_info->{'flash_begin'} = hex($1);
 		}
 		if($line =~ /FLASH0_LENGTH=0x([0-9A-F]+)/) {
-			$flash_len = hex($1);
+			$ld_info->{'flash_len'} = hex($1);
 		}
 		if($line =~ /FLASH0_DS=0x([0-9A-F]+)/) {
-			$flash_ds = hex($1);
+			$ld_info->{'flash_ds'} = hex($1);
 		}
 		if($line =~ /FLASH0_DS2=0x([0-9A-F]+)/) {
-			$flash_ds2 = hex($1);
+			$ld_info->{'flash_ds2'} = hex($1);
+		}
+        if($line =~ /UPGRADE_STORAGE_LENGTH=0x([0-9A-F]+)/) {
+			$ld_info->{'upgrade_storage'} = hex($1);
 		}
 		if($line =~ /^MEMORY/) {
 			my $line2 = <$LD>;
@@ -419,13 +431,19 @@ sub report_resource_usage
 		}
 	}
 	close $LD;
+}
 
-	if(defined $flash_ds) {
-		my $flash_ds_len = $flash_len - $flash_ds;
-		$flash_ds_len = ($flash_ds2 - $flash_ds) if defined $flash_ds2;
-		printf "DS length %d (0x%06X) at 0x%06X\n", $flash_ds_len/2, $flash_ds_len/2, $flash_ds;
-	}
+sub report_resource_usage
+{
+	my ($sections, $ld_info, $load_regions) = @_;
+	my $total;
+	print "\n";
+	printf "Patch code starts at    0x%06X (RAM address)\n", $ld_info->{pram_patch_begin};
+	printf "Patch code ends at      0x%06X (RAM address)\n", $ld_info->{pram_patch_end};
+	printf "Patch ram starts at     0x%06X (RAM address)\n", $ld_info->{ram_patch_begin};
+	printf "Patch ram ends at       0x%06X (RAM address)\n", $ld_info->{ram_patch_end};
 
+	print  "\nApplication memory usage:\n";
 	foreach my $section (@{$sections}) {
 		foreach my $region (values(%{$load_regions})) {
 			next if $section->{sh_addr} < $region->{start};
@@ -443,14 +461,17 @@ sub report_resource_usage
 		printf "% 16s %8s start 0x%06X, end 0x%06X, size %d\n", $section->{name}, $section->{mem_type}, $section->{sh_addr},
 					$section->{sh_addr} + $section->{sh_size}, $section->{sh_size};
 	}
-	print  "\nApplication memory usage:\n";
 	foreach my $region (values(%{$load_regions})) {
 		next if $region->{end_used} == 0;
 		my $use = $region->{end_used} - $region->{start_used};
 		$total += $use;
 		printf "  %s (%s): used 0x%06X - 0x%06X size (%d)\n", $region->{name}, $region->{type}, $region->{start_used}, $region->{end_used}, $use;
 	}
-	printf "Total footprint %d (0x%X)\n\n", $total, $total;
+	printf "  Total application footprint %d (0x%X)\n\n", $total, $total;
+	if(defined $ld_info->{upgrade_storage}) {
+		printf "DS available %d (0x%06X) at 0x%06X\n\n", $ld_info->{upgrade_storage}, $ld_info->{upgrade_storage}, $ld_info->{flash_ds};
+	}
+
 }
 
 sub output_cgs_cfg
@@ -850,16 +871,21 @@ sub hex_record
 
 sub preview_sections
 {
-	my ($sections, $sorted_sections, $section_info) = @_;
+	my ($sections, $sorted_sections, $section_info, $direct_load) = @_;
 
 	# sort overlay sections to end
 	# move data sections prior to datagot and relo
+	my $setup_section;
 	my @overlay_sections;
 	my @nonoverlay_sections;
 	my @pie_sections;
 	my @non_pie_sections;
 	foreach my $section (@{$sections}) {
 		next if !defined $section->{name};
+		if( $section->{name} eq '.setup' && $direct_load) {
+			$setup_section = $section;
+			next;
+		}
 		if($section->{name} =~ /^\._(\d)_/) {
 			# mark the section as overlay
 			$section->{'overlay_id'} = $1;
@@ -897,8 +923,9 @@ sub preview_sections
 		push @{$sorted_sections}, @non_pie_sections;
 		push @{$sorted_sections}, @pie_sections;
 	}
-
-
+	if(defined $sorted_sections) {
+		push @{$sorted_sections}, $setup_section;
+	}
 }
 
 sub output_cgs_elf
@@ -916,7 +943,7 @@ sub output_cgs_elf
 
 	my $sorted_sections = [];
 	my $section_info = {};
-	preview_sections($sections, $sorted_sections, $section_info);
+	preview_sections($sections, $sorted_sections, $section_info, $direct_load);
 
 	foreach my $section (@{$sorted_sections}) {
 		next if ($section->{sh_type} != 1 && $section->{sh_type} != 6 && $section->{sh_type} != 9); # PROGBITS
