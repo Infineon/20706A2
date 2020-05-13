@@ -299,8 +299,10 @@ sub main
 			if defined $section_lut->{first_free_section_in_SRAM}->{sh_addr};
 	$param->{SRAM_START_ADDR} = $section_lut->{FIRST_FREE_SECTION_IN_SRAM}->{sh_addr}
 			if defined $section_lut->{FIRST_FREE_SECTION_IN_SRAM}->{sh_addr};
-#	$param->{SRAM_START_ADDR} = $section_lut->{POST_INIT_SECTION_IN_SRAM}->{sh_addr}
-#			if defined $section_lut->{POST_INIT_SECTION_IN_SRAM}->{sh_addr};
+    # for DIRECT_LOAD, add app code after init sections (including SlimBoot)
+	$param->{SRAM_START_ADDR} = $section_lut->{POST_INIT_SECTION_IN_SRAM}->{sh_addr}
+			if defined $section_lut->{POST_INIT_SECTION_IN_SRAM}->{sh_addr} &&
+			   defined $param->{direct_load} && $param->{direct_load};
     die "Ram start undefined\n" if !defined $param->{SRAM_START_ADDR};
 	output_ld($section_lut, $param);
 }

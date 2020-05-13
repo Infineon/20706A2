@@ -45,7 +45,7 @@ CONFIG?=Debug
 #
 # Advanced Configuration
 #
-SOURCES=
+SOURCES=../../libraries/btsdk-common/wiced_bt_utils.c
 INCLUDES=\
     $(CY_BASELIB_PATH)/include \
     $(CY_BASELIB_PATH)/include/hal \
