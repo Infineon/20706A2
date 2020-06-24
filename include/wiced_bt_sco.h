@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -43,6 +43,23 @@
  *              Constants
  ******************************************************/
 
+/**
+ *  @addtogroup  sco_api_functions       Synchronous Connection Oriented (SCO) Channel
+ *  @ingroup     wicedbt_av
+ *
+ *  SCO Definitions and Functions
+ *
+ *  SCO logical transport, is a symmetric, point-to-point transport between
+ *  the master and a specific slave. The SCO logical transport reserves slots
+ *  and can therefore be considered as a circuit-switched connection between
+ *  the master and the slave. The master may support up to three SCO links to
+ *  the same slave or to different slaves. A slave may support up to three SCO
+ *  links from the same master, or two SCO links if the links originate from
+ *  different masters. SCO packets are never retransmitted.
+ *
+ *  @{
+ */
+
 typedef enum
 {
     WICED_BT_SCO_OVER_I2SPCM = 0,   /* [DEFAULT] PCM data config for routing over I2S/PCM interface */
@@ -68,21 +85,6 @@ typedef struct
 {
     wiced_bt_sco_route_path_t    path;    /* sco routing path  0:uart; 1:i2s/pcm 2:app_cb */
 }wiced_bt_voice_path_setup_t;
-
-/**
- *  @addtogroup  sco_api_functions       Synchronous Connection Oriented (SCO) Channel
- *  @ingroup     wicedbt
- *
- *  SCO logical transport, is a symmetric, point-to-point transport between
- *  the master and a specific slave. The SCO logical transport reserves slots
- *  and can therefore be considered as a circuit-switched connection between
- *  the master and the slave. The master may support up to three SCO links to
- *  the same slave or to different slaves. A slave may support up to three SCO
- *  links from the same master, or two SCO links if the links originate from
- *  different masters. SCO packets are never retransmitted.
- *
- *  @{
- */
 
 /******************************************************
  *              Function Declarations

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -63,7 +63,8 @@ extern "C" {
 
 // MAX packet size that can be sent over iAP2
 #define IAP2_MAX_PACKET_SIZE    1003
-
+#define PORT_PURGE_TXCLEAR     0x01
+#define PORT_PURGE_RXCLEAR     0x02
 /**
  * Data provided by the application and utilized by the library
  */
@@ -265,6 +266,16 @@ void wiced_bt_iap2_rx_flow_enabled( uint16_t session, wiced_bool_t enable );
  */
 wiced_bool_t wiced_bt_iap2_can_send_more_data(void);
 
+/**
+ * iAP2 application may use this function to discard all the data from the
+ * output or input queues of the specified connection.
+ *
+ * @param[in]      handle : Connection handle indicated in the connection up callback
+ * @param[in]      purge_flags - specify the action to take with PORT_PURGE_TXCLEAR
+ *                 and/or PORT_PURGE_RXCLEAR.
+ * @return         rfcomm port return code
+ */
+void wiced_bt_iap2_port_purge(uint16_t handle, uint8_t purge_flags);
 
 /**@} wiced_bt_iap2_api_functions */
 

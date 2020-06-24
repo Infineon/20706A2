@@ -1,4 +1,36 @@
 #!/bin/bash
+#
+# Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
+# Cypress Semiconductor Corporation. All Rights Reserved.
+#
+# This software, including source code, documentation and related
+# materials ("Software"), is owned by Cypress Semiconductor Corporation
+# or one of its subsidiaries ("Cypress") and is protected by and subject to
+# worldwide patent protection (United States and foreign),
+# United States copyright laws and international treaty provisions.
+# Therefore, you may use this Software only as provided in the license
+# agreement accompanying the software package from which you
+# obtained this Software ("EULA").
+# If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
+# non-transferable license to copy, modify, and compile the Software
+# source code solely for use in connection with Cypress's
+# integrated circuit products. Any reproduction, modification, translation,
+# compilation, or representation of this Software except as specified
+# above is prohibited without the express written permission of Cypress.
+#
+# Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
+# reserves the right to make changes to the Software without notice. Cypress
+# does not assume any liability arising out of the application or use of the
+# Software or any product or circuit described in the Software. Cypress does
+# not authorize its products for use in any products where a malfunction or
+# failure of the Cypress product may reasonably be expected to result in
+# significant property damage, injury or death ("High Risk Product"). By
+# including Cypress's product in a High Risk Product, the manufacturer
+# of such system or application assumes all risk of such use and in doing
+# so agrees to indemnify Cypress against all liability.
+#
 (set -o igncr) 2>/dev/null && set -o igncr; # this comment is required
 set -e
 #set -x
@@ -36,7 +68,7 @@ USAGE+=" (-w=|--scripts=)<wiced scripts path> (-t=|--tools=)<wiced tools>"
 USAGE+=" (-b=|--builddir=)<build dir> (-e=|--elfname=)<elf name>"
 USAGE+=" (-a=|--appname=)<app name> (-d=|--hdf=)<hdf file>"
 USAGE+=" (-n=|--entry=)<app entry function> (-l=|--cgslist=)<cgs file list>"
-USAGE+=" (-f=|--failsafe=)<failsafe cgs file> (-g=|--cgsargs=)<cgs tool arg>"
+USAGE+=" (-z=|--sscgs=)<static cgs file> -f=|--failsafe=)<failsafe cgs file> (-g=|--cgsargs=)<cgs tool arg>"
 USAGE+=" (-p=|--btp=)<btp file> (-i=|--id=)<hci id file> (-o=|--overridebaudfile=)<override baud rate list>"
 USAGE+=" (-q=|--chip=)<chip> (-r=|--target=)<target>"
 USAGE+=" (-m=|--minidriver=)<minidriver file> (-c=|--clflags=)<chipload tool flags>"
@@ -96,6 +128,10 @@ do
         ;;
     -f=*|--failsafe=*)
         CY_APP_FAILSAFE="${i#*=}"
+        shift
+        ;;
+    -z=*|--sscgs=*)
+        CY_APP_SS_CGS="${i#*=}"
         shift
         ;;
     -g=*|--cgsargs=*)
@@ -174,17 +210,18 @@ if [ "$VERBOSE" != "" ]; then
     echo 9:  CY_APP_ENTRY         : $CY_APP_ENTRY
     echo 10: CY_APP_CGSLIST       : $CY_APP_CGSLIST
     echo 11: CY_APP_FAILSAFE      : $CY_APP_FAILSAFE
-    echo 12: CY_APP_CGS_ARGS      : $CY_APP_CGS_ARGS
-    echo 13: CY_APP_BTP           : $CY_APP_BTP
-    echo 14: CY_APP_HCI_ID        : $CY_APP_HCI_ID
-    echo 15: CY_APP_BAUDRATE_FILE : $CY_APP_BAUDRATE_FILE
-    echo 16: CY_CHIP              : $CY_CHIP
-    echo 17: CY_TARGET            : $CY_TARGET
-    echo 18: CY_APP_MINIDRIVER    : $CY_APP_MINIDRIVER
-    echo 19: CY_DS2_APP_HEX       : $CY_DS2_APP_HEX
-    echo 20: CY_APP_CHIPLOAD_FLAGS: $CY_APP_CHIPLOAD_FLAGS
-    echo 21: CY_APP_MERGE_HEX_NAME: $CY_APP_MERGE_HEX_NAME
-    echo 22: CY_APP_BUILD_EXTRAS  : $CY_APP_BUILD_EXTRAS
+    echo 12: CY_APP_SS_CGS        : $CY_APP_SS_CGS
+    echo 13: CY_APP_CGS_ARGS      : $CY_APP_CGS_ARGS
+    echo 14: CY_APP_BTP           : $CY_APP_BTP
+    echo 15: CY_APP_HCI_ID        : $CY_APP_HCI_ID
+    echo 16: CY_APP_BAUDRATE_FILE : $CY_APP_BAUDRATE_FILE
+    echo 17: CY_CHIP              : $CY_CHIP
+    echo 18: CY_TARGET            : $CY_TARGET
+    echo 19: CY_APP_MINIDRIVER    : $CY_APP_MINIDRIVER
+    echo 20: CY_DS2_APP_HEX       : $CY_DS2_APP_HEX
+    echo 21: CY_APP_CHIPLOAD_FLAGS: $CY_APP_CHIPLOAD_FLAGS
+    echo 22: CY_APP_MERGE_HEX_NAME: $CY_APP_MERGE_HEX_NAME
+    echo 23: CY_APP_BUILD_EXTRAS  : $CY_APP_BUILD_EXTRAS
 fi
 
 # check that required files are present
@@ -275,11 +312,18 @@ fi
 CY_APP_CGS_ARGS_ORIG=$CY_APP_CGS_ARGS
 CY_APP_CGS_ARGS=$("$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-bdaddr.pl" ${CY_CHIP} "$CY_APP_BTP" ${CY_APP_CGS_ARGS})
 
+# add ss cgs if needed, copy local to use local hdf
+if [ "$CY_APP_SS_CGS" != "" ]; then
+"$CY_TOOL_CP" "$CY_APP_SS_CGS" "$CY_MAINAPP_BUILD_DIR/."
+CY_APP_SS_CGS=$(basename $CY_APP_SS_CGS)
+CY_APP_SS_CGS="--ss-cgs \"$CY_MAINAPP_BUILD_DIR/$CY_APP_SS_CGS\""
+fi
+
 # for flash downloads of non-HomeKit, this is the download file, done
 # generate hex download file, use eval because of those darn quotes needed around "DLConfigTargeting:RAM runtime"
 echo "generate hex file:"
-echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
-eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 
 if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
 echo "Appending DS2 section"
@@ -307,7 +351,8 @@ echo "Building in static section from staticdata.hex"
 "$CY_TOOL_MV" $CY_APP_HEX $CY_APP_HEX.temp
 "$CY_TOOL_RM" $CY_APP_HCD
 "$CY_TOOL_SYNC"
-"$CYWICEDTOOLS/IntelHexToBin/IntelHexMerge" "$CY_APP_HEX.temp" "$CY_MAINAPP_BUILD_DIR/../staticdata.hex" "$CY_APP_HEX"
+"$CYWICEDTOOLS/hexgen/hexgen2" -a 0x500800 -i "$CY_MAINAPP_BUILD_DIR/../../../datainput.txt" -o "$CY_MAINAPP_BUILD_DIR/../../../staticdata.hex"
+"$CYWICEDTOOLS/IntelHexToBin/IntelHexMerge" "$CY_APP_HEX.temp" "$CY_MAINAPP_BUILD_DIR/../../../staticdata.hex" "$CY_APP_HEX"
 "$CYWICEDTOOLS/IntelHexToBin/IntelHexToHCD" "$CY_APP_HEX" "$CY_APP_HCD"
 fi
 

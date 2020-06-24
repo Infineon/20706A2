@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -53,15 +53,20 @@
 * Kit Guide for more information.
 *
 *
-******************************************************************************
-*** Parameters.
-***
-*** The following parameters are used to configure the driver or define
-*** return status. They are not modifiable.
-******************************************************************************/
+*/
 
-// PWM HW block has 4 PWM channels each with its own 10 bit counter.
-// The first PWM channel is PWM0.
+/******************************************************************************
+ * Global Data Structure definitions                                          *
+ ******************************************************************************/
+
+/**
+* \addtogroup group_pwm_data_structures Structures
+* PWM Structures
+* \{
+*/
+
+/// PWM HW block has 4 PWM channels each with its own 10 bit counter.
+/// The first PWM channel is PWM0.
 typedef enum
 {
     PWM0  = 0,
@@ -71,24 +76,31 @@ typedef enum
     MAX_PWMS = 4
 } pwm_channel_t;
 
-// Clock used for PWM. When LHL_CLK is set, 128 KHz is used.
-// PMU_CLK requires aclk to be configured first.
+/// Clock used for PWM. When LHL_CLK is set, 128 KHz is used.
+/// PMU_CLK requires aclk to be configured first.
 typedef enum
 {
     LHL_CLK,
     PMU_CLK
 } pwm_clk_t;
 
-//init count and toggle count for the PWM counters
+/// init count and toggle count for the PWM counters
 typedef struct{
     UINT32 init_count;
     UINT32 toggle_count;
 } pwm_config_t;
 
+/** \} group_pwm_data_structures */
+
 /******************************************************************************
-*** Function prototypes and defines.
+*** Global functions .
 ******************************************************************************/
 
+/**
+* \addtogroup group_pwm_functions Functions
+* PWM Functions
+* \{
+*/
 ///////////////////////////////////////////////////////////////////////////////
 /// Configures, enables, and starts the PWM to be active on a
 /// preconfigured GPIO pin.
@@ -196,6 +208,7 @@ void wiced_hal_pwm_enable(UINT8 channel);
 ///////////////////////////////////////////////////////////////////////////////
 void wiced_hal_pwm_get_params( UINT32 clock_frequency_in, UINT32 duty_cycle, UINT32 pwm_frequency_out, pwm_config_t * params_out);
 
+/** \} group_pwm_functions */
 /* @} */
 
 #endif // __WICED_PWM_H__

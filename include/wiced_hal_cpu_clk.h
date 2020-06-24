@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -44,15 +44,12 @@
 
 /**  \addtogroup CPU Clock
 * \ingroup HardwareDrivers
-*/
-/*! @{ */
-/**
 * Defines a driver to facilitate interfacing with the CPU clock.
 *
 * Use this to update the CPU clock frequency.
 * Care should be taken by an App that it doesn't disable a frequency not set by it.
 *
-*/
+* @{ */
 
 /******************************************************************************
 *** Parameters.
@@ -91,4 +88,5 @@ typedef enum
 ///////////////////////////////////////////////////////////////////////////////
 wiced_bool_t wiced_update_cpu_clock( wiced_bool_t enable, wiced_cpu_clk_freq_t freq);
 
+/** @} */
 #endif // __WICED_CPU_CLOCK_H__

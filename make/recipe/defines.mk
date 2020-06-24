@@ -1,5 +1,5 @@
 #
-# Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+# Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
 # Cypress Semiconductor Corporation. All Rights Reserved.
 #
 # This software, including source code, documentation and related
@@ -116,13 +116,14 @@ CY_CORE_DEFINES+=\
 	-DSPAR_APP_SETUP=application_setup \
 	-D__TARGET_CPU_CORTEX_M3 \
 	-D__ARMCC_VERSION=400677 \
-	-DPLATFORM='"$(subst -,_,$(TARGET))"'
+	-DPLATFORM='"$(subst -,_,$(TARGET))"' \
+	-D$(subst -,_,$(TARGET))
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=2 \
-	-DWICED_SDK_MINOR_VER=5 \
+	-DWICED_SDK_MINOR_VER=6 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=7341
+	-DWICED_SDK_BUILD_NUMBER=7989
 
 #
 # Set the output file paths

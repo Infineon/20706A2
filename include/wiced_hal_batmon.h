@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -55,16 +55,16 @@
 * power necessary for proper system functionality. Note that the Battery
 * Monitor relies on polling to check on the status of the battery.
 *
-*
-*
-******************************************************************************
+*/
+
+/******************************************************************************
 *** Parameters.
 ***
 *** The following parameters are used to configure the driver or define
 *** return status. They are not modifiable.
-******************************************************************************
-*
-**
+******************************************************************************/
+
+/**
 // Supported ADC input channel selection for battery connection.
 @verbatim
 typedef enum ADC_INPUT_CHANNEL_SEL {
@@ -106,6 +106,10 @@ typedef enum ADC_INPUT_CHANNEL_SEL {
 **/
 
 /******************************************************************************
+*** Function prototypes and defines.
+******************************************************************************/
+
+/******************************************************************************
  * Battery Observer List
 ******************************************************************************/
 typedef void (wiced_hal_batmon_observer_fp)(uint32_t);
@@ -117,9 +121,7 @@ typedef struct _wiced_hal_batmon_observer
     wiced_hal_batmon_observer_fp* callback;
 } wiced_hal_batmon_observer_t;
 
-/******************************************************************************
-*** Function prototypes and defines.
-******************************************************************************/
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Sets the configuration parameters of the Battery Monitor. This function is
 /// *optional*, since the Battery Monitor parameters are pre-populated with

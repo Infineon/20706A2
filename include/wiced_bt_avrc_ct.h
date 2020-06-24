@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -35,7 +35,12 @@
  *
  * Bluetooth AVRC Remote Control Application Programming WICED Interface
  *
+ * @addtogroup  wicedbt_avrc_ct       AVRCP Controller Role (CT)
+ * @ingroup wicedbt_avrc
+ *
  * WICED Bluetooth AVRC Remote Control CT Functions
+ *
+ * @{
  */
 
 #pragma once
@@ -121,10 +126,6 @@ extern "C" {
 /**
  * AVRC remote control functions
  *
- * @addtogroup  wicedbt_avrc_ct       AVRCP Controller Role (CT)
- * @ingroup wicedbt_avrc
- *
- * @{
  */
 /****************************************************************************/
 

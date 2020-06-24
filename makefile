@@ -1,5 +1,5 @@
 #
-# Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+# Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
 # Cypress Semiconductor Corporation. All Rights Reserved.
 #
 # This software, including source code, documentation and related
@@ -45,7 +45,8 @@ CONFIG?=Debug
 #
 # Advanced Configuration
 #
-SOURCES=../../libraries/btsdk-common/wiced_bt_utils.c
+SOURCES=../../libraries/btsdk-common/wiced_bt_utils.c \
+        ../../libraries/btsdk-common/factory_config_read.c
 INCLUDES=\
     $(CY_BASELIB_PATH)/include \
     $(CY_BASELIB_PATH)/include/hal \

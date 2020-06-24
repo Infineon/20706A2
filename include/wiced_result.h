@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Cypress Semiconductor Corporation or a subsidiary of
+ * Copyright 2016-2020, Cypress Semiconductor Corporation or a subsidiary of
  * Cypress Semiconductor Corporation. All Rights Reserved.
  *
  * This software, including source code, documentation and related
@@ -80,8 +80,8 @@ extern "C" {
 
 /*************************************************************************/
 /**
- *  @addtogroup  Result       WICED result
- *  @ingroup     gentypes
+ *  @addtogroup  Result       WICED Result Codes
+ *  @ingroup     wicedsys
  *
  *  <b> Result types</b>. @b
  *  Result enums, macros with prefix WICED_ to WICED_RESULT_LIST and WICED_BT_ to BT_RESULT_LIST.
