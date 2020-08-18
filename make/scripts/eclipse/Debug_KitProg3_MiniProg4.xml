@@ -7,5 +7,5 @@
 <stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.action" value="NONE"/>
 <stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.enabled" value="true"/>
 <stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.mode" value="default"/>
-<stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.name" value="&&CY_APPNAME&& Attach_KitProg3"/>
+<stringAttribute key="org.eclipse.cdt.launch.launchGroup.1.name" value="&&CY_APPNAME&& Attach_KitProg3_MiniProg4"/>
 </launchConfiguration>

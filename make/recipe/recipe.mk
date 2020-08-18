@@ -64,7 +64,6 @@ CY_RECIPE_LDFLAGS?=\
     $(CY_TOOLCHAIN_LDFLAGS)\
     $(CY_CORE_LDFLAGS)\
     -Wl,--entry=$(CY_CORE_APP_ENTRY)\
-    -Wl,-z,muldefs\
     -Wl,--no-warn-mismatch\
     -Wl,--just-symbols="$(CY_CORE_PATCH_SYMBOLS)"\
     -T$(CY_CONFIG_DIR)/$(APPNAME).ld

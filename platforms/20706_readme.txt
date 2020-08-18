@@ -10,7 +10,7 @@ transceiver supporting BR/EDR/BLE.
 
 SDK Software Features
 ----------------------
-- Dual mode Bluetooth stack included the ROM (BR/EDR and BLE).
+- Dual mode Bluetooth stack included in the ROM (BR/EDR and BLE).
 - BT stack and profile level APIs for embedded BT application development.
 - WICED HCI protocol to simplify host/MCU application development.
 - APIs and drivers to access on board peripherals

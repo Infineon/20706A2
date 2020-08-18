@@ -121,9 +121,9 @@ CY_CORE_DEFINES+=\
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=2 \
-	-DWICED_SDK_MINOR_VER=6 \
+	-DWICED_SDK_MINOR_VER=7 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=7989
+	-DWICED_SDK_BUILD_NUMBER=8978
 
 #
 # Set the output file paths
@@ -270,6 +270,7 @@ CY_OPENOCD_DEVICE_CFG=$(CY_INTERNAL_BASELIB_PATH)/platforms/CYW$(CY_TARGET_DEVIC
 CY_VSCODE_ARGS="s|&&RELEASETARGET&&|build/$(TARGET)/Release/$(APPNAME).elf|g;"\
                 "s|&&DEBUGTARGET&&|build/$(TARGET)/Debug/$(APPNAME).elf|g;"\
                 "s|&&MODUSSHELL&&|$(CY_MODUS_SHELL_DIR)|g;"\
+                "s|&&CY_MTB_PATH&&|$(CY_TOOLS_DIR)|g;"\
                 "s|&&TARGET&&|$(TARGET)|g;"\
                 "s|&&OPENOCDSEARCH&&|$(CY_INTERNAL_BASELIB_PATH)/platforms|g;"\
                 "s|&&OPENOCDFILE&&|$(CY_OPENOCD_DEVICE_CFG)|g;"\

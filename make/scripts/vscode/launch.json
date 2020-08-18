@@ -9,7 +9,8 @@
     //    your global PATH.  Cortex-Debug needs to find the specific gdb-server
     //    you want to use.
     //
-    //       "cortex-debug.JLinkGDBServerPath": "<JLinkInstallDir>/JLinkGDBServerCL.exe"
+    //       Windows     : "cortex-debug.JLinkGDBServerPath": "<JLinkInstallDir>/JLinkGDBServerCL"
+    //       Linux / Mac : "cortex-debug.JLinkGDBServerPath": "<JLinkInstallDir>/JLinkGDBServer"
     //
     //    User settings are located in:
     //
