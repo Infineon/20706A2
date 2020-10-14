@@ -190,7 +190,7 @@ do
     *)
         echo "bad parameter $i"
         echo "usage: $0 $USAGE"
-        echo "failed to generate $CY_APP_LD"
+        echo "failed to generate download file"
         exit 1
         ;;
     esac
@@ -324,8 +324,16 @@ fi
 echo "generate hex file:"
 echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+if [[ ! -e $CY_APP_HEX ]]; then
+    echo "!! Post build failed, no hex file output"
+    exit 1
+fi
 
 if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
+if [[ ! -e $CY_DS2_APP_HEX ]]; then
+    echo "!! OTA image cannot be built, could not find ds2 app hex file $CY_DS2_APP_HEX"
+    exit 1
+fi
 echo "Appending DS2 section"
 "$CY_TOOL_MV" $CY_APP_HEX $CY_APP_HEX.ds1
 "$CY_TOOL_RM" $CY_APP_HCD

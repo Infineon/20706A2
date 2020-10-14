@@ -79,7 +79,7 @@ CY_RECIPE_DEFINES?=\
     $(CY_APP_OTA_DEFINES)\
     $(CY_CORE_DEFINES)\
     $(CY_CORE_EXTRA_DEFINES)\
-    $(CY_TOOLCHAIN_DEBUG_FLAG)\
+    $(CY_TOOLCHAIN_DEBUG_DEFINES)\
     -DSPAR_CRT_SETUP=$(CY_CORE_APP_ENTRY)\
 	$(foreach feature,$(CY_COMPONENT_LIST),-DCOMPONENT_$(subst -,_,$(feature)))
 
@@ -127,7 +127,7 @@ CY_RECIPE_GENERATED=$(CY_GENERATED_DIR)/lib_installer.c
 CY_RECIPE_GENSRC=\
     bash --norc --noprofile\
     "$(CY_INTERNAL_BASELIB_PATH)/make/scripts/bt_gen_lib_installer.bash"\
-    "--shell=$(CY_MODUS_SHELL_DIR)"\
+    "--shell=$(CY_MODUS_SHELL_DIR_BWC)"\
     "--scripts=$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
     "--out=$(CY_RECIPE_GENERATED)"\
     $(addprefix $(CY_INTERNAL_BASELIB_PATH)/$(CY_CORE_PATCH_LIB_PATH)/,$(CY_APP_PATCH_LIBS))\
@@ -142,7 +142,7 @@ ifeq ($(LIBNAME),)
 CY_RECIPE_PREBUILD?=\
     bash --norc --noprofile\
     "$(CY_INTERNAL_BASELIB_PATH)/make/scripts/bt_pre_build.bash"\
-    --shell="$(CY_MODUS_SHELL_DIR)"\
+    --shell="$(CY_MODUS_SHELL_DIR_BWC)"\
     --scripts="$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
     --defs="$(CY_CORE_LD_DEFS)"\
     --patch="$(CY_CORE_PATCH_SYMBOLS)"\
@@ -158,7 +158,7 @@ ifeq ($(LIBNAME),)
 CY_RECIPE_POSTBUILD?=\
     bash --norc --noprofile\
     "$(CY_INTERNAL_BASELIB_PATH)/make/scripts/bt_post_build.bash"\
-    --shell="$(CY_MODUS_SHELL_DIR)"\
+    --shell="$(CY_MODUS_SHELL_DIR_BWC)"\
     --cross="$(CY_CROSSPATH)/arm-none-eabi-"\
     --scripts="$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
     --tools="$(CY_WICED_TOOLS_DIR)"\

@@ -140,6 +140,7 @@ typedef PACKED struct
 }KeyEvent;
 #pragma pack()
 
+#ifdef WICED_KEYSCAN_FUNCTION_SUPPORT
 void ksq_init(void* buffer, BYTE elementSize, BYTE maxElements);
 void ksq_flush(void);
 BYTE ksq_getCurNumElements(void);
@@ -160,7 +161,7 @@ INLINE BOOL32 ksq_isEmpty (void)
 {
     return (ksq_getCurNumElements() == 0);
 }
-
+#endif // WICED_KEYSCAN_FUNCTION_SUPPORT
 
 /* @} */
 
@@ -281,6 +282,7 @@ typedef struct
 } KeyscanState;
 
 
+#ifdef WICED_KEYSCAN_FUNCTION_SUPPORT
 void keyscan_init(void);
 
 /// Reset the keyscan HW. Any existing events should be thrown away.
@@ -332,6 +334,7 @@ void keyscan_initHW(void);
 void keyscan_configGpios(void);
 void keyscan_getEventsFromHWFifo(void);
 
+#endif // WICED_KEYSCAN_FUNCTION_SUPPORT
 /* @} */
 
 #ifdef __cplusplus

@@ -31,14 +31,14 @@
 # so agrees to indemnify Cypress against all liability.
 #
 
-ifeq ($(DEBUG),true)
+ifeq ($(WHICHFILE),true)
 $(info Processing $(lastword $(MAKEFILE_LIST)))
 endif
 
 #
 # gdb command line launch
 #
-CY_GDB_CLIENT=$(CY_COMPILER_DIR)/bin/arm-none-eabi-gdb
+CY_GDB_CLIENT=$(CY_COMPILER_DIR_BWC)/bin/arm-none-eabi-gdb
 CY_GDB_SYM=$(CY_CONFIG_DIR)/$(APPNAME).elf
 CY_GDB_ARGS=$(CY_INTERNAL_BASELIB_PATH)/make/scripts/gdbinit
 
@@ -75,7 +75,7 @@ GDB_SERVER_COMMAND?=$(CY_OPENOCD_DIR)/bin/openocd $(CY_OPENOCD_GDB_SERVER_ARGS)
 #
 CY_DOWNLOAD_CMD=\
 	bash "$(CY_INTERNAL_BASELIB_PATH)/make/scripts/bt_program.bash"\
-	--shell="$(CY_MODUS_SHELL_DIR)"\
+	--shell="$(CY_MODUS_SHELL_DIR_BWC)"\
 	--tools="$(CY_WICED_TOOLS_DIR)"\
 	--scripts="$(CY_INTERNAL_BASELIB_PATH)/make/scripts"\
 	--hex="$(CY_CONFIG_DIR)/$(APPNAME)_download.hex"\

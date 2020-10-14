@@ -4,64 +4,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Utility: getlibs",
-            "type": "shell",
-            "windows" : {
-                "command": "${config:modustoolbox.toolsPath}/modus-shell/bin/bash.exe" ,
-                "args": [
-                    "--norc",
-                    "-c",
-                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe getlibs"
-                ]
-            },
-            "linux" : {
-                "command": "bash",
-                "args": [
-                    "--norc",
-                    "-c",
-                    "make getlibs"
-                ]
-            },
-            "osx" : {
-                "command": "bash",
-                "args": [
-                    "--norc",
-                    "-c",
-                    "make getlibs"
-                ]
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Utility: refresh",
-            "type": "shell",
-            "windows" : {
-                "command": "${config:modustoolbox.toolsPath}/modus-shell/bin/bash.exe" ,
-                "args": [
-                    "--norc",
-                    "-c",
-                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe vscode"
-                ]
-            },
-            "linux" : {
-                "command": "bash",
-                "args": [
-                    "--norc",
-                    "-c",
-                    "make vscode"
-                ]
-            },
-            "osx" : {
-                "command": "bash",
-                "args": [
-                    "--norc",
-                    "-c",
-                    "make vscode"
-                ]
-            },
-            "problemMatcher": []
-        },
-        {
             "label": "Build: Build [Debug]",
             "type": "shell",
 
@@ -104,7 +46,7 @@
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& clean ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& build"
+                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& clean ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe -j CONFIG=Debug TARGET=&&TARGET&& build"
                 ]
             },
             "linux" : {
@@ -126,7 +68,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -160,7 +102,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -193,7 +135,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -204,7 +146,7 @@
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& clean ; &&MODUSSHELL&&/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& build"
+                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& clean ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe -j CONFIG=Release TARGET=&&TARGET&& build"
                 ]
             },
             "linux" : {
@@ -226,7 +168,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -259,7 +201,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -292,7 +234,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -325,7 +267,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -358,7 +300,7 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
@@ -391,18 +333,18 @@
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             }
         },
         {
-            "label": "Tool: Bluetooth Configurator",
+            "label": "Tool: Library Manager",
             "type": "shell",
             "windows" : {
                 "command": "${config:modustoolbox.toolsPath}/modus-shell/bin/bash.exe" ,
                 "args": [
                     "--norc",
                     "-c",
-                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe open CY_OPEN_TYPE=bt-configurator CY_CONFIG_JOB_CONTROL="
+                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe modlibs CY_CONFIG_JOB_CONTROL="
                 ]
             },
             "linux" : {
@@ -410,7 +352,7 @@
                 "args": [
                     "--norc",
                     "-c",
-                    "make open CY_OPEN_TYPE=bt-configurator CY_CONFIG_JOB_CONTROL="
+                    "make modlibs CY_CONFIG_JOB_CONTROL="
                 ]
             },
             "osx" : {
@@ -418,40 +360,11 @@
                 "args": [
                     "--norc",
                     "-c",
-                    "make open CY_OPEN_TYPE=bt-configurator CY_CONFIG_JOB_CONTROL="
+                    "make modlibs CY_CONFIG_JOB_CONTROL="
                 ]
             },
             "problemMatcher": "$gcc"
         },
-        {
-            "label": "Tool: device-configurator",
-            "type": "shell",
-            "windows" : {
-                "command": "${config:modustoolbox.toolsPath}/modus-shell/bin/bash.exe" ,
-                "args": [
-                    "--norc",
-                    "-c",
-                    "export PATH=/bin:/usr/bin:$PATH ; ${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe open CY_OPEN_TYPE=device-configurator CY_CONFIG_JOB_CONTROL="
-                ]
-            },
-            "linux" : {
-                "command": "bash",
-                "args": [
-                    "--norc",
-                    "-c",
-                    "make open CY_OPEN_TYPE=device-configurator CY_CONFIG_JOB_CONTROL="
-                ]
-            },
-            "osx" : {
-                "command": "bash",
-                "args": [
-                    "--norc",
-                    "-c",
-                    "make open CY_OPEN_TYPE=device-configurator CY_CONFIG_JOB_CONTROL="
-                ]
-            },
-            "problemMatcher": "$gcc"
-        },
-        &&BTAPPTOOLS&&
+        &&CY_BT_APP_TOOLS&&
     ]
 }

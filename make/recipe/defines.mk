@@ -39,6 +39,9 @@ endif
 # List the supported toolchains
 #
 CY_SUPPORTED_TOOLCHAINS=GCC_ARM
+ifeq ($(filter $(TOOLCHAIN),$(CY_SUPPORTED_TOOLCHAINS)),)
+$(error must use supported TOOLCHAIN such as: $(CY_SUPPORTED_TOOLCHAINS))
+endif
 
 ifeq ($(OS),Windows_NT)
     CY_OS_DIR=Windows
@@ -51,8 +54,15 @@ else
         CY_OS_DIR=OSX
     endif
 endif
-CY_WICED_TOOLS_DIR=$(CY_WICED_TOOLS_ROOT)/$(CY_OS_DIR)
 
+# backward compatible variables for flow version 1
+ifeq ($(FLOW_VERSION),2)
+CY_COMPILER_DIR_BWC:=$(CY_INTERNAL_TOOL_gcc_BASE)
+CY_MODUS_SHELL_DIR_BWC:=$(CY_INTERNAL_TOOLS)/$(CY_TOOL_modus-shell_BASE)
+else
+CY_COMPILER_DIR_BWC:=$(CY_COMPILER_DIR)
+CY_MODUS_SHELL_DIR_BWC:=$(CY_MODUS_SHELL_DIR)
+endif
 
 ################################################################################
 # Feature processing
@@ -125,9 +135,9 @@ CY_CORE_DEFINES+=\
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=2 \
-	-DWICED_SDK_MINOR_VER=7 \
-	-DWICED_SDK_REV_NUMBER=1 \
-	-DWICED_SDK_BUILD_NUMBER=9289
+	-DWICED_SDK_MINOR_VER=8 \
+	-DWICED_SDK_REV_NUMBER=0 \
+	-DWICED_SDK_BUILD_NUMBER=10492
 
 #
 # Set the output file paths
@@ -161,18 +171,43 @@ else
   CY_OPEN_TYPE_LIST+=$(CY_BT_APP_TOOLS)
   CY_SUPPORTED_TOOL_TYPES+=$(CY_BT_APP_TOOLS)
 endif
-CY_BT_APP_TOOLS_DIR=$(CY_SHARED_PATH)/tools
-CY_BT_APP_TOOLS_DIR_ABS=$(CY_SHARED_PATH_ABS)/tools
+
+FLOW_VERSION=$(if $(strip $(CY_GETLIBS_SHARED_PATH)),2,1)
+
+ifeq ($(FLOW_VERSION),2)
+CY_WICED_TOOLS_ROOT=$(SEARCH_btsdk-tools)
+endif
+CY_WICED_TOOLS_DIR=$(CY_WICED_TOOLS_ROOT)/$(CY_OS_DIR)
+
+ifeq ($(FLOW_VERSION),2)
+CY_BT_APP_TOOLS_UTILS_DIR=$(SEARCH_btsdk-utils)
+CY_BT_APP_TOOLS_UTILS_DIR_ABS=$(realpath $(SEARCH_btsdk-utils))
+CY_BT_HOST_APPS_BT_BLE_DIR=$(SEARCH_btsdk-host-apps-bt-ble)
+CY_BT_HOST_APPS_BT_BLE_DIR_ABS=$(realpath $(SEARCH_btsdk-host-apps-bt-ble))
+CY_BT_HOST_PEER_APPS_MESH_DIR=$(SEARCH_btsdk-host-peer-apps-mesh)
+CY_BT_HOST_PEER_APPS_MESH_DIR_ABS=$(realpath $(SEARCH_btsdk-host-peer-apps-mesh))
+CY_BT_PEER_APPS_OTA_DIR=$(SEARCH_btsdk-peer-apps-ota)
+CY_BT_PEER_APPS_BLE_DIR=$(SEARCH_btsdk-peer-apps-ble)
+else
+CY_BT_APP_TOOLS_UTILS_DIR=$(CY_SHARED_PATH)/tools/btsdk-utils
+CY_BT_APP_TOOLS_UTILS_DIR_ABS=$(CY_SHARED_PATH_ABS)/tools/btsdk-utils
+CY_BT_HOST_APPS_BT_BLE_DIR=$(CY_SHARED_PATH)/tools/btsdk-host-apps-bt-ble
+CY_BT_HOST_APPS_BT_BLE_DIR_ABS=$(CY_SHARED_PATH)/tools/btsdk-host-apps-bt-ble
+CY_BT_HOST_PEER_APPS_MESH_DIR=$(CY_SHARED_PATH)/tools/btsdk-host-peer-apps-mesh
+CY_BT_HOST_PEER_APPS_MESH_DIR_ABS=$(realpath $(CY_SHARED_PATH)/tools/btsdk-host-peer-apps-mesh))
+CY_BT_PEER_APPS_OTA_DIR=$(CY_SHARED_PATH)/tools/btsdk-peer-apps-ota
+CY_BT_PEER_APPS_BLE_DIR=$(CY_SHARED_PATH)/tools/btsdk-peer-apps-ble
+endif
 
 ifneq ($(filter BTSpy,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-  CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/BTSpy/$(CY_OS_DIR)/BTSpy.exe
+  CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/BTSpy/$(CY_OS_DIR)/BTSpy.exe
 else
   ifeq ($(CY_OS_DIR),Linux64)
-    CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/BTSpy/$(CY_OS_DIR)/RunBtSpy.sh
+    CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/BTSpy/$(CY_OS_DIR)/RunBtSpy.sh
   else
     CY_OPEN_BTSpy_TOOL=open
-    CY_OPEN_BTSpy_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR_ABS)/btsdk-utils/BTSpy/$(CY_OS_DIR)/bt_spy.app
+    CY_OPEN_BTSpy_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_UTILS_DIR_ABS)/BTSpy/$(CY_OS_DIR)/bt_spy.app
   endif
 endif
 CY_OPEN_BTSpy_tool_EXT=
@@ -183,32 +218,32 @@ endif
 
 ifneq ($(filter ClientControl,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-  CY_OPEN_ClientControl_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/ClientControl.exe
+  CY_OPEN_ClientControl_TOOL=$(CY_BT_HOST_APPS_BT_BLE_DIR)/client_control/$(CY_OS_DIR)/ClientControl.exe
 else
   ifeq ($(CY_OS_DIR),Linux64)
-    CY_OPEN_ClientControl_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/RunClientControl.sh
+    CY_OPEN_ClientControl_TOOL=$(CY_BT_HOST_APPS_BT_BLE_DIR)/client_control/$(CY_OS_DIR)/RunClientControl.sh
   else
     CY_OPEN_ClientControl_TOOL=open
-    CY_OPEN_ClientControl_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR_ABS)/btsdk-host-apps-bt-ble/client_control/$(CY_OS_DIR)/ClientControl.app
+    CY_OPEN_ClientControl_TOOL_ARGS=-a $(CY_BT_HOST_APPS_BT_BLE_DIR_ABS)/client_control/$(CY_OS_DIR)/ClientControl.app
   endif
 endif
 endif
 
 ifneq ($(filter MeshClient,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-CY_OPEN_MeshClient_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-peer-apps-mesh/$(CY_OS_DIR)/MeshClient/Release/x86/MeshClient.exe
+CY_OPEN_MeshClient_TOOL=$(CY_BT_HOST_PEER_APPS_MESH_DIR)/peer/$(CY_OS_DIR)/MeshClient/Release/x86/MeshClient.exe
 endif
 endif
 
 ifneq ($(filter ClientControlMesh,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-  CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-mesh/VS_ClientControl/Release/ClientControlMesh
+  CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_HOST_PEER_APPS_MESH_DIR)/host/VS_ClientControl/Release/ClientControlMesh
 else
   ifeq ($(CY_OS_DIR),Linux64)
-    CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-host-apps-mesh/Qt_ClientControl/$(CY_OS_DIR)/RunClientControl.sh
+    CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_HOST_PEER_APPS_MESH_DIR)/host/Qt_ClientControl/$(CY_OS_DIR)/RunClientControl.sh
   else
     CY_OPEN_ClientControlMesh_TOOL=open
-    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_DIR_ABS)/btsdk-host-apps-mesh/Qt_ClientControl/macos/mesh_client.app
+    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a $(CY_BT_HOST_PEER_APPS_MESH_DIR_ABS)/host/Qt_ClientControl/macos/mesh_client.app
   endif
 endif
 endif
@@ -216,27 +251,27 @@ endif
 # need to add ota image file
 ifneq ($(filter WsOtaUpgrade,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-CY_OPEN_WsOtaUpgrade_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-peer-apps-ota/$(CY_OS_DIR)/WsOtaUpgrade/Release/x64/WsOtaUpgrade.exe
+CY_OPEN_WsOtaUpgrade_TOOL=$(CY_BT_PEER_APPS_OTA_DIR)/$(CY_OS_DIR)/WsOtaUpgrade/Release/x64/WsOtaUpgrade.exe
 CY_OPEN_WsOtaUpgrade_TOOL_ARGS=$(CY_CONFIG_DIR)/$(APPNAME)_$(TARGET).ota.bin
 endif
 endif
 
 # need to sign ota image file ecdsa_genkey, ecdsa_sign, ecdsa_verify
 ifneq ($(filter ecdsa_genkey,$(CY_BT_APP_TOOLS)),)
-CY_OPEN_ecdsa_genkey_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_genkey
+CY_OPEN_ecdsa_genkey_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_genkey
 endif
 ifneq ($(filter ecdsa_sign,$(CY_BT_APP_TOOLS)),)
-CY_OPEN_ecdsa_sign_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_genkey
+CY_OPEN_ecdsa_sign_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_genkey
 CY_OPEN_ecdsa_sign_TOOL_ARGS=$(CY_CONFIG_DIR)/$(APPNAME)_$(TARGET).ota.bin
 endif
 ifneq ($(filter ecdsa_verify,$(CY_BT_APP_TOOLS)),)
-CY_OPEN_ecdsa_verify_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_verify
+CY_OPEN_ecdsa_verify_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_verify
 CY_OPEN_ecdsa_verify_TOOL_ARGS=$(CY_CONFIG_DIR)/$(APPNAME)_$(TARGET).ota.bin
 endif
 
 # manufacturing test, display in file system
 ifneq ($(filter WMBT,$(CY_BT_APP_TOOLS)),)
-$(info $(subst /,\,$(CY_BT_APP_TOOLS_DIR)/btsdk-utils/wmbt))
+$(info $(subst /,\,$(CY_BT_APP_TOOLS_UTILS_DIR)/wmbt))
 CY_OPEN_WMBT_TOOL=explorer.exe
 CY_OPEN_WMBT_TOOL_ARGS=/separate /e $(subst /,\,$(CY_INTERNAL_APPLOC)/tools/btsdk-utils/wmbt)
 endif
@@ -244,9 +279,13 @@ endif
 # hello client peer app
 ifneq ($(filter hello_client,$(CY_BT_APP_TOOLS)),)
 ifeq ($(CY_OS_DIR),Windows)
-CY_OPEN_hello_client_TOOL=$(CY_BT_APP_TOOLS_DIR)/btsdk-peer-apps-ble/hello_sensor/$(CY_OS_DIR)/HelloClient/Release/x64/HelloClient.exe
+CY_OPEN_hello_client_TOOL=$(CY_BT_PEER_APPS_BLE_DIR)/hello_sensor/$(CY_OS_DIR)/HelloClient/Release/x64/HelloClient.exe
 endif
 endif
+
+#
+# IDE specifics for program/debug
+#
 
 #
 # vscode app launchers
@@ -254,39 +293,64 @@ endif
 define tool_launch_json
 {\
  \"label\": \"Tool: $(1)\",\
- \"type\": \"process\",\
- \"command\": \"$(CY_OPEN_$(1)_TOOL)\",\
- \"args\": [$(foreach tool_arg,$(CY_OPEN_$(1)_TOOL_ARGS),\"$(tool_arg)\",)],\
+ \"type\": \"shell\",\
+ \"windows\" : {\
+ \"command\": \"\$${config:modustoolbox.toolsPath}/modus-shell/bin/bash.exe\",\
+ \"args\": [\"--norc\",\"-c\",\
+ \"export PATH=/bin:/usr/bin:\$$PATH ; \$${config:modustoolbox.toolsPath}/modus-shell/bin/make.exe open CY_OPEN_TYPE=$(1) CY_CONFIG_JOB_CONTROL=\"],\
+ },\
+ \"linux\" : {\
+ \"command\": \"bash\",\
+ \"args\": [\"--norc\",\"-c\",\"make open CY_OPEN_TYPE=$(1) CY_CONFIG_JOB_CONTROL=\"],\
+ },\
+ \"osx\" : {\
+ \"command\": \"bash\",\
+ \"args\": [\"--norc\",\"-c\",\"make open CY_OPEN_TYPE=$(1) CY_CONFIG_JOB_CONTROL=\"],\
+ },\
  \"problemMatcher\": \"\$$gcc\",\
 },
 endef
 CY_BT_APP_TOOLS_JSON=$(foreach tool,$(CY_BT_APP_TOOLS),$(call tool_launch_json,$(tool)))
 
-#
-# IDE specifics for program/debug
-#
-CY_OPENOCD_ARG =-s $(CY_INTERNAL_BASELIB_PATH)/platforms
-CY_OPENOCD_ARG+=-f CYW$(CY_TARGET_DEVICE)_openocd.cfg
+CY_GCC_BASE_DIR=$(subst $(CY_INTERNAL_TOOLS)/,,$(CY_INTERNAL_TOOL_gcc_BASE))
+CY_GCC_VERSION=$(shell $(CY_INTERNAL_TOOL_arm-none-eabi-gcc_EXE) -dumpversion)
+CY_OPENOCD_EXE_DIR=$(patsubst $(CY_INTERNAL_TOOLS)/%,%,$(CY_INTERNAL_TOOL_openocd_EXE))
+CY_OPENOCD_SCRIPTS_DIR=$(patsubst $(CY_INTERNAL_TOOLS)/%,%,$(CY_INTERNAL_TOOL_openocd_scripts_SCRIPT))
+
+ifneq ($(CY_BUILD_LOCATION),)
+CY_ELF_FILE?=$(CY_INTERNAL_BUILD_LOC)/$(TARGET)/$(CONFIG)/$(APPNAME).$(CY_TOOLCHAIN_SUFFIX_TARGET)
+else
+CY_ELF_FILE?=./$(notdir $(CY_INTERNAL_BUILD_LOC))/$(TARGET)/$(CONFIG)/$(APPNAME).$(CY_TOOLCHAIN_SUFFIX_TARGET)
+endif
+
+CY_C_FLAGS=$(subst $(CY_SPACE),\"$(CY_COMMA)$(CY_NEWLINE_MARKER)\",$(strip $(CY_RECIPE_CFLAGS)))
 
 CY_JLINK_DEVICE_CFG=Cortex-M4
 CY_OPENOCD_DEVICE_CFG=$(CY_INTERNAL_BASELIB_PATH)/platforms/CYW$(CY_TARGET_DEVICE)_openocd.cfg
+CY_OPENOCD_ARG =-s $(CY_INTERNAL_BASELIB_PATH)/platforms
+CY_OPENOCD_ARG+=-f CYW$(CY_TARGET_DEVICE)_openocd.cfg
 
-CY_VSCODE_ARGS="s|&&RELEASETARGET&&|build/$(TARGET)/Release/$(APPNAME).elf|g;"\
-                "s|&&DEBUGTARGET&&|build/$(TARGET)/Debug/$(APPNAME).elf|g;"\
-                "s|&&MODUSSHELL&&|$(CY_MODUS_SHELL_DIR)|g;"\
+CY_VSCODE_ARGS="s|&&CY_ELF_FILE&&|$(CY_ELF_FILE)|g;"\
                 "s|&&CY_MTB_PATH&&|$(CY_TOOLS_DIR)|g;"\
                 "s|&&TARGET&&|$(TARGET)|g;"\
-                "s|&&OPENOCDSEARCH&&|$(CY_INTERNAL_BASELIB_PATH)/platforms|g;"\
-                "s|&&OPENOCDFILE&&|$(CY_OPENOCD_DEVICE_CFG)|g;"\
-                "s|&&MODUSTOOLCHAIN&&|$(subst ",,$(CY_COMPILER_DIR))|g;"\
-                "s|&&MODUSTOOLCHAINVERSION&&|$(subst ",,$(subst gcc-,,$(notdir $(CY_COMPILER_DIR))))|g;"\
-                "s|&&CFLAGS&&|$(CY_RECIPE_CFLAGS)|g;"\
-                "s|&&MODUSOPENOCD&&|$(CY_OPENOCD_DIR)|g;"\
-                "s|&&DEVICEATTACH&&|$(CY_JLINK_DEVICE_CFG)|g;"\
-                "s|&&MODUSLIBMANAGER&&|$(CY_LIBRARY_MANAGER_DIR)|g;"\
-                "s|&&GDBPATH&&|$(CY_COMPILER_DIR)|g;"\
-                "s|&&CLIENTCONTROLMESH&&|$(CY_CLIENT_CONTROL_MESH)|g;"\
-                "s|&&BTAPPTOOLS&&|$(CY_BT_APP_TOOLS_JSON)|g;"\
+                "s|&&CY_OPENOCD_ADDL_SEARCH&&|$(CY_INTERNAL_BASELIB_PATH)/platforms|g;"\
+                "s|&&CY_OPENOCD_CFG_FILE&&|$(CY_OPENOCD_DEVICE_CFG)|g;"\
+                "s|&&CY_TOOL_CHAIN_DIRECTORY&&|$(subst ",,$(CY_CROSSPATH))|g;"\
+                "s|&&CY_GCC_VERSION&&|$(CY_GCC_VERSION)|g;"\
+                "s|&&CY_C_FLAGS&&|$(CY_C_FLAGS)|g;"\
+                "s|&&CY_OPENOCD_EXE_DIR&&|$(CY_OPENOCD_EXE_DIR)|g;"\
+                "s|&&CY_OPENOCD_SCRIPTS_DIR&&|$(CY_OPENOCD_SCRIPTS_DIR)|g;"\
+                "s|&&CY_CDB_FILE&&|$(CY_CDB_FILE)|g;"\
+                "s|&&CY_JLINK_DEVICE_CFG&&|$(CY_JLINK_DEVICE_CFG)|g;"\
+                "s|&&CY_BT_APP_TOOLS&&|$(CY_BT_APP_TOOLS_JSON)|g;"\
+
+ifeq ($(CY_USE_CUSTOM_GCC),true)
+CY_VSCODE_ARGS+="s|&&CY_GCC_BIN_DIR&&|$(CY_INTERNAL_TOOL_gcc_BASE)/bin|g;"\
+				"s|&&CY_GCC_DIRECTORY&&|$(CY_INTERNAL_TOOL_gcc_BASE)|g;"
+else
+CY_VSCODE_ARGS+="s|&&CY_GCC_BIN_DIR&&|$$\{config:modustoolbox.toolsPath\}/$(CY_GCC_BASE_DIR)/bin|g;"\
+				"s|&&CY_GCC_DIRECTORY&&|$$\{config:modustoolbox.toolsPath\}/$(CY_GCC_BASE_DIR)|g;"
+endif
 
 CY_ECLIPSE_ARGS="s|&&CY_OPENOCD_ARG&&|$(CY_OPENOCD_ARG)|;"\
                 "s|&&CY_JLINK_DEVICE&&|$(CY_JLINK_DEVICE_CFG)|;"\

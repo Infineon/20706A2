@@ -94,6 +94,52 @@ typedef struct
     void (*isr_callback)(void);
 }wiced_pmu_callbacks_t;
 
+/** Sleep modes */
+typedef enum
+{
+    WICED_SLEEP_MODE_NO_TRANSPORT, /**< Used for HID use cases. When a transport is connected behavior is undefined.*/
+    WICED_SLEEP_MODE_TRANSPORT     /**< This mode allows PDS sleep when transport is connected and uses device wake line to wake up*/
+}wiced_sleep_mode_type_t;
+
+/** Active interrupt level for Wake through GPIO*/
+typedef enum
+{
+    WICED_SLEEP_WAKE_ACTIVE_LOW, /**< Active low interrupt wakes the chip */
+    WICED_SLEEP_WAKE_ACTIVE_HIGH /**< Active high interrupt wakes the chip*/
+}wiced_sleep_wake_type_t;
+
+/** Sleep poll type */
+typedef enum
+{
+    WICED_SLEEP_POLL_TIME_TO_SLEEP,      /**< Polling for maximum allowed sleep duration */
+    WICED_SLEEP_POLL_SLEEP_PERMISSION    /**< Polling for permission to sleep */
+} wiced_sleep_poll_type_t;
+
+/** Sleep permission
+* Note : In WICED_SLEEP_MODE_NO_TRANSPORT case, application will be restarted on exiting out of the power shutdown sleep.
+*        Application MUST NOT allow sleep, when any BT activity is involved.
+*        If the application desires to save any state (16 bits of data) before going to power save it
+*        can do so by using wiced_power_save_store_state() and retrieve the state on coming back
+*        from power save by using wiced_power_save_retrieve_state().
+*        To prevent FW from putting the chip in Shutdown/PDS sleep mode, select WICED_SLEEP_NOT_ALLOWED.
+*/
+typedef enum
+{
+    WICED_SLEEP_NOT_ALLOWED,               /**< Sleep is not allowed */
+    WICED_SLEEP_ALLOWED,                   /**< Allow PDS/HIDD OFF sleep. PDS in case of WICED_SLEEP_MODE_TRANSPORT mode and HIDD OFF in case of WICED_SLEEP_MODE_NO_TRANSPORT mode. */
+}wiced_sleep_permission_type_t;
+
+/**
+ *
+ *  Application implements call back of this type to allow or disallow the chip to go to sleep.
+ *
+ * @param[in]       type:  Poll type (see #wiced_sleep_poll_type_t)
+ *
+ * @return          if type == WICED_SLEEP_POLL_TIME_TO_SLEEP, application should return the maximum time allowed to sleep in micro seconds.
+ *                     WICED_SLEEP_MAX_TIME_TO_SLEEP allows the Firmware to determine the duration it can sleep.
+ *                  if type == WICED_SLEEP_POLL_SLEEP_PERMISSION, application should return one of the values in wiced_sleep_permission_type_t
+ */
+typedef uint32_t (*wiced_sleep_allow_check_callback ) (wiced_sleep_poll_type_t type );
 
 /*to handle callback for bt_wake toggling */
 typedef void (wiced_bt_wake_app_cb_t)(void *data);
@@ -110,17 +156,16 @@ typedef void (wiced_bt_wake_app_cb_t)(void *data);
  */
 typedef void wiced_power_save_cback_t( void );
 
-/**
- * Power Save approve callback
- *
- * Callback to the application to check if the application approves the device to go to power save
- *mode
- * Registered using wiced_power_save_register_approve_cback().
- *
- * @return  time to sleep - if the application decides to go to power save mode then it returns amount of time to sleep,
- *                          it may return zero to not to go to power save mode.
- */
-typedef uint32_t wiced_power_save_approve_cback_t ( void );
+
+/** Sleep configuration parameters */
+typedef struct
+{
+    wiced_sleep_mode_type_t                  sleep_mode;             /**< Requested sleep mode */
+    wiced_sleep_wake_type_t                  host_wake_mode;         /**< Active level for host wake */
+    wiced_sleep_wake_type_t                  device_wake_mode;       /**< Active level for device wake */
+    wiced_sleep_allow_check_callback         sleep_permit_handler;   /**< Call back to be called by sleep framework
+                                                                          to poll for sleep permission */
+}wiced_sleep_config_t;
 
 /*****************************************************************************
  *          Function Prototypes
@@ -161,25 +206,6 @@ void wiced_power_save_start( wiced_wake_source_t wake_source,
  *
  */
 void wiced_power_save_stop( void );
-
-/**
- * Function         wiced_power_save_register_approve_cback
- *
- * Registers the callback function which will be invoked to check if the application approves
- * the device to go to power save mode.  If application disallows, power save mode will continue
- * to be attempted by the device with further invocations.  Use wiced_power_save_stop to stop
- * the device from further retries.
- *
- * @param[in]      p_cback        : Callback function which will be invoked to check if the
- *                                  application approves the device to go to power save mode
- *                                  Application returns non-zero from the callback to approve,
- *                                  or zero to disallow.
- *
- * @return          void
- *
- */
-void wiced_power_save_register_approve_cback(
-                                   wiced_power_save_approve_cback_t* p_cback );
 
 /**
  * Function         wiced_power_save_register_enter_cback
@@ -236,6 +262,15 @@ void wiced_power_save_store_state( uint16_t value );
  *
  */
 uint16_t wiced_power_save_retrieve_state( void );
+
+/** API to configure sleep mode parameters.
+ *
+ * @param[in]       p_sleep_config: see @wiced_sleep_config_t
+ *
+ * @return          WICED_SUCCESS or WICED_ERROR
+ */
+wiced_result_t wiced_sleep_configure( wiced_sleep_config_t *p_sleep_config );
+
 
 /**
  * Function         wiced_sleep_config

@@ -31,8 +31,8 @@ endif
 # The base path to the GCC cross compilation executables
 #
 ifeq ($(CY_COMPILER_PATH),)
-CY_CROSSPATH=$(CY_COMPILER_DIR)/bin
-CY_INCLUDEPATH=$(CY_COMPILER_DIR)
+CY_CROSSPATH=$(CY_COMPILER_DIR_BWC)/bin
+CY_INCLUDEPATH=$(CY_COMPILER_DIR_BWC)
 else
 CY_CROSSPATH=$(CY_COMPILER_PATH)/bin
 CY_INCLUDEPATH=$(CY_COMPILER_PATH)
@@ -125,7 +125,7 @@ CY_TOOLCHAIN_LDFLAGS=\
 	$(CY_TOOLCHAIN_CM4_LDFLAGS)\
 	-nostartfiles\
 	-Xlinker --gc-sections\
-	-L$(CY_COMPILER_DIR)/lib
+	-L$(CY_COMPILER_DIR_BWC)/lib
 
 #
 # Command line flags for archiving

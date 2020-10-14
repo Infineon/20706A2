@@ -165,6 +165,7 @@ wiced_result_t wiced_bt_avrc_ct_features_register(
         wiced_bt_avrc_ct_features_cback_t features_callback);
 #endif
 
+#ifdef WICED_BT_AVRC_CT_DEINIT_SUPPORT
 /**
  * Function         wiced_bt_avrc_ct_deinit
  *
@@ -174,6 +175,7 @@ wiced_result_t wiced_bt_avrc_ct_features_register(
  *
  */
 wiced_result_t wiced_bt_avrc_ct_deinit(void);
+#endif // WICED_BT_AVRC_CT_DEINIT_SUPPORT
 
 /**
  * Function         wiced_bt_avrc_ct_connect

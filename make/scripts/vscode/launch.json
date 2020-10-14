@@ -30,21 +30,22 @@
         // When using 'attach', make sure your program is running on the board and that your executable matches
         // the image in the chip exactly, or else strange things can happen with breakpoint, variables, etc.
         {
-            "name": "Attach Debug (KitProg3)",
+            "name": "Attach Debug (KitProg3_MiniProg4)",
             "type": "cortex-debug",
             "request": "attach",
             "cwd": "${workspaceRoot}",
-            "executable": "&&DEBUGTARGET&&",
+            "executable": "&&CY_ELF_FILE&&",
             "servertype": "openocd",
             "searchDir": [
-                "&&OPENOCDSEARCH&&",
-                "&&MODUSOPENOCD&&/scripts/"
+                "${workspaceRoot}",
+                "${config:modustoolbox.toolsPath}/&&CY_OPENOCD_SCRIPTS_DIR&&/",
+                "&&CY_OPENOCD_ADDL_SEARCH&&",
             ],
             "openOCDPreConfigLaunchCommands": [
                 "set ENABLE_ACQUIRE 0"
             ],
             "configFiles": [
-                "&&OPENOCDFILE&&"
+                "&&CY_OPENOCD_CFG_FILE&&"
             ],
             "overrideAttachCommands": [
                 "set mem inaccessible-by-default off",
@@ -67,14 +68,14 @@
             "type": "cortex-debug",
             "request": "attach",
             "cwd": "${workspaceRoot}",
-            "executable": "&&DEBUGTARGET&&",
+            "executable": "&&CY_ELF_FILE&&",
             "servertype": "jlink",
-            "device": "&&DEVICEATTACH&&",
+            "device": "&&CY_JLINK_DEVICE_CFG&&",
             "demangle": true,
             // svdFile is optional, it can be very large.
             "svdFile": "",
             "showDevDebugOutput": false // When set to true, displays output of GDB.
                                         // This is helpful when something is not working right
-        },
+        }
     ]
 }

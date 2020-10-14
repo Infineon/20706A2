@@ -67,6 +67,34 @@ typedef struct
     uint8_t     *p_param_buf;               /**< Return parameter buffer        */
 } wiced_bt_dev_vendor_specific_command_complete_params_t;
 
+/**
+ * Function         wiced_set_afh_channel_assessment
+ *
+ *                  This function is called to set the channel assessment mode on or off
+ *
+ * @param[in]       enable         : enable or disable
+ *
+ * @return          TRUE if successful
+ *
+ */
+// BTM_API extern tBTM_STATUS BTM_SetAfhChannelAssessment (BOOLEAN enable_or_disable);
+wiced_bt_dev_status_t BTM_SetAfhChannelAssessment(wiced_bool_t enable);
+#define wiced_set_afh_channel_assessment BTM_SetAfhChannelAssessment
+
+/**
+ * Function         wiced_disable_afh_channels
+ *
+ *                  This function is called to disable channels for adaptive frequency hopping
+ *
+ * @param[in]       first        : first channel to disable
+ * @param[in]       last         : last channel to disable
+ *
+ * @return          TRUE if successful
+ *
+ */
+// BTM_API extern tBTM_STATUS BTM_SetAfhChannels (UINT8 first, UINT8 last);
+wiced_bt_dev_status_t BTM_SetAfhChannels(uint8_t first, uint8_t last);
+#define wiced_disable_afh_channels BTM_SetAfhChannels
 
 /*****************************************************************************
  *  DEVICE DISCOVERY - Inquiry, Remote Name, Discovery, Class of Device
@@ -262,6 +290,15 @@ typedef struct
     int8_t                          tx_power;           /**< TX power */
     wiced_bt_device_address_t       rem_bda;            /**< Remote BD address */
 } wiced_bt_tx_power_result_t;
+
+/* Structure returned with switch role request */
+typedef struct
+{
+    uint8_t                         status;             /**< Status of the operation */
+    uint8_t                         role;               /**< BTM_ROLE_MASTER or BTM_ROLE_SLAVE */
+    wiced_bt_device_address_t       bd_addr;            /**< Remote BD address involved with the switch */
+} wiced_bt_dev_switch_role_result_t;
+
 
 /*****************************************************************************
  *  SECURITY MANAGEMENT
@@ -1754,7 +1791,44 @@ void wiced_bt_set_local_bdaddr( wiced_bt_device_address_t  bda , wiced_bt_ble_ad
  *
  * Note             BD_Address must be in Big Endian format
  */
-wiced_result_t wiced_bt_dev_get_role( wiced_bt_device_address_t remote_bd_addr, UINT8 *p_role, wiced_bt_transport_t transport );
+wiced_result_t wiced_bt_dev_get_role( wiced_bt_device_address_t remote_bd_addr, uint8_t *p_role, wiced_bt_transport_t transport );
+
+/**
+ * Function         wiced_bt_dev_switch_role
+ *
+ *                  This function is called to switch the role between master and
+ *                  slave.  If role is already set it will do nothing. If the
+ *                  command was initiated, the callback function is called upon
+ *                  completion.
+ *
+ * @param[in]       remote_bd_addr      : BD address of remote device
+ * @param[in]       new_role            : New role (BTM_ROLE_MASTER or BTM_ROLE_SLAVE)
+ * @param[in]       p_cback             : Result callback (wiced_bt_dev_switch_role_result_t will be passed to the callback)
+
+ *
+ * @return      wiced_result_t
+ *              WICED_BT_SUCCESS if already in specified role.
+ *              WICED_BT_CMD_STARTED if command issued to controller.
+ *              WICED_BT_NO_RESOURCES if couldn't allocate memory to issue command
+ *              WICED_BT_UNKNOWN_ADDR if no active link with bd addr specified
+ *              WICED_BT_MODE_UNSUPPORTED if local device doesn't support role switching
+ */
+wiced_result_t BTM_SwitchRole(wiced_bt_device_address_t remote_bd_addr, uint8_t new_role, wiced_bt_dev_cmpl_cback_t *p_cb);
+#define wiced_bt_dev_switch_role BTM_SwitchRole
+
+/**
+ * Function     wiced_bt_dev_set_link_supervision_timeout
+ *
+ *              set Link Supervision Timeout
+ *
+ * @param[in]   remote_bd_addr   : BD address of remote device
+ * @param[in]   timeout          :
+ *
+ * @return      WICED_BT_PENDING if successfully initiated, otherwise error.
+ *
+ */
+wiced_result_t BTM_SetLinkSuperTout(wiced_bt_device_address_t remote_bd_addr, uint16_t timeout);
+#define wiced_bt_dev_set_link_supervision_timeout BTM_SetLinkSuperTout
 
 /**
  * Function         wiced_bt_dev_get_security_state
@@ -1786,6 +1860,23 @@ wiced_bool_t wiced_bt_dev_get_security_state(wiced_bt_device_address_t bd_addr, 
  * Note              BD_Address must be in Big Endian format
  */
 wiced_bool_t wiced_delete_key_info_from_ram(wiced_bt_device_address_t bd_addr);
+
+#define wiced_bt_dev_set_link_policy BTM_SetLinkPolicy
+/**
+ * Function         wiced_bt_dev_set_link_policy
+ *
+ *                  This function is called to set the Link Policy for remote device
+ *
+ * @param[in]       remote_bda      : remote device's address
+ * @param[in/out]   settings        : pointer to the settings value.
+ *                                    the policy setting is defined in hcidefs.h
+ *                                    if the input setting consists of unsupport feature
+ *                                    for local device, it will be cleared
+ *
+ * @return          wiced_result_t
+*/
+wiced_result_t wiced_bt_dev_set_link_policy(wiced_bt_device_address_t remote_bda,
+        uint16_t *settings);
 
 #ifdef __cplusplus
 }
