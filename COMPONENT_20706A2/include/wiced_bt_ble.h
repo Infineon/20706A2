@@ -58,14 +58,14 @@ typedef uint8_t wiced_bt_ble_scan_mode_t;   /**< scan mode (see #wiced_bt_ble_sc
 /** Scanner filter policy */
 enum wiced_bt_ble_scanner_filter_policy_e {
     /* 0: accept adv packet from all, directed adv pkt not directed to local device is ignored */
-    BTM_BLE_SCANNER_FILTER_ALL_ADV_RSP,
-    /* 1: accept adv packet from device in white list, directed adv packet not directed to local device is ignored */
-    BTM_BLE_SCANNER_FILTER_WHITELIST_ADV_RSP,
+    BTM_BLE_SCAN_POLICY_ACCEPT_ADV_RSP,
+    /* 1: accept adv packet from device in Filter Accept List, directed adv packet not directed to local device is ignored */
+    BTM_BLE_SCAN_POLICY_FILTER_ADV_RSP,
     /* 2: accept adv packet from all, directed adv pkt not directed to local device is ignored except direct adv with RPA */
-    BTM_BLE_SCANNER_FILTER_ALL_RPA_DIR_ADV_RSP,
-    /* 3: accept adv packet from device in white list, directed adv pkt not directed to me is ignored except direct adv with RPA */
-    BTM_BLE_SCANNER_FILTER_WHITELIST_RPA_DIR_ADV_RSP,
-    BTM_BLE_SCANNER_FILTER_MAX
+    BTM_BLE_SCAN_POLICY_ACCEPT_RPA_DIR_ADV_RSP,
+    /* 3: accept adv packet from device in Filter Accept List, directed adv pkt not directed to me is ignored except direct adv with RPA */
+    BTM_BLE_SCAN_POLICY_FILTER_RPA_DIR_ADV_RSP,
+    BTM_BLE_SCAN_POLICY_MAX
 };
 typedef uint8_t   wiced_bt_ble_scanner_filter_policy_t;  /**< Scanner filter policy (see #wiced_bt_ble_scanner_filter_policy_e) */
 
@@ -85,16 +85,16 @@ typedef uint8_t wiced_bt_ble_advert_chnl_map_t;  /**< BLE advertisement channel 
 
 /** Advertising filter policy */
 enum wiced_bt_ble_advert_filter_policy_e {
-    BTM_BLE_ADVERT_FILTER_ALL_CONNECTION_REQ_ALL_SCAN_REQ               = 0x00,    /**< Process scan and connection requests from all devices (i.e., the White List is not in use) (default) */
-    BTM_BLE_ADVERT_FILTER_ALL_CONNECTION_REQ_WHITELIST_SCAN_REQ         = 0x01,    /**< Process connection requests from all devices and only scan requests from devices that are in the White List. */
-    BTM_BLE_ADVERT_FILTER_WHITELIST_CONNECTION_REQ_ALL_SCAN_REQ         = 0x02,    /**< Process scan requests from all devices and only connection requests from devices that are in the White List */
-    BTM_BLE_ADVERT_FILTER_WHITELIST_CONNECTION_REQ_WHITELIST_SCAN_REQ   = 0x03,    /**< Process scan and connection requests only from devices in the White List. */
-    BTM_BLE_ADVERT_FILTER_MAX
+    BTM_BLE_ADV_POLICY_ACCEPT_CONN_AND_SCAN               = 0x00,    /**< Process scan and connection requests from all devices (i.e., the Filter Accept List is not in use) (default) */
+    BTM_BLE_ADV_POLICY_ACCEPT_CONN_FILTER_SCAN         = 0x01,    /**< Process connection requests from all devices and only scan requests from devices that are in the Filter Accept List. */
+    BTM_BLE_ADV_POLICY_FILTER_CONN_ACCEPT_SCAN         = 0x02,    /**< Process scan requests from all devices and only connection requests from devices that are in the Filter Accept List */
+    BTM_BLE_ADV_POLICY_FILTER_CONN_FILTER_SCAN   = 0x03,    /**< Process scan and connection requests only from devices in the Filter Accept List. */
+    BTM_BLE_ADV_POLICY_MAX
 };
 typedef uint8_t   wiced_bt_ble_advert_filter_policy_t;  /**< Advertising filter policy (see #wiced_bt_ble_advert_filter_policy_e) */
 
 /* default advertising filter policy */
-#define BTM_BLE_ADVERT_FILTER_DEFAULT   BTM_BLE_ADVERT_FILTER_ALL_CONNECTION_REQ_ALL_SCAN_REQ
+#define BTM_BLE_ADVERT_FILTER_DEFAULT   BTM_BLE_ADV_POLICY_ACCEPT_CONN_AND_SCAN
 
 /** ADV notification type received on callback */
 enum wiced_bt_ble_advert_notify_type_e {
@@ -145,8 +145,8 @@ typedef uint8_t wiced_bt_ble_advert_notify_type_t;
 /* default connectino interval max */
 #define BTM_BLE_CONN_INTERVAL_MAX_DEF   40      /* recommended max: 50 ms = 56 * 1.25 */
 
-/* default slave latency */
-#define BTM_BLE_CONN_SLAVE_LATENCY_DEF  0      /* 0 */
+/* default peripheral latency */
+#define BTM_BLE_CONN_PERIPHERAL_LATENCY_DEF  0      /* 0 */
 
 /* default supervision timeout */
 #define BTM_BLE_CONN_TIMEOUT_DEF                    2000
@@ -160,10 +160,10 @@ typedef uint8_t wiced_bt_ble_advert_notify_type_t;
 #define BTM_BLE_AUTH_SIGNATURE_SIZE                 12                      /**< BLE data signature length 8 Bytes + 4 bytes counter*/
 typedef uint8_t wiced_dev_ble_signature_t[BTM_BLE_AUTH_SIGNATURE_SIZE];     /**< Device address (see #BTM_BLE_AUTH_SIGNATURE_SIZE) */
 
-#define BTM_BLE_POLICY_BLACK_ALL                    0x00    /* relevant to both */
+#define BTM_BLE_POLICY_REJECT_ALL                   0x00    /* relevant to both */
 #define BTM_BLE_POLICY_ALLOW_SCAN                   0x01    /* relevant to advertiser */
 #define BTM_BLE_POLICY_ALLOW_CONN                   0x02    /* relevant to advertiser */
-#define BTM_BLE_POLICY_WHITE_ALL                    0x03    /* relevant to both */
+#define BTM_BLE_POLICY_ALLOW_ALL                    0x03    /* relevant to both */
 
 /* ADV data flag bit definition used for BTM_BLE_ADVERT_TYPE_FLAG */
 #define BTM_BLE_LIMITED_DISCOVERABLE_FLAG           (0x01 << 0)
@@ -196,7 +196,7 @@ enum wiced_bt_ble_advert_type_e {
     BTM_BLE_ADVERT_TYPE_SIMPLE_PAIRING_RAND_C       = 0x0F,                 /**< Simple Pairing Randomizer R */
     BTM_BLE_ADVERT_TYPE_SM_TK                       = 0x10,                 /**< Security manager TK value */
     BTM_BLE_ADVERT_TYPE_SM_OOB_FLAG                 = 0x11,                 /**< Security manager Out-of-Band data */
-    BTM_BLE_ADVERT_TYPE_INTERVAL_RANGE              = 0x12,                 /**< Slave connection interval range */
+    BTM_BLE_ADVERT_TYPE_INTERVAL_RANGE              = 0x12,                 /**< Peripheral connection interval range */
     BTM_BLE_ADVERT_TYPE_SOLICITATION_SRV_UUID       = 0x14,                 /**< List of solicitated services - 16 bit UUIDs */
     BTM_BLE_ADVERT_TYPE_128SOLICITATION_SRV_UUID    = 0x15,                 /**< List of solicitated services - 128 bit UUIDs */
     BTM_BLE_ADVERT_TYPE_SERVICE_DATA                = 0x16,                 /**< Service data - 16 bit UUID */
@@ -336,10 +336,10 @@ typedef uint8_t wiced_bt_ble_multi_advert_type_t;    /**< BLE advertisement type
 /** Multi-advertisement Filtering policy */
 enum wiced_bt_ble_multi_advert_filtering_policy_e
 {
-    MULTI_ADVERT_FILTER_POLICY_WHITE_LIST_NOT_USED                    = 0x00,   // white list not used
-    MULTI_ADVERT_WHITE_LIST_POLICY_ADV_ALLOW_UNKNOWN_CONNECTION       = 0x01,   // white list for scan request
-    MULTI_ADVERT_WHITE_LIST_POLICY_ADV_ALLOW_UNKNOWN_SCANNING         = 0x02,   // white list for connection request
-    MULTI_ADVERT_FILTER_POLICY_WHITE_LIST_USED_FOR_ALL                = 0x03
+    MULTI_ADVERT_FILTER_POLICY_FILTER_ACCEPT_LIST_NOT_USED                  = 0x00,   // Filter Accept List not used
+    MULTI_ADVERT_FILTER_ACCEPT_LIST_POLICY_ADV_ALLOW_UNKNOWN_CONNECTION     = 0x01,   // Filter Accept List for scan request
+    MULTI_ADVERT_FILTER_ACCEPT_LIST_POLICY_ADV_ALLOW_UNKNOWN_SCANNING       = 0x02,   // Filter Accept List for connection request
+    MULTI_ADVERT_FILTER_POLICY_FILTER_ACCEPT_LIST_USED_FOR_ALL              = 0x03
 };
 typedef uint8_t wiced_bt_ble_multi_advert_filtering_policy_t;    /**< BLE advertisement filtering policy (see #wiced_bt_ble_multi_advert_filtering_policy_e) */
 
@@ -643,9 +643,9 @@ wiced_bool_t wiced_bt_ble_get_security_state (wiced_bt_device_address_t bd_addr,
 
 /**
  *
- * Function         wiced_bt_ble_update_advertising_white_list
+ * Function         wiced_bt_ble_update_advertising_filter_accept_list
  *
- *                  Add or remove device from advertising white list
+ *                  Add or remove device from advertising Filter Accept List
  *
  * @param[in]       add: TRUE to add; FALSE to remove
  * @param[in]       remote_bda: remote device address.
@@ -653,7 +653,7 @@ wiced_bool_t wiced_bt_ble_get_security_state (wiced_bt_device_address_t bd_addr,
  * @return          void
  *
  */
-wiced_bool_t wiced_bt_ble_update_advertising_white_list(wiced_bool_t add, wiced_bt_device_address_t remote_bda);
+wiced_bool_t wiced_bt_ble_update_advertising_filter_accept_list(wiced_bool_t add, wiced_bt_device_address_t remote_bda);
 
 /**
  *
@@ -669,9 +669,9 @@ wiced_bool_t wiced_btm_ble_update_advertisement_filter_policy(wiced_bt_ble_adver
 
 /**
  *
- * Function         wiced_bt_ble_update_scanner_white_list
+ * Function         wiced_bt_ble_update_scanner_filter_list
  *
- *                  Add or remove device from scanner white list
+ *                  Add or remove device from scanner Filter Accept List
  *
  * @param[in]       add: TRUE to add; FALSE to remove
  * @param[in]       remote_bda: remote device address.
@@ -680,7 +680,7 @@ wiced_bool_t wiced_btm_ble_update_advertisement_filter_policy(wiced_bt_ble_adver
  * @return          WICED_TRUE if successful else WICED_FALSE
  *
  */
-wiced_bool_t wiced_bt_ble_update_scanner_white_list(wiced_bool_t add, wiced_bt_device_address_t remote_bda,  wiced_bt_ble_address_type_t addr_type);
+wiced_bool_t wiced_bt_ble_update_scanner_filter_list(wiced_bool_t add, wiced_bt_device_address_t remote_bda,  wiced_bt_ble_address_type_t addr_type);
 
 /**
  *
@@ -720,7 +720,7 @@ wiced_result_t wiced_bt_ble_set_channel_classification(const uint8_t ble_channel
  *                  Start/Stop Mulit advertisements.
  *                  wiced_start_multi_advertisements gives option to start multiple adverstisment instances
  *                  Each of the instances can set different #wiced_set_multi_advertisement_params and #wiced_set_multi_advertisement_data.
- *                  Hence this feature allows the device to advertise to multiple masters at the same time like a multiple peripheral device,
+ *                  Hence this feature allows the device to advertise to multiple centrals at the same time like a multiple peripheral device,
  *                  with different advertising data, Random private addresses, tx_power etc.
  *
  * @param[in]       advertising_enable : MULTI_ADVERT_START  - Advertising is enabled

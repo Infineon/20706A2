@@ -170,7 +170,7 @@ typedef PACKED struct
 /// configure for SPI1 GPIO ports
 typedef PACKED struct
 {
-    UINT8   masterOrSlave;
+    UINT8   centralOrPeripheral;
     UINT16  pinPullConfig;
     UINT32  spiGpioConfig;
 }Spi1PortConfig;
@@ -197,7 +197,7 @@ typedef PACKED struct
 /// configure for SPI2 GPIO port
 typedef PACKED struct
 {
-    UINT8   masterOrSlave;
+    UINT8   centralOrPeripheral;
     UINT16  pinPullConfig;
     UINT32  spiGpioConfig;
 }Spi2PortConfig;

@@ -175,8 +175,8 @@ typedef PACKED struct
 // 10.10.1       Types
 //------------------------------------------------------------------------------
 
-#define CFA_BSC_CADDR_WCTL_ADR_SLAVE0   0xA0
-#define CFA_BSC_CTL_DV_CLK_BY_4         (0x01 << 7)
+#define CFA_BSC_CADDR_WCTL_ADR_PERIPHERAL0   0xA0
+#define CFA_BSC_CTL_DV_CLK_BY_4             (0x01 << 7)
 
 #define CFA_BSC_CTL_SCL_400KHZ          (0x00 << 4)
 #define CFA_BSC_CTL_SCL_100KHZ          (0x01 << 4)

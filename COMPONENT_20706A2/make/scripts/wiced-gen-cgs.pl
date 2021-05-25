@@ -75,6 +75,9 @@ sub main
 		}
 		elsif($arg =~ /^DIRECT_LOAD/) {
 			$direct_load = 1;
+			if($arg =~ /^DIRECT_LOAD=(0x[0-9A-Fa-f]+)/) {
+				$direct_load = hex($1);
+			}
 		}
 	}
 
@@ -151,7 +154,7 @@ sub main
     if(defined $outfile) {
         select STDOUT;
     }
-    report_resource_usage($sections, $ld_info, $load_regions);
+    report_resource_usage($sections, $ld_info, $load_regions, $direct_load);
 }
 
 sub dump_cgs
@@ -171,7 +174,7 @@ sub post_process_cgs
     my @lines;
     return if $cgs_record->{type} ne 'patch';
 
-    if($direct_load == 1 && $cgs_record->{file} !~ /43012C0/) {
+    if($direct_load && $cgs_record->{file} !~ /43012C0/) {
         push @lines, @{$cgs_record->{lines}};
         $cgs_record->{lines} = [];
         foreach my $line (@lines) {
@@ -468,8 +471,10 @@ sub scan_ld_file
 
 sub report_resource_usage
 {
-	my ($sections, $ld_info, $load_regions) = @_;
+	my ($sections, $ld_info, $load_regions, $direct_load) = @_;
 	my $total;
+	my $end;
+	my $last_ram_addr = 0;
 	print "\n";
 	printf "Patch code starts at    0x%06X (RAM address)\n", $ld_info->{pram_patch_begin};
 	printf "Patch code ends at      0x%06X (RAM address)\n", $ld_info->{pram_patch_end};
@@ -491,20 +496,33 @@ sub report_resource_usage
 			last;
 		}
 		next unless defined $section->{mem_type};
+		$end = $section->{sh_addr} + $section->{sh_size};
 		printf "% 16s %8s start 0x%06X, end 0x%06X, size %d\n", $section->{name}, $section->{mem_type}, $section->{sh_addr},
-					$section->{sh_addr} + $section->{sh_size}, $section->{sh_size};
+					$end, $section->{sh_size};
+		if($end > $last_ram_addr) {
+			$last_ram_addr = $end;
+		}
 	}
 	foreach my $region (values(%{$load_regions})) {
 		next if $region->{end_used} == 0;
 		my $use = $region->{end_used} - $region->{start_used};
 		$total += $use;
+		next if $use == 0;
 		printf "  %s (%s): used 0x%06X - 0x%06X size (%d)\n", $region->{name}, $region->{type}, $region->{start_used}, $region->{end_used}, $use;
 	}
 	printf "  Total application footprint %d (0x%X)\n\n", $total, $total;
 	if(defined $ld_info->{upgrade_storage}) {
 		printf "DS available %d (0x%06X) at 0x%06X\n\n", $ld_info->{upgrade_storage}, $ld_info->{upgrade_storage}, $ld_info->{flash_ds};
 	}
-
+	if($direct_load && $direct_load != 1) {
+		printf "DIRECT LOAD address 0x%06X\n", $direct_load;
+		if($end > $direct_load) {
+			printf "ERROR: application RAM (through 0x%06X) overlaps with DIRECT LOAD address 0x%06X\n",
+					$end, $direct_load;
+			print "Change DIRECT LOAD address by changing PLATFORM_DIRECT_LOAD_BASE_ADDR in bsp makefile\n";
+			exit(1);
+		}
+	}
 }
 
 sub output_cgs_cfg

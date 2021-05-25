@@ -446,29 +446,29 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
  *  GATT Database Defintions
  *****************************************************************************/
 /*  The permission bits (see Vol 3, Part F, 3.3.1.1) */
-#define LEGATTDB_PERM_NONE                             (0x00)
-#define LEGATTDB_PERM_VARIABLE_LENGTH                  (0x1 << 0)
-#define LEGATTDB_PERM_READABLE                         (0x1 << 1)
-#define LEGATTDB_PERM_WRITE_CMD                        (0x1 << 2)
-#define LEGATTDB_PERM_WRITE_REQ                        (0x1 << 3)
-#define LEGATTDB_PERM_AUTH_READABLE                    (0x1 << 4)
-#define LEGATTDB_PERM_RELIABLE_WRITE                   (0x1 << 5)
-#define LEGATTDB_PERM_AUTH_WRITABLE                    (0x1 << 6)
+#define GATTDB_PERM_NONE                             (0x00)
+#define GATTDB_PERM_VARIABLE_LENGTH                  (0x1 << 0)
+#define GATTDB_PERM_READABLE                         (0x1 << 1)
+#define GATTDB_PERM_WRITE_CMD                        (0x1 << 2)
+#define GATTDB_PERM_WRITE_REQ                        (0x1 << 3)
+#define GATTDB_PERM_AUTH_READABLE                    (0x1 << 4)
+#define GATTDB_PERM_RELIABLE_WRITE                   (0x1 << 5)
+#define GATTDB_PERM_AUTH_WRITABLE                    (0x1 << 6)
 
-#define LEGATTDB_PERM_WRITABLE  (LEGATTDB_PERM_WRITE_CMD | LEGATTDB_PERM_WRITE_REQ| LEGATTDB_PERM_AUTH_WRITABLE)
-#define LEGATTDB_PERM_MASK                             (0x7f)   /* All the permission bits. */
-#define LEGATTDB_PERM_SERVICE_UUID_128                 (0x1 << 7)
+#define GATTDB_PERM_WRITABLE  (GATTDB_PERM_WRITE_CMD | GATTDB_PERM_WRITE_REQ| GATTDB_PERM_AUTH_WRITABLE)
+#define GATTDB_PERM_MASK                             (0x7f)   /* All the permission bits. */
+#define GATTDB_PERM_SERVICE_UUID_128                 (0x1 << 7)
 
 
 /*  GATT Characteristic Properties */
-#define LEGATTDB_CHAR_PROP_BROADCAST                  (0x1 << 0)
-#define LEGATTDB_CHAR_PROP_READ                       (0x1 << 1)
-#define LEGATTDB_CHAR_PROP_WRITE_NO_RESPONSE          (0x1 << 2)
-#define LEGATTDB_CHAR_PROP_WRITE                      (0x1 << 3)
-#define LEGATTDB_CHAR_PROP_NOTIFY                     (0x1 << 4)
-#define LEGATTDB_CHAR_PROP_INDICATE                   (0x1 << 5)
-#define LEGATTDB_CHAR_PROP_AUTHD_WRITES               (0x1 << 6)
-#define LEGATTDB_CHAR_PROP_EXTENDED                   (0x1 << 7)
+#define GATTDB_CHAR_PROP_BROADCAST                  (0x1 << 0)
+#define GATTDB_CHAR_PROP_READ                       (0x1 << 1)
+#define GATTDB_CHAR_PROP_WRITE_NO_RESPONSE          (0x1 << 2)
+#define GATTDB_CHAR_PROP_WRITE                      (0x1 << 3)
+#define GATTDB_CHAR_PROP_NOTIFY                     (0x1 << 4)
+#define GATTDB_CHAR_PROP_INDICATE                   (0x1 << 5)
+#define GATTDB_CHAR_PROP_AUTHD_WRITES               (0x1 << 6)
+#define GATTDB_CHAR_PROP_EXTENDED                   (0x1 << 7)
 
 /* Conversion macros */
 #define BIT16_TO_8( val ) \
@@ -476,8 +476,34 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
     (uint8_t)(( (val) >> 8 ) & 0xff) /* MSB */
 
 /* UUID lengths */
-#define LEGATTDB_UUID16_SIZE                 2
-#define LEGATTDB_UUID128_SIZE                16
+#define GATTDB_UUID16_SIZE                 2
+#define GATTDB_UUID128_SIZE                16
+
+/* Since the GATT DB macro names were changed from LEGATTDB_xxx from GATTDB_xxx,
+** these backwards compatibility macros are temporarily defined to minimize impact
+** on applications. It is expected that they wll be deprecated over time.
+*/
+#define LEGATTDB_PERM_NONE                             GATTDB_PERM_NONE
+#define LEGATTDB_PERM_VARIABLE_LENGTH                  GATTDB_PERM_VARIABLE_LENGTH
+#define LEGATTDB_PERM_READABLE                         GATTDB_PERM_READABLE
+#define LEGATTDB_PERM_WRITE_CMD                        GATTDB_PERM_WRITE_CMD
+#define LEGATTDB_PERM_WRITE_REQ                        GATTDB_PERM_WRITE_REQ
+#define LEGATTDB_PERM_AUTH_READABLE                    GATTDB_PERM_AUTH_READABLE
+#define LEGATTDB_PERM_RELIABLE_WRITE                   GATTDB_PERM_RELIABLE_WRITE
+#define LEGATTDB_PERM_AUTH_WRITABLE                    GATTDB_PERM_AUTH_WRITABLE
+#define LEGATTDB_PERM_WRITABLE                         GATTDB_PERM_WRITABLE
+#define LEGATTDB_PERM_MASK                             GATTDB_PERM_MASK
+#define LEGATTDB_PERM_SERVICE_UUID_128                 GATTDB_PERM_SERVICE_UUID_128
+#define LEGATTDB_CHAR_PROP_BROADCAST                   GATTDB_CHAR_PROP_BROADCAST
+#define LEGATTDB_CHAR_PROP_READ                        GATTDB_CHAR_PROP_READ
+#define LEGATTDB_CHAR_PROP_WRITE_NO_RESPONSE           GATTDB_CHAR_PROP_WRITE_NO_RESPONSE
+#define LEGATTDB_CHAR_PROP_WRITE                       GATTDB_CHAR_PROP_WRITE
+#define LEGATTDB_CHAR_PROP_NOTIFY                      GATTDB_CHAR_PROP_NOTIFY
+#define LEGATTDB_CHAR_PROP_INDICATE                    GATTDB_CHAR_PROP_INDICATE
+#define LEGATTDB_CHAR_PROP_AUTHD_WRITES                GATTDB_CHAR_PROP_AUTHD_WRITES
+#define LEGATTDB_CHAR_PROP_EXTENDED                    GATTDB_CHAR_PROP_EXTENDED
+#define LEGATTDB_UUID16_SIZE                           GATTDB_UUID16_SIZE
+#define LEGATTDB_UUID128_SIZE                          GATTDB_UUID128_SIZE
 
 
 /* Service and Characteristic macros  */
@@ -489,35 +515,35 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
 
 #define PRIMARY_SERVICE_UUID16(handle, service)  \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     4, \
     BIT16_TO_8((GATT_UUID_PRI_SERVICE)), \
     BIT16_TO_8((service))
 
 #define PRIMARY_SERVICE_UUID128(handle, service)  \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     18, \
     BIT16_TO_8(GATT_UUID_PRI_SERVICE), \
     service
 
 #define SECONDARY_SERVICE_UUID16(handle, service)  \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     4, \
     BIT16_TO_8((GATT_UUID_SEC_SERVICE)), \
     BIT16_TO_8((service))
 
 #define SECONDARY_SERVICE_UUID128(handle, service)  \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     18, \
     BIT16_TO_8(GATT_UUID_SEC_SERVICE), \
     service
 
 #define INCLUDE_SERVICE_UUID16(handle, service_handle, end_group_handle, service)  \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     8, \
     BIT16_TO_8(GATT_UUID_INCLUDE_SERVICE), \
     BIT16_TO_8(service_handle), \
@@ -527,7 +553,7 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
 
 #define INCLUDE_SERVICE_UUID128(handle, service_handle, end_group_handle)\
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     6, \
     BIT16_TO_8(GATT_UUID_INCLUDE_SERVICE), \
     BIT16_TO_8(service_handle), \
@@ -536,7 +562,7 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
 
 #define CHARACTERISTIC_UUID16(handle, handle_value, uuid, properties, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     0x07, \
     BIT16_TO_8(GATT_UUID_CHAR_DECLARE), \
     (uint8_t)(properties), \
@@ -544,25 +570,25 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
     BIT16_TO_8(uuid), \
     BIT16_TO_8((uint16_t)(handle_value)), \
     (uint8_t)(permission), \
-    (uint8_t)(LEGATTDB_UUID16_SIZE), \
+    (uint8_t)(GATTDB_UUID16_SIZE), \
     BIT16_TO_8(uuid)
 
 #define CHARACTERISTIC_UUID128(handle, handle_value, uuid, properties, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     21, \
     BIT16_TO_8(GATT_UUID_CHAR_DECLARE), \
     (uint8_t)(properties), \
     BIT16_TO_8((uint16_t)(handle_value)), \
     uuid, \
     BIT16_TO_8((uint16_t)(handle_value)), \
-    (uint8_t)(permission | LEGATTDB_PERM_SERVICE_UUID_128), \
-    (uint8_t)(LEGATTDB_UUID128_SIZE), \
+    (uint8_t)(permission | GATTDB_PERM_SERVICE_UUID_128), \
+    (uint8_t)(GATTDB_UUID128_SIZE), \
     uuid
 
 #define CHARACTERISTIC_UUID16_WRITABLE(handle, handle_value, uuid, properties, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     0x07, \
     BIT16_TO_8(GATT_UUID_CHAR_DECLARE), \
     (uint8_t)(properties), \
@@ -570,48 +596,48 @@ typedef uint16_t wiced_bt_gatt_appearance_t;     /**< GATT appearance (see #gatt
     BIT16_TO_8(uuid), \
     BIT16_TO_8((uint16_t)(handle_value)), \
     (uint8_t)(permission), \
-    (uint8_t)(LEGATTDB_UUID16_SIZE), \
+    (uint8_t)(GATTDB_UUID16_SIZE), \
     (uint8_t)(0), \
     BIT16_TO_8(uuid)
 
 #define CHARACTERISTIC_UUID128_WRITABLE(handle, handle_value, uuid, properties, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
-    LEGATTDB_PERM_READABLE, \
+    GATTDB_PERM_READABLE, \
     21, \
     BIT16_TO_8(GATT_UUID_CHAR_DECLARE), \
     (uint8_t)(properties), \
     BIT16_TO_8((uint16_t)(handle_value)), \
     uuid, \
     BIT16_TO_8((uint16_t)(handle_value)), \
-    (uint8_t)(permission | LEGATTDB_PERM_SERVICE_UUID_128), \
-    (uint8_t)(LEGATTDB_UUID128_SIZE), \
+    (uint8_t)(permission | GATTDB_PERM_SERVICE_UUID_128), \
+    (uint8_t)(GATTDB_UUID128_SIZE), \
     (uint8_t)(0), \
     uuid
 
 #define CHAR_DESCRIPTOR_UUID16_WRITABLE(handle, uuid, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
     (uint8_t)(permission), \
-    (uint8_t)(LEGATTDB_UUID16_SIZE), \
+    (uint8_t)(GATTDB_UUID16_SIZE), \
     (uint8_t)(0), \
     BIT16_TO_8(uuid)
 
 #define CHAR_DESCRIPTOR_UUID16(handle, uuid, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
     (uint8_t)(permission), \
-    (uint8_t)(LEGATTDB_UUID16_SIZE), \
+    (uint8_t)(GATTDB_UUID16_SIZE), \
     BIT16_TO_8(uuid)
 
 #define CHAR_DESCRIPTOR_UUID128_WRITABLE(handle, uuid, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
-    (uint8_t)(permission | LEGATTDB_PERM_SERVICE_UUID_128), \
-    (uint8_t)(LEGATTDB_UUID128_SIZE), \
+    (uint8_t)(permission | GATTDB_PERM_SERVICE_UUID_128), \
+    (uint8_t)(GATTDB_UUID128_SIZE), \
     (uint8_t)(0), \
     uuid
 
 #define CHAR_DESCRIPTOR_UUID128(handle, uuid, permission) \
     BIT16_TO_8((uint16_t)(handle)), \
-    (uint8_t)(permission | LEGATTDB_PERM_SERVICE_UUID_128), \
-    (uint8_t)(LEGATTDB_UUID128_SIZE), \
+    (uint8_t)(permission | GATTDB_PERM_SERVICE_UUID_128), \
+    (uint8_t)(GATTDB_UUID128_SIZE), \
     uuid
 
 
@@ -1046,8 +1072,8 @@ wiced_bt_gatt_status_t wiced_bt_gatt_disconnect (uint16_t conn_id);
  *
  *              Start or stop LE advertisement and listen for connection.
  *
- *  @param[in]   start      : TRUE to add device to whitelist / FALSE to remove
- *  @param[in]   bd_addr    : Device to add/remove from whitelist
+ *  @param[in]   start      : TRUE to add device to Filter Accept List / FALSE to remove
+ *  @param[in]   bd_addr    : Device to add/remove from Filter Accept List
  *
  *  @return <b> TRUE </b>            : Success
  *          <b> FALSE </b>           : Failure

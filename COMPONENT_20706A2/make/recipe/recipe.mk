@@ -84,6 +84,21 @@ CY_RECIPE_DEFINES?=\
 	$(foreach feature,$(CY_COMPONENT_LIST),-DCOMPONENT_$(subst -,_,$(feature)))
 
 #
+# Application version information
+# Format is 2-bytes app id, 1-byte major, 1-byte minor
+#
+ifndef APP_VERSION_APP_ID
+APP_VERSION_APP_ID = 0
+endif
+ifndef APP_VERSION_MAJOR
+APP_VERSION_MAJOR = 0
+endif
+ifndef APP_VERSION_MINOR
+APP_VERSION_MINOR = 0
+endif
+APP_VERSION = $(shell printf "0x%02X%02X%04X" $(APP_VERSION_MINOR) $(APP_VERSION_MAJOR) $(APP_VERSION_APP_ID))
+
+#
 # Includes construction
 #
 # macro to remove duplicate paths from INC lists, but preserve order of 1st instances
@@ -132,7 +147,8 @@ CY_RECIPE_GENSRC=\
     "--out=$(CY_RECIPE_GENERATED)"\
     $(addprefix $(CY_INTERNAL_BASELIB_PATH)/$(CY_CORE_PATCH_LIB_PATH)/,$(CY_APP_PATCH_LIBS))\
     $(addprefix $(CY_APP_PATCH_LIBS_PRO_PATH)/,$(CY_APP_PATCH_LIBS_PRO))\
-    $(if $(VERBOSE),"--verbose"); CY_CMD_TERM=;
+    $(if $(VERBOSE),"--verbose")\
+	&& CY_CMD_TERM=
 endif
 
 #
@@ -148,7 +164,8 @@ CY_RECIPE_PREBUILD?=\
     --patch="$(CY_CORE_PATCH_SYMBOLS)"\
     --ld="$(CY_CONFIG_DIR)/$(APPNAME).ld"\
     $(if $(findstring 1,$(DIRECT_LOAD)),--direct)\
-    $(if $(VERBOSE),--verbose); CY_CMD_TERM=;
+    $(if $(VERBOSE),"--verbose")\
+	&& CY_CMD_TERM=
 endif
 
 #
@@ -165,6 +182,7 @@ CY_RECIPE_POSTBUILD?=\
     --builddir="$(CY_CONFIG_DIR)"\
     --elfname="$(APPNAME).elf"\
     --appname="$(APPNAME)"\
+    --appver="$(APP_VERSION)"\
     --hdf="$(CY_CORE_HDF)"\
     --entry="$(CY_CORE_APP_ENTRY).entry"\
     --cgslist="$(CY_CORE_CGSLIST)"\
@@ -179,7 +197,8 @@ CY_RECIPE_POSTBUILD?=\
     --failsafe="$(CY_CORE_FAIL_SAFE_CGS)"\
     --clflags="$(CY_CORE_APP_CHIPLOAD_FLAGS)"\
     --extras=$(CY_APP_OTA)$(APP_STATIC_DATA)$(CY_CORE_APP_XIP_EXTRA)$(CY_CORE_DS2_EXTRA)$(CY_CORE_DIRECT_LOAD)\
-    $(if $(VERBOSE),"--verbose"); CY_CMD_TERM=;
+    $(if $(VERBOSE),"--verbose")\
+	&& CY_CMD_TERM=
 endif
 
 #
@@ -206,3 +225,61 @@ vscode_bt_information:
 	echo " - Launch debugger with Run->Start debugging, or F5.";\
 	echo "See document \"WICED Hardware Debugging for Bluetooth Kits\" for details.";\
 	echo;
+
+################################################################################
+# Programmer tool
+################################################################################
+ifeq ($(KITPROG3_BRIDGE),1)
+CY_PROGTOOL_FW_LOADER=$(CY_INTERNAL_TOOL_fw-loader_EXE)
+progtool:
+	$(CY_NOISE)echo;\
+	echo ==============================================================================;\
+	echo "Available commands";\
+	echo ==============================================================================;\
+	echo;\
+	"$(CY_PROGTOOL_FW_LOADER)" --help | sed s/'	'/' '/g;\
+	echo ==============================================================================;\
+	echo "Connected device(s)";\
+	echo ==============================================================================;\
+	echo;\
+	deviceList=$$("$(CY_PROGTOOL_FW_LOADER)" --device-list | grep "FW Version" | sed s/'	'/' '/g);\
+	if [[ ! -n "$$deviceList" ]]; then\
+		echo "ERROR: Could not find any connected devices";\
+		echo;\
+		exit 1;\
+	else\
+		echo "$$deviceList";\
+		echo;\
+	fi;\
+	echo ==============================================================================;\
+	echo "Input command";\
+	echo ==============================================================================;\
+	echo;\
+	echo " Specify the command (and optionally the device name).";\
+	echo " E.g. --mode kp3-daplink KitProg3 CMSIS-DAP HID-0123456789ABCDEF";\
+	echo;\
+	read -p " > " -a params;\
+	echo;\
+	echo ==============================================================================;\
+	echo "Run command";\
+	echo ==============================================================================;\
+	echo;\
+	paramsSize=$${#params[@]};\
+	if [[ $$paramsSize > 2 ]]; then\
+		if [[ $${params[1]} == "kp3-"* ]]; then\
+			deviceName="$${params[@]:2:$$paramsSize}";\
+			"$(CY_PROGTOOL_FW_LOADER)" $${params[0]} $${params[1]} "$$deviceName" | sed s/'	'/' '/g;\
+		else\
+			deviceName="$${params[@]:1:$$paramsSize}";\
+			"$(CY_PROGTOOL_FW_LOADER)" $${params[0]} "$$deviceName" | sed s/'	'/' '/g;\
+		fi;\
+	else\
+		"$(CY_PROGTOOL_FW_LOADER)" "$${params[@]}" | sed s/'	'/' '/g;\
+	fi;
+
+else
+progtool:
+	$(CY_NOISE)echo "This kit does not have a USB Serial device supported by Progtool."
+
+endif
+.PHONY: progtool

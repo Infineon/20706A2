@@ -149,10 +149,10 @@ typedef UINT8 BD_ADDR[HIDDCFA_BD_ADDRESS_SIZE];
 typedef struct
 {
     UINT8   selLPOSrc;
-    // selSlaveLPOSrc
+    // selPeripheralLPOSrc
     // If TRUE: Will continue to use the selected LPO SRC in Sniff.
     // If FALSE: Will use the LPX in Sniff.
-    BOOLEAN selSlaveLPOSrc;
+    BOOLEAN selPeripheralLPOSrc;
     UINT16  driftRate;
 }HIDCFA_SELECT_LPO;
 
@@ -454,7 +454,7 @@ extern void hiddcfa_changeSystemClock ( CLOCK_SPEED cpu_speed );
  * BTLPM LPO source selection
  ****************************************************************************/
 void hiddcfa_btLpmModeChangeInd(UINT8 mode, UINT16 interval, UINT8 asymmetricMultiplier);
-void hiddcfa_changeLPOSource(UINT8 pmu_clkSource, BOOLEAN selSlaveLPOSrc, UINT16 driftRate);
+void hiddcfa_changeLPOSource(UINT8 pmu_clkSource, BOOLEAN selPeripheralLPOSrc, UINT16 driftRate);
 int hiddcfa_calibrateMiaLpo(UINT32 lpoCalibrationCount);
 void hiddcfa_updatePmuSettings(BOOLEAN updatePmuSetting);
 void hiddcfa_setTestMode(void);
@@ -720,7 +720,7 @@ void hiddcfa_lower_CSA_priority(BOOLEAN lower_priority);
 //=====================================================================
 // Function : hiddcfa_disable_AFHChannelAssessMode
 //
-// The function disabled the Slave AFH channel Assesment.
+// The function disabled the Peripheral AFH channel Assesment.
 // This API can be called at the Application start up
 // (after Activate App)
 //

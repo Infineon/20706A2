@@ -115,6 +115,9 @@ typedef void (*wiced_bt_avrc_ct_features_cback_t) (wiced_bt_avrc_ct_features_eve
         wiced_bt_avrc_ct_features_data_t *p_data);
 #endif /* AVRC_ADV_CTRL_INCLUDED == TRUE */
 
+/** Callback when peer device sends AVRCP passthrough commands op code */
+typedef void (*wiced_bt_avrc_ct_pt_evt_cback_t)(uint8_t handle, uint8_t op_id);
+
 /******************************************************
  *               Function Declarations
  ******************************************************/
@@ -218,6 +221,30 @@ wiced_result_t wiced_bt_avrc_ct_disconnect( uint8_t handle );
  *
  */
 wiced_result_t wiced_bt_avrc_ct_send_pass_through_cmd( uint8_t handle, uint8_t cmd, uint8_t state, uint8_t data_len, uint8_t *data );
+
+/**
+ * Function         wiced_bt_avrc_ct_send_unit_info_cmd
+ *
+ *                  Send Unit Info Command
+ *
+ * @param[in]       handle          : Connection handle
+ *
+ * @return          wiced_result_t
+ *
+ */
+wiced_result_t wiced_bt_avrc_ct_send_unit_info_cmd( uint16_t handle );
+
+/**
+ * Function         wiced_bt_avrc_ct_send_sub_unit_info_cmd
+ *
+ *                  Send Sub Unit Info Command
+ *
+ * @param[in]       handle          : Connection handle
+ *
+ * @return          wiced_result_t
+ *
+ */
+wiced_result_t wiced_bt_avrc_ct_send_sub_unit_info_cmd( uint16_t handle );
 
 /**
  * Function         wiced_bt_avrc_ct_get_element_attr_cmd
@@ -477,6 +504,14 @@ wiced_result_t wiced_bt_avrc_ct_add_to_now_playing_cmd( uint8_t handle, uint8_t 
  */
 wiced_result_t wiced_bt_avrc_ct_set_volume_cmd( uint8_t handle, uint8_t volume );
 
+#ifdef CT_HANDLE_PASSTHROUGH_COMMANDS
+/**
+ * wiced_bt_avrc_ct_register_passthrough_event_callback
+ *
+ * @param pt_evt_cb callback
+ */
+void wiced_bt_avrc_ct_register_passthrough_event_callback( wiced_bt_avrc_ct_pt_evt_cback_t pt_evt_cb);
+#endif // CT_HANDLE_PASSTHROUGH_COMMANDS
 /** @}*/
 
 #ifdef __cplusplus

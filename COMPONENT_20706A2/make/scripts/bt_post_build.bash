@@ -46,6 +46,7 @@ set -e
 #                       --builddir=<mainapp build dir>
 #                       --elfname=<app elf>
 #                       --appname=<app name>
+#                       --appver=<app id and major/minor version>
 #                       --hdf=<hdf file>
 #                       --entry=<entry function name>
 #                       --cgslist=<cgs file list>
@@ -66,7 +67,7 @@ set -e
 USAGE="(-s=|--shell=)<shell path> (-x=|--cross=)<cross tools path>"
 USAGE+=" (-w=|--scripts=)<wiced scripts path> (-t=|--tools=)<wiced tools>"
 USAGE+=" (-b=|--builddir=)<build dir> (-e=|--elfname=)<elf name>"
-USAGE+=" (-a=|--appname=)<app name> (-d=|--hdf=)<hdf file>"
+USAGE+=" (-a=|--appname=)<app name> (-u|--appver=)<app version> (-d=|--hdf=)<hdf file>"
 USAGE+=" (-n=|--entry=)<app entry function> (-l=|--cgslist=)<cgs file list>"
 USAGE+=" (-z=|--sscgs=)<static cgs file> -f=|--failsafe=)<failsafe cgs file> (-g=|--cgsargs=)<cgs tool arg>"
 USAGE+=" (-p=|--btp=)<btp file> (-i=|--id=)<hci id file> (-o=|--overridebaudfile=)<override baud rate list>"
@@ -112,6 +113,10 @@ do
         ;;
     -a=*|--appname=*)
         CY_MAINAPP_NAME="${i#*=}"
+        shift
+        ;;
+    -u=*|--appver=*)
+        CY_MAINAPP_VERSION="${i#*=}"
         shift
         ;;
     -d=*|--hdf=*)
@@ -206,6 +211,7 @@ if [ "$VERBOSE" != "" ]; then
     echo 5:  CY_MAINAPP_BUILD_DIR : $CY_MAINAPP_BUILD_DIR
     echo 6:  CY_ELF_NAME          : $CY_ELF_NAME
     echo 7:  CY_MAINAPP_NAME      : $CY_MAINAPP_NAME
+    echo 7:  CY_MAINAPP_VERSION   : $CY_MAINAPP_VERSION
     echo 8:  CY_APP_HDF           : $CY_APP_HDF
     echo 9:  CY_APP_ENTRY         : $CY_APP_ENTRY
     echo 10: CY_APP_CGSLIST       : $CY_APP_CGSLIST
@@ -287,7 +293,9 @@ fi
 
 if [[ $CY_APP_BUILD_EXTRAS = *"DIRECT"* ]]; then
 echo "building image for direct ram load (*.hcd)"
-CY_APP_DIRECT_LOAD="DIRECT_LOAD=1"
+CY_APP_DIRECT_LOAD_ADDR=$(echo $CY_APP_CGS_ARGS | "$CY_TOOL_PERL" -ple 's/.*DLConfigSSLocation:(0x[0-9A-Fa-f]+).*/$1/')
+#echo "Direct load adress $CY_APP_DIRECT_LOAD_ADDR"
+CY_APP_DIRECT_LOAD="DIRECT_LOAD=$CY_APP_DIRECT_LOAD_ADDR"
 CY_APP_CGS_ARGS+=" -O \"DLConfigTargeting:RAM runtime\""
 CY_APP_CGS_ARGS+=" -O DLConfigVSLocation:0"
 CY_APP_CGS_ARGS+=" -O DLConfigVSLength:0"
@@ -302,8 +310,15 @@ fi
 if [ "$VERBOSE" != "" ]; then
     echo "calling $CY_TOOL_PERL -I $CYWICEDSCRIPTS $CYWICEDSCRIPTS/wiced-gen-cgs.pl $CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST $CY_APP_HDF $CY_APP_LD $CY_APP_BTP $CY_APP_ENTRY out=$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 fi
+set +e
 "$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-cgs.pl" "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST "$CY_APP_HDF" "$CY_APP_LD" "$CY_APP_BTP" $CY_APP_ENTRY out="$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs" > "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
+CY_APP_ERROR=$?
 "$CY_TOOL_CAT" "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
+set -e
+if [ $CY_APP_ERROR -eq 1 ]; then
+echo "exiting build"
+exit 1
+fi
 
 # copy hdf local for cgs tool, it seems to need it despite -D
 "$CY_TOOL_CP" "$CY_APP_HDF" "$CY_MAINAPP_BUILD_DIR/."
@@ -321,9 +336,12 @@ fi
 
 # for flash downloads of non-HomeKit, this is the download file, done
 # generate hex download file, use eval because of those darn quotes needed around "DLConfigTargeting:RAM runtime"
+# use set +e because of the darn eval
 echo "generate hex file:"
-echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
-eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -P $CY_MAINAPP_VERSION -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+set +e
+eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -P $CY_MAINAPP_VERSION -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+set -e
 if [[ ! -e $CY_APP_HEX ]]; then
     echo "!! Post build failed, no hex file output"
     exit 1

@@ -128,10 +128,10 @@ CY_CORE_DEFINES+=\
 	-D$(subst -,_,$(TARGET))
 
 CY_CORE_EXTRA_DEFINES=\
-	-DWICED_SDK_MAJOR_VER=2 \
-	-DWICED_SDK_MINOR_VER=9 \
+	-DWICED_SDK_MAJOR_VER=3 \
+	-DWICED_SDK_MINOR_VER=0 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=12234
+	-DWICED_SDK_BUILD_NUMBER=14025
 
 #
 # Set the output file paths
@@ -150,9 +150,6 @@ ifneq ($(LIBNAME),BTSDK_TopLevel)
 CY_SUPPORTED_TOOL_TYPES+=bt-configurator
 endif
 
-ifeq ($(CY_TARGET_DEVICE),20819A1)
-CY_SUPPORTED_TOOL_TYPES+=cype-tool
-endif
 # hint for bt-configurator
 CY_OPEN_bt_configurator_DEVICE=--device 20xxx
 
@@ -185,8 +182,8 @@ else
   ifeq ($(CY_OS_DIR),Linux64)
     CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/BTSpy/$(CY_OS_DIR)/RunBtSpy.sh
   else
-    CY_OPEN_BTSpy_TOOL=open
-    CY_OPEN_BTSpy_TOOL_ARGS=-a $(CY_BT_APP_TOOLS_UTILS_DIR_ABS)/BTSpy/$(CY_OS_DIR)/bt_spy.app
+    CY_OPEN_BTSpy_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR_ABS)/BTSpy/open.sh
+    CY_OPEN_BTSpy_TOOL_ARGS=$(CY_BT_APP_TOOLS_UTILS_DIR_ABS)/BTSpy/$(CY_OS_DIR)/bt_spy.app
   endif
 endif
 CY_OPEN_BTSpy_tool_EXT=
@@ -202,8 +199,8 @@ else
   ifeq ($(CY_OS_DIR),Linux64)
     CY_OPEN_ClientControl_TOOL=$(CY_BT_HOST_APPS_BT_BLE_DIR)/client_control/$(CY_OS_DIR)/RunClientControl.sh
   else
-    CY_OPEN_ClientControl_TOOL=open
-    CY_OPEN_ClientControl_TOOL_ARGS=-a $(CY_BT_HOST_APPS_BT_BLE_DIR_ABS)/client_control/$(CY_OS_DIR)/ClientControl.app
+    CY_OPEN_ClientControl_TOOL=$(CY_BT_HOST_APPS_BT_BLE_DIR_ABS)/client_control/open.sh
+    CY_OPEN_ClientControl_TOOL_ARGS=$(CY_BT_HOST_APPS_BT_BLE_DIR_ABS)/client_control/$(CY_OS_DIR)/ClientControl.app
   endif
 endif
 endif
@@ -221,8 +218,8 @@ else
   ifeq ($(CY_OS_DIR),Linux64)
     CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_HOST_PEER_APPS_MESH_DIR)/host/Qt_ClientControl/$(CY_OS_DIR)/RunClientControl.sh
   else
-    CY_OPEN_ClientControlMesh_TOOL=open
-    CY_OPEN_ClientControlMesh_TOOL_ARGS=-a $(CY_BT_HOST_PEER_APPS_MESH_DIR_ABS)/host/Qt_ClientControl/macos/mesh_client.app
+    CY_OPEN_ClientControlMesh_TOOL=$(CY_BT_HOST_PEER_APPS_MESH_DIR_ABS)/host/Qt_ClientControl/open.sh
+    CY_OPEN_ClientControlMesh_TOOL_ARGS=$(CY_BT_HOST_PEER_APPS_MESH_DIR_ABS)/host/Qt_ClientControl/macos/mesh_client.app
   endif
 endif
 endif
