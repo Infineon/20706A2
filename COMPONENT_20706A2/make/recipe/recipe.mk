@@ -81,7 +81,9 @@ CY_RECIPE_DEFINES?=\
     $(CY_CORE_EXTRA_DEFINES)\
     $(CY_TOOLCHAIN_DEBUG_DEFINES)\
     -DSPAR_CRT_SETUP=$(CY_CORE_APP_ENTRY)\
-	$(foreach feature,$(CY_COMPONENT_LIST),-DCOMPONENT_$(subst -,_,$(feature)))
+    $(foreach feature,$(CY_COMPONENT_LIST),-DCOMPONENT_$(subst -,_,$(feature)))\
+    -DCY_SUPPORTS_DEVICE_VALIDATION\
+    -D$(subst -,_,$(DEVICE))
 
 #
 # Application version information
@@ -148,7 +150,7 @@ CY_RECIPE_GENSRC=\
     $(addprefix $(CY_INTERNAL_BASELIB_PATH)/$(CY_CORE_PATCH_LIB_PATH)/,$(CY_APP_PATCH_LIBS))\
     $(addprefix $(CY_APP_PATCH_LIBS_PRO_PATH)/,$(CY_APP_PATCH_LIBS_PRO))\
     $(if $(VERBOSE),"--verbose")\
-	&& CY_CMD_TERM=
+    && CY_CMD_TERM=
 endif
 
 #
@@ -165,7 +167,7 @@ CY_RECIPE_PREBUILD?=\
     --ld="$(CY_CONFIG_DIR)/$(APPNAME).ld"\
     $(if $(findstring 1,$(DIRECT_LOAD)),--direct)\
     $(if $(VERBOSE),"--verbose")\
-	&& CY_CMD_TERM=
+    && CY_CMD_TERM=
 endif
 
 #
@@ -198,7 +200,7 @@ CY_RECIPE_POSTBUILD?=\
     --clflags="$(CY_CORE_APP_CHIPLOAD_FLAGS)"\
     --extras=$(CY_APP_OTA)$(APP_STATIC_DATA)$(CY_CORE_APP_XIP_EXTRA)$(CY_CORE_DS2_EXTRA)$(CY_CORE_DIRECT_LOAD)\
     $(if $(VERBOSE),"--verbose")\
-	&& CY_CMD_TERM=
+    && CY_CMD_TERM=
 endif
 
 #

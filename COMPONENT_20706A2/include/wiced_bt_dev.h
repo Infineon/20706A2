@@ -968,7 +968,9 @@ typedef wiced_result_t (wiced_bt_management_cback_t) (wiced_bt_management_evt_t 
  * @param[in] reason        : In disconnection case disconnect reason
  * @return void
  */
-typedef void (wiced_bt_connection_status_change_cback_t) (wiced_bt_device_address_t bd_addr, uint8_t *p_features, wiced_bool_t is_connected, uint16_t handle, wiced_bt_transport_t transport, uint8_t reason);  /**<   connection status change callback */
+typedef void (wiced_bt_connection_status_change_cback_t) (wiced_bt_device_address_t bd_addr,
+                uint8_t *p_features, wiced_bool_t is_connected,
+                uint16_t handle, wiced_bt_transport_t transport, uint8_t reason);
 
 
 /**
@@ -979,7 +981,8 @@ typedef void (wiced_bt_connection_status_change_cback_t) (wiced_bt_device_addres
  *
  * @return Nothing
  */
-typedef void (wiced_bt_inquiry_result_cback_t) (wiced_bt_dev_inquiry_scan_result_t *p_inquiry_result, uint8_t *p_eir_data); /**<   inquiry result callback */
+typedef void (wiced_bt_inquiry_result_cback_t) (wiced_bt_dev_inquiry_scan_result_t *p_inquiry_result,
+                uint8_t *p_eir_data);
 
 /**
  * Synchronous BTM operation is complete.
@@ -997,7 +1000,8 @@ typedef void (wiced_bt_dev_cmpl_cback_t) (void *p_data);
  *
  * @return Nothing
  */
-typedef void (wiced_bt_dev_vendor_specific_command_complete_cback_t) (wiced_bt_dev_vendor_specific_command_complete_params_t *p_command_complete_params);
+typedef void (wiced_bt_dev_vendor_specific_command_complete_cback_t) (
+                wiced_bt_dev_vendor_specific_command_complete_params_t *p_command_complete_params);
 
 /******************************************************
  *               Function Declarations
@@ -1434,7 +1438,8 @@ void wiced_bt_dev_pin_code_reply (wiced_bt_device_address_t bd_addr, wiced_resul
  *
  *  Note            BD_Address must be in Big Endian format
  */
-wiced_result_t wiced_bt_dev_sec_bond (wiced_bt_device_address_t bd_addr, wiced_bt_ble_address_type_t bd_addr_type, wiced_bt_transport_t transport, uint8_t pin_len, uint8_t *p_pin);
+wiced_result_t wiced_bt_dev_sec_bond (wiced_bt_device_address_t bd_addr,
+                wiced_bt_ble_address_type_t bd_addr_type, wiced_bt_transport_t transport, uint8_t pin_len, uint8_t *p_pin);
 
 
 /**
@@ -1473,7 +1478,8 @@ wiced_result_t wiced_bt_dev_sec_bond_cancel (wiced_bt_device_address_t bd_addr);
  *
  * Note             BD_Address must be in Big Endian format
  */
-wiced_result_t wiced_bt_dev_set_encryption (wiced_bt_device_address_t bd_addr, wiced_bt_transport_t transport, void *p_ref_data);
+wiced_result_t wiced_bt_dev_set_encryption (wiced_bt_device_address_t bd_addr,
+                wiced_bt_transport_t transport, void *p_ref_data);
 
 
 /**
@@ -1688,46 +1694,6 @@ wiced_result_t wiced_bt_dev_delete_bonded_device(wiced_bt_device_address_t bd_ad
 
 
 /**
- * Function         wiced_bt_dev_add_device_to_address_resolution_db
- *
- *                  add link key information to internal address resolution db
- *
- * @param[in]      p_link_keys    : link keys information stored in application side
- * @param[in]      addr_type      : peer address type stored in application side
- *
- * @return          wiced_result_t
- *
- */
-wiced_result_t wiced_bt_dev_add_device_to_address_resolution_db(wiced_bt_device_link_keys_t *p_link_keys,wiced_bt_ble_address_type_t addr_type);
-
-
-/**
- * Function         wiced_bt_dev_remove_device_from_address_resolution_db
- *
- *                  remove link key information from internal address resolution db
- *
- * @param[in]      p_link_keys    : link keys information stored in application side
- *
- * @return          wiced_result_t
- *
- */
-wiced_result_t wiced_bt_dev_remove_device_from_address_resolution_db(wiced_bt_device_link_keys_t *p_link_keys);
-
-/**
- * Function         wiced_bt_dev_get_ble_keys
- *
- *                  get le key mask from stored key information of nv ram
- *
- * @param[in]      bd_addr    : remote bd address
- * @param[out]      p_key_mask    : ble key mask stored
- *
- * @return          wiced_result_t
- *
- * Note             BD_Address must be in Big Endian format
- */
-wiced_result_t wiced_bt_dev_get_ble_keys(wiced_bt_device_address_t bd_addr, wiced_bt_dev_le_key_type_t *p_key_mask);
-
-/**
  * Function         wiced_bt_set_local_bdaddr
  *
  *                  Set Local Bluetooth Device Address. If application passes BLE_ADDR_RANDOM as an address type,
@@ -1739,12 +1705,6 @@ wiced_result_t wiced_bt_dev_get_ble_keys(wiced_bt_device_address_t bd_addr, wice
  *                               BLE_ADDR_RANDOM should be used only for BLE Only mode, not for BR-EDR or Dual Mode
  *
  * @return          void
- *
- * Note            BD_Address must be in Big Endian format
- *
- * Example         Data         | A | B | C | D | E | F |
- *                 Address      | 0 | 1 | 2 | 3 | 4 | 5 |
- *                 For above example it will set A:B:C:D:E:F bd address
  */
 void wiced_bt_set_local_bdaddr( wiced_bt_device_address_t  bda , wiced_bt_ble_address_type_t addr_type);
 

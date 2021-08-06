@@ -36,7 +36,7 @@ set -e
 #set -x
 
 #######################################################################################################################
-# This script performs post-build operations to form BT download images.
+# This script performs post-build operations to form Bluetooth application download images.
 #
 # usage:
 #   bt_post_build.bash  --shell=<modus shell path>
@@ -241,6 +241,7 @@ CY_APP_HEX_STATIC="$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}_static.hex"
 CY_APP_HEX_SS="$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}_ss.hex"
 CY_APP_HCD="$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}_download.hcd"
 CY_APP_LD="$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}.ld"
+CY_APP_CGS_MAP="$CY_MAINAPP_BUILD_DIR/${CY_MAINAPP_NAME}.cgs.map"
 
 # check dependencies - only rebuild when needed
 if [ -e "$CY_APP_HEX" ]; then
@@ -263,6 +264,7 @@ CY_TOOL_PERL=perl
 CY_TOOL_RM=rm
 CY_TOOL_CP=cp
 CY_TOOL_ECHO=echo
+CY_TOOL_TAIL=tail
 if ! type "$CY_TOOL_WC" &> /dev/null; then
 CY_TOOL_WC=$CYMODUSSHELL/bin/wc
 fi
@@ -287,6 +289,9 @@ fi
 if ! type "$CY_TOOL_ECHO" &> /dev/null; then
 CY_TOOL_ECHO=$CYMODUSSHELL/bin/echo
 fi
+if ! type "$CY_TOOL_TAIL" &> /dev/null; then
+CY_TOOL_TAIL=$CYMODUSSHELL/bin/tail
+fi
 
 # clean up any previous copies
 "$CY_TOOL_RM" -f "$CY_MAINAPP_BUILD_DIR/configdef*.hdf" "$CY_APP_HCD" "$CY_APP_HEX" "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs" "$CY_MAINAPP_BUILD_DIR/det_and_id.log" "$CY_MAINAPP_BUILD_DIR/download.log"
@@ -310,10 +315,11 @@ fi
 if [ "$VERBOSE" != "" ]; then
     echo "calling $CY_TOOL_PERL -I $CYWICEDSCRIPTS $CYWICEDSCRIPTS/wiced-gen-cgs.pl $CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST $CY_APP_HDF $CY_APP_LD $CY_APP_BTP $CY_APP_ENTRY out=$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 fi
+CY_RESOURCE_REPORT=$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt
 set +e
-"$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-cgs.pl" "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST "$CY_APP_HDF" "$CY_APP_LD" "$CY_APP_BTP" $CY_APP_ENTRY out="$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs" > "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
+"$CY_TOOL_PERL" -I "$CYWICEDSCRIPTS" "$CYWICEDSCRIPTS/wiced-gen-cgs.pl" "$CY_MAINAPP_BUILD_DIR/$CY_ELF_NAME" $CY_APP_DIRECT_LOAD $CY_APP_CGSLIST "$CY_APP_HDF" "$CY_APP_LD" "$CY_APP_BTP" $CY_APP_ENTRY out="$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs" > "$CY_RESOURCE_REPORT"
 CY_APP_ERROR=$?
-"$CY_TOOL_CAT" "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt"
+"$CY_TOOL_CAT" "$CY_RESOURCE_REPORT"
 set -e
 if [ $CY_APP_ERROR -eq 1 ]; then
 echo "exiting build"
@@ -334,17 +340,41 @@ CY_APP_SS_CGS=$(basename $CY_APP_SS_CGS)
 CY_APP_SS_CGS="--ss-cgs \"$CY_MAINAPP_BUILD_DIR/$CY_APP_SS_CGS\""
 fi
 
+# DIRECT_LOAD address is moved by wiced-gen-cgs.pl to not overlap with app
+# check that DLConfigSSLocation matches DIRECT_LOAD address
+if [[ "$CY_APP_CGS_ARGS" = *"DLConfigSSLocation"* ]]; then
+# DIRECT_LOAD address that may have been moved by wiced-gen-cgs.pl
+CY_DIRECT_LOAD_ADDR_1=$("$CY_TOOL_PERL" -ne 'print "$1" if /DIRECT LOAD address (0x[0-9A-F]+)/' "$CY_RESOURCE_REPORT")
+# move load address if overlapping with app
+CY_APP_CGS_ARGS=${CY_APP_CGS_ARGS//${CY_APP_DIRECT_LOAD_ADDR}/${CY_DIRECT_LOAD_ADDR_1}}
+fi
+
 # for flash downloads of non-HomeKit, this is the download file, done
 # generate hex download file, use eval because of those darn quotes needed around "DLConfigTargeting:RAM runtime"
 # use set +e because of the darn eval
 echo "generate hex file:"
-echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -P $CY_MAINAPP_VERSION -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+echo "cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -P $CY_MAINAPP_VERSION -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS -M $CY_APP_CGS_MAP --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 set +e
-eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -P $CY_MAINAPP_VERSION -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
+eval "$CYWICEDTOOLS/CGS/cgs -D $CY_MAINAPP_BUILD_DIR $CY_APP_CGS_ARGS -B $CY_APP_BTP -P $CY_MAINAPP_VERSION -I $CY_APP_HEX -H $CY_APP_HCD $CY_APP_SS_CGS -M $CY_APP_CGS_MAP --cgs-files $CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.cgs"
 set -e
 if [[ ! -e $CY_APP_HEX ]]; then
     echo "!! Post build failed, no hex file output"
     exit 1
+fi
+
+# check that there is room to load DIRECT_LOAD
+if [[ $CY_APP_BUILD_EXTRAS = *"DIRECT"* ]]; then
+if [[ -e $CY_APP_CGS_MAP ]]; then
+# get last RAM addr for DIRECT_LOAD
+CY_APP_CGS_MAP_LAST_LINE=$($CY_TOOL_TAIL -1 "$CY_APP_CGS_MAP")
+CY_APP_END_DS=$(echo $CY_APP_CGS_MAP_LAST_LINE | "$CY_TOOL_PERL" -ple 's/[^0]+(0x[0-9A-Fa-f]+)/$1/')
+# get last SRAM addr
+CY_APP_END_SRAM=$("$CY_TOOL_PERL" -ne 'print "$1" if /end SRAM (0x[0-9A-F]+)/' "$CY_RESOURCE_REPORT")
+if [[ "$CY_APP_END_DS" -gt "$CY_APP_END_SRAM" ]]; then
+    echo "!! Error: DIRECT_LOAD SS/DS end ($CY_APP_END_DS) would exceed SRAM end ($CY_APP_END_SRAM)"
+    exit 1
+fi
+fi
 fi
 
 if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
@@ -457,7 +487,7 @@ if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
     CY_APP_HEX="$CY_APP_HEX.ds1"
 fi
 # convert hex to bin
-DS_ADDR=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available \d+ \(0x[0-9A-Fa-f]+\) at (0x[0-9A-Fa-f]+)/' "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt")
+DS_ADDR=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available \d+ \(0x[0-9A-Fa-f]+\) at (0x[0-9A-Fa-f]+)/' "$CY_RESOURCE_REPORT")
 if [[ $CY_APP_CGS_ARGS_ORIG = *"-A 0xFF000000"* ]]; then
     DS_ADDR=$(printf "0x%08X" $((${DS_ADDR}+0xFF000000)))
 fi
@@ -465,7 +495,7 @@ fi
 # print size
 FILESIZE=$("$CY_TOOL_WC" -c < "$CY_APP_OTA_BIN")
 echo "OTA Upgrade file size is $FILESIZE"
-DS_LENGTH=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available (\d+)/' "$CY_MAINAPP_BUILD_DIR/$CY_MAINAPP_NAME.report.txt")
+DS_LENGTH=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available (\d+)/' "$CY_RESOURCE_REPORT")
 echo "Upgrade storage available $DS_LENGTH"
 [ "$FILESIZE" -gt "$DS_LENGTH" ] && echo "WARNING: OTA image exceeds DS area"
 

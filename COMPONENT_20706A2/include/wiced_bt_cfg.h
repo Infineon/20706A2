@@ -110,20 +110,20 @@ typedef struct
     /* Advertisement scan configuration */
     uint16_t                            high_duty_scan_interval;            /**< High duty scan interval (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_SCAN_INTERVAL) */
     uint16_t                            high_duty_scan_window;              /**< High duty scan window (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_SCAN_WINDOW) */
-    uint16_t                            high_duty_scan_duration;            /**< High duty scan duration in seconds */
+    uint16_t                            high_duty_scan_duration;            /**< High duty scan duration in seconds (0 for infinite) */
 
     uint16_t                            low_duty_scan_interval;             /**< Low duty scan interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_SCAN_INTERVAL) */
     uint16_t                            low_duty_scan_window;               /**< Low duty scan window (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_SCAN_WINDOW) */
-    uint16_t                            low_duty_scan_duration;             /**< Low duty scan duration in seconds */
+    uint16_t                            low_duty_scan_duration;             /**< Low duty scan duration in seconds (0 for infinite) */
 
     /* Connection scan configuration */
     uint16_t                            high_duty_conn_scan_interval;       /**< High duty cycle connection scan interval (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_CONN_SCAN_INTERVAL) */
     uint16_t                            high_duty_conn_scan_window;         /**< High duty cycle connection scan window (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_CONN_SCAN_WINDOW) */
-    uint16_t                            high_duty_conn_duration;            /**< High duty cycle connection duration in seconds */
+    uint16_t                            high_duty_conn_duration;            /**< High duty cycle connection duration in seconds (0 for infinite) */
 
     uint16_t                            low_duty_conn_scan_interval;        /**< Low duty cycle connection scan interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_CONN_SCAN_INTERVAL) */
     uint16_t                            low_duty_conn_scan_window;          /**< Low duty cycle connection scan window (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_CONN_SCAN_WINDOW) */
-    uint16_t                            low_duty_conn_duration;             /**< Low duty cycle connection duration in seconds */
+    uint16_t                            low_duty_conn_duration;             /**< Low duty cycle connection duration in seconds (0 for infinite) */
 
     /* Connection configuration */
     uint16_t                            conn_min_interval;                  /**< Minimum connection interval (default: WICED_BT_CFG_DEFAULT_CONN_MIN_INTERVAL) */
@@ -139,26 +139,26 @@ typedef struct
 
     uint16_t                            high_duty_min_interval;             /**< High duty undirected connectable advert minimum advertising interval (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_ADV_MIN_INTERVAL) */
     uint16_t                            high_duty_max_interval;             /**< High duty undirected connectable advert maximum advertising interval (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_ADV_MAX_INTERVAL) */
-    uint16_t                            high_duty_duration;                 /**< High duty advertising duration in seconds (0 for infinite)*/
+    uint16_t                            high_duty_duration;                 /**< High duty advertising duration in seconds (0 for infinite) */
 
     uint16_t                            low_duty_min_interval;              /**< Low duty undirected connectable advert minimum advertising interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_ADV_MIN_INTERVAL) */
     uint16_t                            low_duty_max_interval;              /**< Low duty undirected connectable advert maximum advertising interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_ADV_MAX_INTERVAL) */
-    uint16_t                            low_duty_duration;                  /**< Low duty advertising duration in seconds (0 for infinite)*/
+    uint16_t                            low_duty_duration;                  /**< Low duty advertising duration in seconds (0 for infinite) */
 
     uint16_t                            high_duty_directed_min_interval;    /**< high duty directed adv minimum advertising interval (This parameter is ignored by the controller, refer to Vol 2, Part E section 7.8.5 in BT 4.2 spec. for details) */
     uint16_t                            high_duty_directed_max_interval;    /**< high duty directed adv maximum advertising interval (This parameter is ignored by the controller, refer to Vol 2, Part E section 7.8.5 in BT 4.2 spec. for details) */
 
     uint16_t                            low_duty_directed_min_interval;     /**< Low duty directed adv minimum advertising interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_DIRECTED_ADV_MIN_INTERVAL) */
     uint16_t                            low_duty_directed_max_interval;     /**< Low duty directed adv maximum advertising interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_DIRECTED_ADV_MAX_INTERVAL) */
-    uint16_t                            low_duty_directed_duration;         /**< Low duty directed advertising duration in seconds (0 for infinite)*/
+    uint16_t                            low_duty_directed_duration;         /**< Low duty directed advertising duration in seconds (0 for infinite) */
 
     uint16_t                            high_duty_nonconn_min_interval;     /**< High duty non-connectable adv minimum advertising interval (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_NONCONN_ADV_MIN_INTERVAL) */
     uint16_t                            high_duty_nonconn_max_interval;     /**< High duty non-connectable adv maximum advertising interval (default: WICED_BT_CFG_DEFAULT_HIGH_DUTY_NONCONN_ADV_MAX_INTERVAL) */
-    uint16_t                            high_duty_nonconn_duration;         /**< High duty non-connectable advertising duration in seconds (0 for infinite)*/
+    uint16_t                            high_duty_nonconn_duration;         /**< High duty non-connectable advertising duration in seconds (0 for infinite) */
 
     uint16_t                            low_duty_nonconn_min_interval;      /**< Low duty non-connectable adv minimum advertising interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_NONCONN_ADV_MIN_INTERVAL) */
     uint16_t                            low_duty_nonconn_max_interval;      /**< Low duty non-connectable adv maximum advertising interval (default: WICED_BT_CFG_DEFAULT_LOW_DUTY_NONCONN_ADV_MAX_INTERVAL) */
-    uint16_t                            low_duty_nonconn_duration;          /**< Low duty non-connectable advertising duration in seconds (0 for infinite)*/
+    uint16_t                            low_duty_nonconn_duration;          /**< Low duty non-connectable advertising duration in seconds (0 for infinite) */
 
 } wiced_bt_cfg_ble_advert_settings_t;
 

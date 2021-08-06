@@ -45,8 +45,18 @@
 extern "C" {
 #endif
 
-#define BD_ADDR_LEN     6
-typedef uint8_t         wiced_bt_device_address_t[BD_ADDR_LEN]; /**< Device address length */
+#define BD_ADDR_LEN     6  /**< Bluetooth device address length */
+/**
+ * Bluetooth Device address
+ * @note: The Bluetooth device address is expressed in Big Endian format
+ *
+ *  ---------------------------------------------------
+ * |byte 0 | byte 1 | byte 2 | byte 3| byte 4| byte 5 |
+ *  ---------------------------------------------------
+ * | NAP 1 | NAP 0  |   UAP  | LAP 2 | LAP 1 | LAP 0  |
+ *  ---------------------------------------------------
+ * */
+typedef uint8_t         wiced_bt_device_address_t[BD_ADDR_LEN];
 
 #define BD_NAME_LEN     248
 typedef uint8_t wiced_bt_remote_name_t[BD_NAME_LEN + 1];        /* Device name array */

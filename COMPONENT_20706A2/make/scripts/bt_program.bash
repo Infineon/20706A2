@@ -35,7 +35,7 @@
 set -e
 
 #######################################################################################################################
-# This script is designed to program BT devices via HCI.
+# This script is designed to program Bluetooth devices via HCI.
 #
 # usage:
 # 	bt_program.bash --shell=<modus shell path>

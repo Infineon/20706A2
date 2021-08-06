@@ -164,7 +164,8 @@ CY_TOOLCHAIN_OBJRSPFILE=@
 #
 # Produce a makefile dependency rule for each input file
 #
-CY_TOOLCHAIN_DEPENDENCIES=-MMD -MP -MF"$(subst .$(CY_TOOLCHAIN_SUFFIX_O),.$(CY_TOOLCHAIN_SUFFIX_D),$@)" -MT"$@"
+CY_TOOLCHAIN_DEPENDENCIES=-MMD -MP -MF "$(subst .$(CY_TOOLCHAIN_SUFFIX_O),.$(CY_TOOLCHAIN_SUFFIX_D),$@)" -MT "$@"
+CY_TOOLCHAIN_EXPLICIT_DEPENDENCIES=-MMD -MP -MF "$$(subst .$(CY_TOOLCHAIN_SUFFIX_O),.$(CY_TOOLCHAIN_SUFFIX_D),$$@)" -MT "$$@"
 
 #
 # Additional includes in the compilation process based on this
