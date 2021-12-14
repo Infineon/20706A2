@@ -145,33 +145,14 @@ wiced_result_t wiced_bt_app_start_timer ( uint16_t app_timer_interval,
 {
     if ( app_timer_interval != 0 )
     {
-        if ( wiced_init_timer( &app_timer, p_app_timer_cb, 0, WICED_SECONDS_PERIODIC_TIMER ) == WICED_SUCCESS )
-        {
-            if ( wiced_start_timer( &app_timer, app_timer_interval) != WICED_SUCCESS )
-            {
-                return WICED_ERROR;
-            }
-
-        }
-        else
-        {
-            return WICED_ERROR;
-        }
+        wiced_init_timer( &app_timer, p_app_timer_cb, 0, WICED_SECONDS_PERIODIC_TIMER );
+        wiced_start_timer( &app_timer, app_timer_interval);
     }
 
     if ( fine_timer_interval != 0 )
     {
-        if ( wiced_init_timer( &app_fine_timer, p_app_fine_timer_cb, 0, WICED_MILLI_SECONDS_PERIODIC_TIMER ) == WICED_SUCCESS )
-        {
-            if ( wiced_start_timer( &app_fine_timer, fine_timer_interval ) != WICED_SUCCESS )
-            {
-                return WICED_ERROR;
-            }
-        }
-        else
-        {
-            return WICED_ERROR;
-        }
+        wiced_init_timer( &app_fine_timer, p_app_fine_timer_cb, 0, WICED_MILLI_SECONDS_PERIODIC_TIMER );
+        wiced_start_timer( &app_fine_timer, fine_timer_interval );
     }
     return WICED_SUCCESS;
 }
@@ -208,14 +189,10 @@ wiced_result_t wiced_bt_app_start_conn_idle_timer(
     {
           wiced_stop_timer( &app_conn_idle_timer );
     }
-    if ( wiced_init_timer( &app_conn_idle_timer, p_app_idle_timer_cb, 0, WICED_SECONDS_TIMER ) == WICED_SUCCESS )
-    {
-        if ( wiced_start_timer( &app_conn_idle_timer, con_idle_timeout ) ==  WICED_SUCCESS )
-        {
-            return WICED_SUCCESS;
-        }
-    }
-    return WICED_ERROR;
+    wiced_init_timer( &app_conn_idle_timer, p_app_idle_timer_cb, 0, WICED_SECONDS_TIMER );
+    wiced_start_timer( &app_conn_idle_timer, con_idle_timeout );
+
+    return WICED_SUCCESS;
 }
 
 /**
@@ -246,15 +223,10 @@ wiced_result_t wiced_bt_app_set_conn_idle_timer_notify_ind_gatt_db( wiced_timer_
         /* Starts the connection idle timer if notification or indication is not enabled for gatt client characteristic configuration  */
         if ( !wiced_bt_gatt_check_notify_ind_db() )
         {
-            if ( wiced_init_timer( &app_conn_idle_timer_no_notify_ind, p_app_idle_timer_cb, 0, WICED_SECONDS_TIMER )== WICED_SUCCESS )
-            {
-                if ( wiced_start_timer( &app_conn_idle_timer_no_notify_ind, p_wiced_bt_app_config->con_idle_timeout ) ==  WICED_SUCCESS )
-                {
-                    return WICED_SUCCESS;
-                }
-            }
+            wiced_init_timer( &app_conn_idle_timer_no_notify_ind, p_app_idle_timer_cb, 0, WICED_SECONDS_TIMER );
+            wiced_start_timer( &app_conn_idle_timer_no_notify_ind, p_wiced_bt_app_config->con_idle_timeout );
 
-            return WICED_ERROR;
+            return WICED_SUCCESS;
         }
 #endif
     }

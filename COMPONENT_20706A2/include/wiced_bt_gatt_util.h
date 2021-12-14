@@ -33,7 +33,7 @@
 
 /** @file
  *
- *  WICED Generic Attribute (GATT) Application Programming Interface
+ *  AIROC Generic Attribute (GATT) Application Programming Interface
  */
 #pragma once
 

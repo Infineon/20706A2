@@ -33,7 +33,7 @@
 
 /** @file
  *
- * @addtogroup  wicedbt_audio_utils     WICED Audio Utilities
+ * @addtogroup  wicedbt_audio_utils     AIROC Audio Utilities
  * @ingroup     wicedbt_av
  *
  * @{

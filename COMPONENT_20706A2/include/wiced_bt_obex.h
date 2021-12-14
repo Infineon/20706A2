@@ -33,7 +33,7 @@
 
 /** @file
  *
- *  WICED Bluetooth OBEX Application Programming Interface
+ *  AIROC Bluetooth OBEX Application Programming Interface
  */
 #pragma once
 

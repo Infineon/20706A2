@@ -46,10 +46,10 @@
 **                                                Type Definitions
 *****************************************************************************/
 
-/** @defgroup Transport     WICED Transport
+/** @defgroup Transport     AIROC Transport
  *  @ingroup HardwareDrivers
  *
- * This section describes the API's necessary to configure WICED transport, send
+ * This section describes the API's necessary to configure AIROC transport, send
  * and receive data over the transport.
  *
  *  @{
@@ -66,7 +66,7 @@ typedef enum
 /** Wiced uart transport mode */
 typedef enum
 {
-    WICED_TRANSPORT_UART_HCI_MODE, /**<  Data sent as per the WICED HCI Protocol over UART */
+    WICED_TRANSPORT_UART_HCI_MODE, /**<  Data sent as per the AIROC HCI Protocol over UART */
     WICED_TRANSPORT_UART_RAW_MODE, /**<  Data sent as raw bytes over UART */
 }wiced_transport_uart_mode_t;
 

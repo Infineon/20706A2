@@ -32,7 +32,7 @@
  */
 
 /** @file
- *  Defines common constants and types for the WICED Bluetooth Framework
+ *  Defines common constants and types for the AIROC Bluetooth Framework
  */
 
 #pragma once

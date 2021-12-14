@@ -33,12 +33,12 @@
 
 /** @file
  *
- * Bluetooth AVRC Remote Control Application Programming WICED Interface
+ * Bluetooth AVRC Remote Control Application Programming Interface
  *
  * @addtogroup  wicedbt_avrc_ct       AVRCP Controller Role (CT)
  * @ingroup wicedbt_avrc
  *
- * WICED Bluetooth AVRC Remote Control CT Functions
+ * AIROC Bluetooth AVRC Remote Control CT Functions
  *
  * @{
  */

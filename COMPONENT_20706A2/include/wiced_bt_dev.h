@@ -45,7 +45,7 @@
  *
  * @defgroup wicedbt      Bluetooth
  *
- * This section describes APIs of various Bluetooth components in the WICED SDK
+ * This section describes APIs of various Bluetooth components in the AIROC BTSDK
  */
 
 #pragma once
@@ -441,7 +441,7 @@ typedef struct
 /** BR/EDR pairing complete infomation */
 typedef struct
 {
-    uint8_t         status;                 /**< status of the simple pairing process (see defintions for HCI status codes) */
+    uint8_t         status;                 /**< status of the simple pairing process (See standard HCI error codes. Please refer Bluetooth version 5.2, volume 1, part F for CONTROLLER ERROR CODES ) */
 } wiced_bt_dev_br_edr_pairing_info_t;
 
 /** BLE pairing complete infomation */
@@ -1391,7 +1391,7 @@ wiced_result_t wiced_bt_dev_write_eir (uint8_t *p_buff, uint16_t len);
  ****************************************************************************/
 /****************************************************************************/
 /**
- * This section talks about the varios API's necessary to incorporate Bluetooth
+ * This section talks about the various API's necessary to incorporate Bluetooth
  * Security Functions to an application. Please refer to the "Part H" of the Bluetooth
  * specification for further details.
  *
@@ -1823,6 +1823,53 @@ wiced_result_t wiced_bt_dev_set_link_policy(wiced_bt_device_address_t remote_bda
 
 wiced_result_t wiced_bt_set_device_class(wiced_bt_dev_class_t dev_class);
 
+#define wiced_bt_set_tx_power wiced_bt_dev_set_tx_power
+/**
+ * Function         wiced_bt_set_tx_power
+ *
+ *  Command to set the tx power on link
+ *
+ * @param[in]       bd_addr       : peer address
+ * @param[in]       power          :  power value in db (min:-24 max:4)
+ *
+ * @return          wiced_result_t
+ *
+ **/
+wiced_result_t wiced_bt_set_tx_power ( wiced_bt_device_address_t bd_addr , INT8 power );
+
+#define wiced_bt_ble_set_adv_tx_power wiced_bt_dev_set_adv_tx_power
+/**
+* Function         wiced_bt_ble_set_adv_tx_power
+*
+*  Command to set LE Advertisement tx power
+*
+* @param[in]       power          :  power value in db
+*
+* @return          wiced_result_t
+*
+**/
+wiced_result_t wiced_bt_ble_set_adv_tx_power(INT8 power);
+
+#define wiced_bt_dev_read_tx_power BTM_ReadTxPower
+/**
+ * Function         wiced_bt_dev_read_tx_power
+ *
+ *                  Read the transmit power for the requested link
+ *
+ * @param[in]       remote_bda      : BD address of connection to read tx power
+ * @param[in]       transport       : Transport type
+ * @param[in]       p_cback         : Result callback (wiced_bt_tx_power_result_t will be passed to the callback)
+ *
+ * @return
+ *
+ *                  WICED_BT_PENDING if command issued to controller.
+ *                  WICED_BT_NO_RESOURCES if couldn't allocate memory to issue command
+ *                  WICED_BT_UNKNOWN_ADDR if no active link with bd addr specified
+ *                  WICED_BT_BUSY if command is already in progress
+ *
+ */
+wiced_result_t wiced_bt_dev_read_tx_power (wiced_bt_device_address_t remote_bda, wiced_bt_transport_t transport,
+                                            wiced_bt_dev_cmpl_cback_t *p_cback);
 #ifdef __cplusplus
 }
 #endif

@@ -37,7 +37,7 @@
  *  \ingroup wicedsys
  *
  *  @{
- * Wiced Memory Management Interface
+ * Memory Management Interface
  */
 
 #pragma once

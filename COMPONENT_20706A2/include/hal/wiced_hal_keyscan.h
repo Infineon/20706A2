@@ -108,7 +108,7 @@ typedef PACKED struct
  *  \ingroup HardwareDrivers
 * @{
 *
-* Defines the WICED standard keyscan driver. The WICED standard keyscan driver
+* Defines the AIROC standard keyscan driver. The AIROC standard keyscan driver
 * provides the status and control for the keyscan interface. It provides the
 * keyEvents to the interface, maintains the queue behind it. It also supports
 * keyscanning turning on or off.

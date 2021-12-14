@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2021, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -30,36 +31,46 @@
  * of such system or application assumes all risk of such use and in doing
  * so agrees to indemnify Cypress against all liability.
  */
- /** @file
- *
- *  This implements the application-thread level event handling for AIROC Apps
- */
-#ifndef __WICED_BT_EVENT_H__
-#define __WICED_BT_EVENT_H__
-#include "wiced.h"
+/** @file
+*
+* wrappers for correctly timed i2c operation
+*
+*/
 
- /* The serialization queue will have these callbacks */
-typedef struct
-{
-    // The function to invoke in application thread context
-    int (*fn)(void*);
+#ifdef __WICED_I2C_LIB_DRIVER_H__
+#define __WICED_I2C_LIB_DRIVER_H__
 
-    // Any arbitrary data to be given to the callback. wiced_app_event_serialize Caller has to allocate and free once serialized event handled
-    void* data;
-} wiced_app_event_srzn_cb_t;
+/**  \addtogroup I2CDriver I2C
+* \ingroup I2CDriver
+* @{
+* This patch library provides wrappers to the I2CDriver module,
+* correcting speed and slave address bit shift to match the i2c
+* operation on other devices.
+*/
 
+/// Wrapper for wiced_hal_i2c_init() that provides some extra hardware setup
+wiced_result_t wiced_hal_i2c_lib_init(UINT8 configure_path);
 
-/*
- *This function lets you serialize a call onto the application thread.
- *
- *@param[in]    fn          : serialized call back on serialization
- *
- *@param[in]    data        : data to be handled in serialized call
+/// Wrapper for wiced_hal_i2c_lib_set_speed() that modifies the speed value for correct clocking
+void wiced_hal_i2c_lib_set_speed(UINT8 speed);
 
- * @return      wiced_bool_t
+/// wrapper for wiced_hal_i2c_get_speed() that returns the current speed value
+UINT8 wiced_hal_i2c_lib_get_speed(void);
 
- * Note: It is application's responsibility freeing data pointer
- */
-wiced_bool_t wiced_app_event_serialize( int (*fn)(void*), void* data);
+/// Wrapper for wiced_hal_i2c_read() that shifts the slave address ( << 1 ) for
+/// API consistency with other devices.
+UINT8 wiced_hal_i2c_lib_read(UINT8* data, UINT16 length, UINT8 slave);
 
-#endif //__WICED_BT_EVENT_H__
+/// Wrapper for wiced_hal_i2c_combo_read() that shifts the slave address ( << 1 ) for
+/// API consistency with other devices.
+UINT8 wiced_hal_i2c_lib_combo_read( UINT8* read_buff, UINT16 read_buff_length,
+                                              UINT8* write_buff, UINT8 write_buff_length,
+                                              UINT8 slave_address);
+
+/// Wrapper for wiced_hal_i2c_write() that shifts the slave address ( << 1 ) for
+/// API consistency with other devices.
+UINT8 wiced_hal_i2c_lib_write(UINT8* data, UINT16 length, UINT8 slave);
+
+/* @} */
+
+#endif // __WICED_I2C_LIB_DRIVER_H__

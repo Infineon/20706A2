@@ -31,10 +31,10 @@
  * so agrees to indemnify Cypress against all liability.
  */
 
-/** @addtogroup Transport     WICED Transport
+/** @addtogroup Transport     AIROC Transport
  *  @ingroup HardwareDrivers
  *
- * This section describes the API's to configure and use the SPI as WICED transport.
+ * This section describes the API's to configure and use the SPI as AIROC transport.
  *
  *   @{
  *

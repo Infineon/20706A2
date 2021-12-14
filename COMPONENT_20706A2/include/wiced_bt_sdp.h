@@ -327,7 +327,7 @@ typedef struct
  * @ingroup     wicedbt
  *
  * Service Discovery Protocol (SDP) provides a means for applications to
- * discover which services are available in the nearby bluetooth devices and
+ * discover which services are available in the nearby Bluetooth devices and
  * to determine the characteristics of those available services.
  * NOTE: Attributes Entries in the SDP record to be entered in sorted order.
  *
@@ -348,8 +348,7 @@ extern "C"
  *
  * Function         wiced_bt_sdp_db_init
  *
- * Initialize local SDP server database (database generated using
- * WICED BT Designer)
+ * Initialize local SDP server database
  *
  * @param[in]       p_sdp_db:    First element in database array
  * @param[in]       size:        size (in bytes) of SDP database

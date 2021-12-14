@@ -33,7 +33,7 @@
 /*
  * File Name: wiced_i2s_test.h
  *
- * WICED I2S Test Interface
+ * AIROC I2S Test Interface
  */
 
 /******************************************************************************

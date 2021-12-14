@@ -98,7 +98,7 @@ endif
 ifndef APP_VERSION_MINOR
 APP_VERSION_MINOR = 0
 endif
-APP_VERSION = $(shell printf "0x%02X%02X%04X" $(APP_VERSION_MINOR) $(APP_VERSION_MAJOR) $(APP_VERSION_APP_ID))
+APP_VERSION = $(shell env printf "0x%02X%02X%04X" $(APP_VERSION_MINOR) $(APP_VERSION_MAJOR) $(APP_VERSION_APP_ID))
 
 #
 # Includes construction

@@ -40,7 +40,7 @@
 ******************************************************************************/
 #pragma once
 
-/* WICED -> BTE Conversion  */
+/* AIROC -> BTE Conversion  */
 #define int8_t          INT8
 #define int16_t         INT16
 #define int32_t         INT32

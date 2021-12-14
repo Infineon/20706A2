@@ -33,7 +33,7 @@
 
 /** @file
  *
- * Definitions the interfaces  for the WICED Host Controller Interface
+ * Definitions the interfaces  for the AIROC Host Controller Interface
  *
  */
 #ifndef _WICED_HCI_H_

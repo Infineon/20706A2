@@ -33,7 +33,7 @@
 
 /** @file
 *
-* \defgroup wiced_utils WICED Trace Utilities
+* \defgroup wiced_utils AIROC Trace Utilities
 * \ingroup wicedsys
 * @{
 *
@@ -54,7 +54,7 @@
 typedef enum
 {
     WICED_ROUTE_DEBUG_NONE  =  0x00, /**< No traces */
-    WICED_ROUTE_DEBUG_TO_WICED_UART, /**< send debug strings in formatted WICED HCI messages over HCI UART to ClientControl or MCU */
+    WICED_ROUTE_DEBUG_TO_WICED_UART, /**< send debug strings in formatted AIROC HCI messages over HCI UART to ClientControl or MCU */
     WICED_ROUTE_DEBUG_TO_HCI_UART,   /**< send debug strings as plain text to HCI UART, used by default if wiced_set_debug_uart() not called */
     WICED_ROUTE_DEBUG_TO_DBG_UART,   /**< Deprecated */
     WICED_ROUTE_DEBUG_TO_PUART       /**< send debug strings as plain text to the peripheral uart (PUART) */
@@ -115,7 +115,6 @@ void wiced_set_debug_uart_patch ( wiced_debug_uart_types_t uart );
 
 // deprecated/internal
 int  wiced_printf(char * buffer, int len, ...);
-void wiced_bt_trace_array( const char *string, const uint8_t* array, const uint16_t len );
 void wiced_trace_array( const uint8_t* array, uint16_t len );
 int  wiced_va_printf(char * buffer, int len, va_list va);
 void hs_uart_write(uint8_t byte);

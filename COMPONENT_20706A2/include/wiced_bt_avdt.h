@@ -355,7 +355,7 @@ typedef struct
     uint8_t         ret_tout;                       /**< AVDTP signaling retransmission timeout */
     uint8_t         sig_tout;                       /**< AVDTP signaling message timeout */
     uint8_t         idle_tout;                      /**< AVDTP idle signaling channel timeout */
-    uint8_t         sec_mask;                       /**< Security mask (not used on WICED platforms: security is configured using wiced_bt_cfg) */
+    uint8_t         sec_mask;                       /**< Security mask (not used on AIROC platforms: security is configured using wiced_bt_cfg) */
 } wiced_bt_avdt_reg_t;
 
 /** Stream endpoint information */

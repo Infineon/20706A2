@@ -41,7 +41,7 @@ extern "C" {
 #define RESULT_ENUM( prefix, name, value )  prefix ## name = (value)
 #endif /* ifndef RESULT_ENUM */
 
-/* WICED result list */
+/* AIROC result list */
 #define WICED_RESULT_LIST( prefix ) \
     RESULT_ENUM( prefix, SUCCESS,                        0 ),   /**< Success */                        \
     RESULT_ENUM( prefix, PENDING,                        1 ),   /**< Pending */                        \
@@ -75,12 +75,12 @@ extern "C" {
     RESULT_ENUM( prefix, NO_STORED_AP_IN_DCT,           29 ),   /**< DCT contains no AP credentials */ \
     RESULT_ENUM( prefix, STA_JOIN_FAILED,               30 ),   /**< Join failed */ \
     RESULT_ENUM( prefix, NO_MEMORY,                   0x10 ),   /**< NO_MEMORY */
-/* WICED result list */
+/* AIROC result list */
 
 
 /*************************************************************************/
 /**
- *  @addtogroup  Result       WICED Result Codes
+ *  @addtogroup  Result       AIROC Result Codes
  *  @ingroup     wicedsys
  *
  *  <b> Result types</b>. @b
@@ -90,7 +90,7 @@ extern "C" {
  *  @{
  */
 /*************************************************************************/
-/** WICED result */
+/** AIROC result */
 typedef enum
 {
 #ifdef MPAF_CUSTOM_STACK
@@ -99,7 +99,7 @@ typedef enum
     BT_RESULT_LIST      (  WICED_BT_       )  /* 8000 - 8999 */
 } wiced_result_t;
 
-/**@}  WICED Result */
+/**@}  AIROC Result */
 
 /******************************************************
  *            Structures

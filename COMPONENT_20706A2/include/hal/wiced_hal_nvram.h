@@ -63,7 +63,7 @@
 #define WICED_NVRAM_VSID_END        0x75
 
 /*
- * NOTE: From 0x01 to 0x75 is reserved to WICED Application.
+ * NOTE: From 0x01 to 0x75 is reserved to the Application.
  * Internal NVRAM VSID starts from 0x76 to 0x7B and this should not be used by application.
  */
 

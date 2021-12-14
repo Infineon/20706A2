@@ -346,7 +346,7 @@ typedef uint8_t wiced_bt_avrc_battery_status_t;
 #define AVRC_MEDIA_ATTR_ID_GENRE                0x06    /**< Text field representing the category of the composition characterized by a particular style. */
 #define AVRC_MEDIA_ATTR_ID_PLAYING_TIME         0x07    /**< Numeric ASCII string containing the length of the audio file in milliseconds. */
 #endif
-#define AVRC_MAX_MEDIA_ATTR_LEN                 200      /**< Maximum length of the stored media attribute fields. */
+#define AVRC_MAX_MEDIA_ATTR_LEN                 80      /**< Maximum length of the stored media attribute fields. */
 #define AVRC_MAX_NUM_MEDIA_ATTR_ID              7
 /** @} AVRC_MEDIA_ATTR_ID */
 
