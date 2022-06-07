@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -129,9 +129,9 @@ CY_CORE_DEFINES+=\
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=3 \
-	-DWICED_SDK_MINOR_VER=2 \
+	-DWICED_SDK_MINOR_VER=3 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=20467
+	-DWICED_SDK_BUILD_NUMBER=23146
 
 #
 # Set the output file paths

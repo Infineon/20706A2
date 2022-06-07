@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -138,10 +138,10 @@ wiced_bool_t wiced_set_rtc_time(wiced_rtc_time_t  *newTime);
  * Function         wiced_rtc_ctime
  *
  *                  This function call will convert the wiced_rtc_time_t object pointed by wiced_rtc_time_t to
- *                  c string containing a human-readable verion of the correspoing
+ *                  c string containing a human-readable verion of the corresponding
  *                  local time and data. Caller should make sure *outbuf size larger then 22 bytes.
  *
- *                  The returned string has the folloing format
+ *                  The returned string has the following format
  *                  Mmm dd hh:mm:ss yyyy
  *                  where
  *                      Mmm - the month in letters
@@ -171,7 +171,7 @@ void wiced_seconds_to_rtc_time(uint32_t second, wiced_rtc_time_t *rtctime);
 /**
  * Function         wiced_rtc_time_to_seconds
  *
- *                  Convert RTC_time broken-down format to 32-bits seocnds
+ *                  Convert RTC_time broken-down format to 32-bits seconds
  *
  * @param[in]       rtctime   : timer object pointer to be converted
  * @param[out]      second    : converted uint32_t seconds

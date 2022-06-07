@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -309,7 +309,7 @@ void wiced_bt_app_config( const wiced_bt_app_config_t* p_config);
 
 /** Wiced Bt App Initialization
  *
- *Performs the HAL initialization, GATT Registration and aslo set the BLE advertisement
+ *Performs the HAL initialization, GATT Registration and also set the BLE advertisement
  *data with the parameters defined by the app
  *
   * @return   wiced_result_t

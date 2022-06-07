@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -123,6 +123,18 @@ enum wiced_bt_rfcomm_signal_e
     PORT_BREAK,             /** BRK */
 };
 typedef uint8_t wiced_bt_rfcomm_signal_t;   /**< RFCOMM Signals (see #wiced_bt_rfcomm_signal_e) */
+
+typedef struct
+{
+#define PORT_FLAG_CTS_HOLD  0x01    /* Tx is waiting for CTS signal */
+#define PORT_FLAG_DSR_HOLD  0x02    /* Tx is waiting for DSR signal */
+#define PORT_FLAG_RLSD_HOLD 0x04    /* Tx is waiting for RLSD signal */
+
+    uint16_t  flags;
+    uint16_t  in_queue_size;          /* Number of bytes in the input queue */
+    uint16_t  out_queue_size;         /* Number of bytes in the output queue */
+    uint16_t  mtu_size;               /* peer MTU size */
+} wiced_port_status_t;
 
 /**
  *  Define the callback function prototypes for wiced_bt_rfcomm_data_cback_t
@@ -344,6 +356,20 @@ wiced_bt_rfcomm_result_t wiced_bt_rfcomm_init(uint32_t buffer_size, uint32_t buf
  *              <b> WICED_FALSE </b>            : If fails
  */
 wiced_bool_t wiced_bt_rfcomm_control_data_flow(BD_ADDR peer_bda);
+
+/**
+ *  This function reports current status of a connection.
+ *
+ *  @param[in]  handle              : The connection handle returned by
+ *                                    @link wiced_bt_rfcomm_create_connection wiced_bt_rfcomm_create_connection @endlink
+ *  @param[out]  p_status              : pointer to the wiced_port_status_t structur to receive connection status
+ *
+ *  @return     <b> WICED_BT_RFCOMM_SUCCESS </b>        : If successful
+ *              <b> WICED_BT_RFCOMM_BAD_HANDLE </b>     : If the handle is out of range
+ *              <b> WICED_BT_RFCOMM_NOT_OPENED </b>     : If the connection is not opened
+ */
+wiced_bt_rfcomm_result_t wiced_bt_rfcomm_port_get_queue_status (uint16_t handle, wiced_port_status_t *p_status);
+
 
 #ifdef __cplusplus
 }

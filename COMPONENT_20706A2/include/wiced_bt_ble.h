@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -455,44 +455,99 @@ wiced_bt_dev_status_t wiced_bt_ble_set_raw_scan_response_data(UINT8 num_elem,
                                                         wiced_bt_ble_advert_elem_t *p_data);
 
 /**
- *
- * Function         wiced_bt_ble_observe
- *
- *                  This function makes the device start or stop operating in the observer role.
- *                  The observer role device receives advertising events from a broadcast device.
- *
- * @param[in] start :               TRUE to start the observer role
- * @param[in] duration :            the duration for the observer role
- * @param[in] p_scan_result_cback : scan result callback
- *
- * @return          status of the operation
- *
- */
+* Function         wiced_bt_ble_observe
+*
+*
+* This API allows the device to register a callback to receive both connectable
+* and non-connectable ADV packets. It is fundamentally the same as the API
+* \ref wiced_bt_ble_scan, except that the scan results are filtered to allow
+* non-connectable packets. Furthermore, the scan parameters used by the observe
+* API are the 'low_duty' parameters set in \ref wiced_bt_cfg_settings_t, which
+* is passed to \ref wiced_bt_stack_init.
+*
+* Refer to \ref wiced_bt_ble_scan for an example of the callback to be used.
+*
+* \param[in] start                    WICED_TRUE==start, WICED_FALSE==stop
+* \param[in] duration                 num_seconds to scan
+* \param[in] p_scan_result_cback      callback to receive packets asynchronously
+*
+* \return
+*  - WICED_SUCCESS
+*  - WICED_ERROR
+*
+* \note
+* This API should not be used at the same time as \ref wiced_bt_ble_scan.
+*
+*/
 wiced_bt_dev_status_t wiced_bt_ble_observe (wiced_bool_t start, uint8_t duration, wiced_bt_ble_scan_result_cback_t *p_scan_result_cback);
 
 /**
- * Function         wiced_bt_ble_scan
- *
- *                  Start LE scanning
- *
- *                  The <b>scan_type</b> parameter determines what scanning parameters and durations
- *                  to use (as specified by the application configuration).
- *
- *                  Scan results are notified using <b>p_scan_result_cback</b>
- *
- * @param[in]       scan_type : BTM_BLE_SCAN_TYPE_NONE, BTM_BLE_SCAN_TYPE_HIGH_DUTY,  BTM_BLE_SCAN_TYPE_LOW_DUTY
- * @param[in]       duplicate_filter_enable : TRUE or FALSE to enable or disable  duplicate filtering
- *
- * @param[in]       p_scan_result_cback : scan result callback
- *
- * @return          wiced_result_t
- *
- *                  WICED_BT_PENDING if successfully initiated
- *                  WICED_BT_BUSY if already in progress
- *                  WICED_BT_ILLEGAL_VALUE if parameter(s) are out of range
- *                  WICED_BT_NO_RESOURCES if could not allocate resources to start the command
- *                  WICED_BT_WRONG_MODE if the device is not up.
- */
+* Function         wiced_bt_ble_scan
+*
+* This API allows the device to register a callback to receive _connectable_
+* ADV packets from peripheral devices. It is fundamentally the same as the API
+* \ref wiced_bt_ble_observe, except that the scan results are filtered to only
+* allow connectable packets. The scan interval, window, duration, and type
+* (active or passive), are initialized in \ref wiced_bt_cfg_settings_t upon
+* calling the stack initialization API (\ref wiced_bt_stack_init). The packets
+* received in the callback can be limited to a small, known set of devices
+* using \ref wiced_bt_ble_update_scanner_filter_policy.
+*
+* Below is an example of how to start receiving scan results in a callback
+* and print the name of the advertised device if found in the received
+* packet:
+*
+* \code
+* void scan_cback( wiced_bt_ble_scan_results_t *scan_res, uint8_t *adv_data )
+* {
+*     uint8_t length;
+*     uint8_t *p_data;
+*
+*     if ( p_scan_result )
+*     {
+*         p_data = wiced_bt_ble_check_advertising_data( p_adv_data,
+*             BTM_BLE_ADVERT_TYPE_NAME_COMPLETE, &length );
+*
+*         if(length)
+*         {
+*             WICED_BT_TRACE("%B %s RSSI: %i\r\n",
+*                 p_scan_result->remote_bd_addr, (char *)p_data,
+*                 p_scan_result->rssi );
+*         }
+*         else
+*         {
+*             WICED_BT_TRACE("%B UNK RSSI: %i\r\n",
+*                 p_scan_result->remote_bd_addr, p_scan_result->rssi );
+*         }
+*     }
+*     else
+*     {
+*         WICED_BT_TRACE( "Scan completed\r\n" );
+*     }
+* }
+*
+* {
+*     wiced_bt_ble_scan( BTM_BLE_SCAN_TYPE_HIGH_DUTY, WICED_TRUE, scan_cback);
+* }
+* \endcode
+*
+* \param[in] scan_type
+*  - BTM_BLE_SCAN_TYPE_NONE: disable scan
+*  - BTM_BLE_SCAN_TYPE_HIGH_DUTY: use scan params prefixed high_duty_conn_scan_*
+*  - BTM_BLE_SCAN_TYPE_LOW_DUTY: use scan params prefixed low_duty_conn_scan_*
+* \param[in] duplicate_filter_enable  WICED_TRUE==enable, WICED_FALSE==disable
+* \param[in] p_scan_result_cback      callback to receive packets asynchronously
+*
+* \return
+*  - WICED_BT_PENDING if successfully initiated
+*  - WICED_BT_BUSY if already in progress
+*  - WICED_BT_ILLEGAL_VALUE if parameter(s) are out of range
+*  - WICED_BT_NO_RESOURCES if could not allocate resources to start the command
+*  - WICED_BT_WRONG_MODE if the device is not up.
+*
+* \note
+* This API should not be used at the same time as \ref wiced_bt_ble_observe.
+*/
 wiced_result_t  wiced_bt_ble_scan (wiced_bt_ble_scan_type_t scan_type, wiced_bool_t duplicate_filter_enable, wiced_bt_ble_scan_result_cback_t *p_scan_result_cback);
 
 /**

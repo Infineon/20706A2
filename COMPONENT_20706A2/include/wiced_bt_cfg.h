@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -214,7 +214,7 @@ typedef struct
     uint8_t                             *device_name;                   /**< Local device name (NULL terminated) */
     wiced_bt_dev_class_t                device_class;                   /**< Local device class */
     uint8_t                             security_requirement_mask;      /**< Security requirements mask (BTM_SEC_NONE, or combination of BTM_SEC_IN_AUTHENTICATE, BTM_SEC_OUT_AUTHENTICATE, BTM_SEC_ENCRYPT (see #wiced_bt_sec_level_e)) */
-    uint8_t                             max_simultaneous_links;         /**< Maximum number simultaneous links to different devices */
+    uint8_t                             max_simultaneous_links;         /**< Maximum number simultaneous links to different devices. This information is used for memory allocation, limiting number of active connections is left up to applications. */
 
     /* Scan and advertisement configuration */
     wiced_bt_cfg_br_edr_scan_settings_t br_edr_scan_cfg;                /**< BR/EDR scan settings */

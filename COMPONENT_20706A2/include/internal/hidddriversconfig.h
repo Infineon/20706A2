@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -207,7 +207,7 @@ typedef PACKED struct
 typedef PACKED struct
 {
 
-    /// configure the oscialltor frequencey
+    /// configure the oscillator frequency
     UINT8       oscillatorFrequencykHz;
 
     /// The reference clock to use for RTC - the 32K or 128 Mia LPO
@@ -314,13 +314,13 @@ typedef PACKED struct
             //
             UINT32            ldo_ctl_en_bit            : 1;
 
-            // bit 1 -   enale powerdown of the bandgap in HIDDOFF mode
+            // bit 1 -   enable powerdown of the bandgap in HIDDOFF mode
             //           set this bit, bandgap will be power down when HIDOFF mode
             UINT32              ldo_bandgap_pd_en       : 1;
 
 
             // bit 4:2 - LDO output level when 24MHz crystal is powered down
-            // program with the same value as ldo_ctl1[3:1], if no votage step is needed
+            // program with the same value as ldo_ctl1[3:1], if no voltage step is needed
             UINT32              ldo_sleep_output_level  : 3;
 
             // reserved 31:5
@@ -334,16 +334,16 @@ typedef PACKED struct
     // ldo_ctl[31:0] = {ldo_ctl1_reg, ldo_ctl0_reg}
     //
     // ldo_ctl[0]   - BG low power mode, default 0 (enable)
-    // ldo_ctl[2:1] - LPF enable/adjust to fitler off BG noise , default disabled for faster startup
+    // ldo_ctl[2:1] - LPF enable/adjust to filter off BG noise , default disabled for faster startup
     // ldo_ctl[3]   - BG power down, default power up
     // ldo_ctl[7:4] - BG PTAT Current adjustment
     // ldo_ctl[11:8]    - BG CTAT current adjustment
     // ldo_ctl[14:12]   - BG Vref Adjustment
     // ldo_ctl[15]      - reserved
-    // ldo_ctl[16]      - LDO Power down    , defautl power up
+    // ldo_ctl[16]      - LDO Power down    , default power up
     // ldo_ctl[19:17]   - LDO Output Voltage Adjustment
     // ldo_ctl[20]      - Enable VDS matching amplifier for low dropout, default enabled
-    // ldo_ctl[21]      - Enable LDO current limite, default disable
+    // ldo_ctl[21]      - Enable LDO current limit, default disable
     // ldo_ctl[22]      - Select between constant/feedback current limit mode for LDO
     // ldo_ctl[23]      - LDO current limit adjustment
     // ldo_ctl[25:24]   - adjust LDO feedback pole to compensate ESR zero
@@ -386,10 +386,10 @@ typedef PACKED struct
             // bit 20    - Disable VDS matching amplifier for low dropout
             UINT32      ldoVDSdisable           : 1;
 
-            // bit 21   - Enable LDO current limite
+            // bit 21   - Enable LDO current limit
             UINT32      ldocurrentLimitenable   : 1;
 
-            // bit 22    - LDO limit mode/loopback mode 0:limite 1:loopback
+            // bit 22    - LDO limit mode/loopback mode 0:limit 1:loopback
             UINT32      ldoCurrentMode          : 1;
 
             // bit 23    - limit mode adjustment

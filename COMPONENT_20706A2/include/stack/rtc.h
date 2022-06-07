@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -151,7 +151,7 @@ typedef union
 
 
 //
-// time converation reference timebase
+// time conversion reference timebase
 //  2010/1/1
 //
 typedef enum
@@ -214,9 +214,9 @@ void rtc_getRTCTime(RtcTime *timebuf);
 BOOL32 rtc_setRTCTime(RtcTime  *newTime);
 
 // convert the tm object pointed by timer to
-// c string containing a human-readable verion of the correspoing local time and data
+// c string containing a human-readable verion of the corresponding local time and data
 //
-// the returned string has the folloing format
+// the returned string has the following format
 //
 // Mmm dd hh:mm:ss yyyy
 // where
@@ -232,7 +232,7 @@ char *rtc_ctime(RtcTime *timer, char *outbuf);
 // conver the 32 bit seconds to RTC_time broken down format
 void    rtc_sec2RtcTime(UINT32 second, RtcTime *rtctime);
 
-// convert RTC_time broken-down format to 32-bits seocnds
+// convert RTC_time broken-down format to 32-bits seconds
 void    rtc_RtcTime2Sec(RtcTime *rtctime, UINT32 *second);
 
 //

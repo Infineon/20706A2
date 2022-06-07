@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -137,11 +137,11 @@ enum
     GPIO_GLOBAL_INPUT_DISABLE    = 0x0040,
 
     /// iocfg_p#_adr[7]
-    /// GPIO configruation bit 7,
+    /// GPIO configuration bit 7,
     /// reserved
 
     /// iocfg_p#_adr[8]
-    /// GPIO configruation bit 8,
+    /// GPIO configuration bit 8,
     /// reserved
 
     /// iocfg_p#_adr[10:9] = "pullup/pulldown"
@@ -163,10 +163,10 @@ enum
     GPIO_DRIVE_SEL_HIGHEST      = 0x0800,  // 8mA @ 3.3v
 
     /// iocfg_p#_adr[12]
-    /// GPIO configruation bit 12,
+    /// GPIO configuration bit 12,
     /// reserved
 
-    /// iocfg_p#_adr[13] = "Input Hystersis"
+    /// iocfg_p#_adr[13] = "Input Hysteresis"
     /// GPIO configuration bit 13, hysteresis control
     /// iocfg_p0[13] controls the hysteresis of the following GPIOs p[0:25], p[30:39];
     /// iocfg_p26[13] controls the hysteresis of the GPIOs p[26:29]

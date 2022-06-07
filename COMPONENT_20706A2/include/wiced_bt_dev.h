@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -166,7 +166,6 @@ enum wiced_bt_dev_filter_cond_e {
 #define BTM_INQ_RMT_NAME_DONE       2
 #define BTM_INQ_RMT_NAME_FAILED     3
 
-
 /** BTM service definitions (used for storing EIR data to bit mask */
 #ifndef BTM_EIR_UUID_ENUM
 #define BTM_EIR_UUID_ENUM
@@ -273,6 +272,15 @@ typedef struct
     wiced_bool_t                    eir_complete_list;                      /**< TRUE if EIR array is complete */
 } wiced_bt_dev_inquiry_scan_result_t;
 
+/** Structure returned with remote name  request */
+typedef struct
+{
+    uint16_t                            status;                                /**< Status of the operation */
+    wiced_bt_device_address_t           bd_addr;                               /**< Remote BD address */
+    uint16_t                            length;                                /**< Device name Length */
+    wiced_bt_remote_name_t              remote_bd_name;                        /**< Remote device name */
+} wiced_bt_dev_remote_name_result_t;
+
 /** RSSI Result (in response to #wiced_bt_dev_read_rssi) */
 typedef struct
 {
@@ -289,7 +297,6 @@ typedef struct
     uint8_t                         role;               /**< BTM_ROLE_CENTRAL or BTM_ROLE_PERIPHERAL */
     wiced_bt_device_address_t       bd_addr;            /**< Remote BD address involved with the switch */
 } wiced_bt_dev_switch_role_result_t;
-
 
 /*****************************************************************************
  *  SECURITY MANAGEMENT
@@ -339,7 +346,7 @@ enum wiced_bt_dev_io_cap_e
     BTM_IO_CAPABILITIES_DISPLAY_AND_YES_NO_INPUT,           /**< Display Yes/No      */
     BTM_IO_CAPABILITIES_KEYBOARD_ONLY,                  /**< Keyboard Only       */
     BTM_IO_CAPABILITIES_NONE,                           /**< No Input, No Output */
-    BTM_IO_CAPABILITIES_BLE_DISPLAY_AND_KEYBOARD_INPUT, /**< Keyboard display (For BLE SMP) */
+    BTM_IO_CAPABILITIES_BLE_DISPLAY_AND_KEYBOARD_INPUT, /**< Keyboard display (For LE SMP) */
     BTM_IO_CAPABILITIES_MAX
 };
 
@@ -371,7 +378,7 @@ enum wiced_bt_dev_le_auth_req_e
     BTM_LE_AUTH_REQ_MASK =          0x1D
 };
 #endif
-typedef uint8_t wiced_bt_dev_le_auth_req_t;             /**< BLE authentication requirement (see #wiced_bt_dev_le_auth_req_e) */
+typedef uint8_t wiced_bt_dev_le_auth_req_t;             /**< LE authentication requirement (see #wiced_bt_dev_le_auth_req_e) */
 
 /** OOB Data status */
 #ifndef BTM_OOB_STATE
@@ -444,7 +451,7 @@ typedef struct
     uint8_t         status;                 /**< status of the simple pairing process (See standard HCI error codes. Please refer Bluetooth version 5.2, volume 1, part F for CONTROLLER ERROR CODES ) */
 } wiced_bt_dev_br_edr_pairing_info_t;
 
-/** BLE pairing complete infomation */
+/** LE pairing complete infomation */
 typedef struct
 {
     wiced_result_t                    status;                 /**< status of the simple pairing process   */
@@ -460,7 +467,7 @@ typedef struct
 typedef union
 {
     wiced_bt_dev_br_edr_pairing_info_t  br_edr;         /**< BR/EDR pairing complete infomation */
-    wiced_bt_dev_ble_pairing_info_t     ble;            /**< BLE pairing complete infomation */
+    wiced_bt_dev_ble_pairing_info_t     ble;            /**< LE pairing complete infomation */
 } wiced_bt_dev_pairing_info_t;
 
 /** Pairing complete notification (BTM_PAIRING_COMPLETE_EVT event data type) */
@@ -1003,6 +1010,16 @@ typedef void (wiced_bt_dev_cmpl_cback_t) (void *p_data);
 typedef void (wiced_bt_dev_vendor_specific_command_complete_cback_t) (
                 wiced_bt_dev_vendor_specific_command_complete_params_t *p_command_complete_params);
 
+/**
+ * Remote name result callback
+ *
+ * @param p_remote_name_result : Remote name result data
+ *
+ * @return Nothing
+ *
+ */
+typedef void (wiced_bt_remote_name_cback_t) (wiced_bt_dev_remote_name_result_t *p_remote_name_result);
+
 /******************************************************
  *               Function Declarations
  ******************************************************/
@@ -1383,6 +1400,26 @@ wiced_result_t wiced_bt_dev_read_rssi (wiced_bt_device_address_t remote_bda, wic
  *
  */
 wiced_result_t wiced_bt_dev_write_eir (uint8_t *p_buff, uint16_t len);
+
+/******************************************************************************
+* Function Name: wiced_bt_dev_get_remote_name
+***************************************************************************//**
+*
+* Gets the BT Friendly name from the remote device.
+*
+* \param[in] bd_addr                                Peer BD address
+* \param[in] p_remote_name_result_cback             remote name result callback
+*
+* \return
+*  - WICED_BT_PENDING if successfully initiated
+*  - WICED_BT_BUSY if already in progress
+*  - WICED_BT_ILLEGAL_VALUE if parameter(s) are out of range
+*  - WICED_BT_NO_RESOURCES if could not allocate resources to start the command
+*  - WICED_BT_WRONG_MODE if the device is not up.
+*
+******************************************************************************/
+wiced_result_t  wiced_bt_dev_get_remote_name( wiced_bt_device_address_t bd_addr,
+                                              wiced_bt_remote_name_cback_t *p_remote_name_result_cback );
 
 /**@} wicedbt_bredr */
 
