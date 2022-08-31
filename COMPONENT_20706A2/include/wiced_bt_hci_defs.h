@@ -42,11 +42,11 @@
 #ifndef HCIDEFS_H
 #define HCIDEFS_H
 
-#define HCI_PROTO_VERSION     0x01      /* Version for BT spec 1.1          */
-#define HCI_PROTO_VERSION_1_2 0x02      /* Version for BT spec 1.2          */
-#define HCI_PROTO_VERSION_2_0 0x03      /* Version for BT spec 2.0          */
-#define HCI_PROTO_VERSION_2_1 0x04      /* Version for BT spec 2.1 [Lisbon] */
-#define HCI_PROTO_VERSION_3_0 0x05      /* Version for BT spec 3.0          */
+#define HCI_PROTO_VERSION     0x01      /* Version for Bluetooth spec 1.1          */
+#define HCI_PROTO_VERSION_1_2 0x02      /* Version for Bluetooth spec 1.2          */
+#define HCI_PROTO_VERSION_2_0 0x03      /* Version for Bluetooth spec 2.0          */
+#define HCI_PROTO_VERSION_2_1 0x04      /* Version for Bluetooth spec 2.1 [Lisbon] */
+#define HCI_PROTO_VERSION_3_0 0x05      /* Version for Bluetooth spec 3.0          */
 #define HCI_PROTO_REVISION    0x000C    /* Current implementation version   */
 /*
 **  Definitions for HCI groups
@@ -340,9 +340,9 @@
 #define HCI_VSC_MULTI_AV_HANDLE         0x0AAA
 #define HCI_VSC_BURST_MODE_HANDLE       0x0BBB
 
-/* BLE HCI */
+/* LE HCI */
 #define HCI_GRP_BLE_CMDS                (0x08 << 10)
-/* Commands of BLE Controller setup and configuration */
+/* Commands of LE Controller setup and configuration */
 #define HCI_BLE_SET_EVENT_MASK          (0x0001 | HCI_GRP_BLE_CMDS)
 #define HCI_BLE_READ_BUFFER_SIZE        (0x0002 | HCI_GRP_BLE_CMDS)
 #define HCI_BLE_READ_LOCAL_SPT_FEAT     (0x0003 | HCI_GRP_BLE_CMDS)
@@ -913,7 +913,7 @@
     0x0000000000800000 Authenticated_Payload_Timeout_Expired Event
 */
 #if BTM_BLE_PRIVACY_SPT == TRUE
-/* BLE event mask */
+/* LE event mask */
 #define HCI_BLE_EVENT_MASK_DEF               "\x00\x00\x00\x00\x00\x00\x07\xff"
 #else
 #define HCI_BLE_EVENT_MASK_DEF              "\x00\x00\x00\x00\x00\x00\x00\x7f"
@@ -1253,7 +1253,7 @@
 #define HCI_A_LAW_SUPPORTED(x)      (((x) & HCI_AIR_CODING_FORMAT_MASK) == HCI_AIR_CODING_FORMAT_A_LAW)
 #define HCI_TRANSPNT_SUPPORTED(x)   (((x) & HCI_AIR_CODING_FORMAT_MASK) == HCI_AIR_CODING_FORMAT_TRANSPNT)
 
-/* Coding Formats (BT 4.1 or later Assigned numbers) */
+/* Coding Formats (Bluetooth 4.1 or later Assigned numbers) */
 #define HCI_CODING_FORMAT_ULAW      ((UINT8) 0x00)  /* u-Law log    */
 #define HCI_CODING_FORMAT_ALAW      ((UINT8) 0x01)  /* A-Law log    */
 #define HCI_CODING_FORMAT_CVSD      ((UINT8) 0x02)  /* CVSD         */
@@ -1262,14 +1262,14 @@
 #define HCI_CODING_FORMAT_MSBC      ((UINT8) 0x05)  /* MSBC PCM   */
 #define HCI_CODING_FORMAT_VS        ((UINT8) 0xFF)  /* Specifies VSC used */
 
-/* PCM Data Formats (BT 4.1 or later Assigned numbers) */
+/* PCM Data Formats (Bluetooth 4.1 or later Assigned numbers) */
 #define HCI_PCM_DATA_FORMAT_NA      ((UINT8) 0x00)  /* N/A to coding format in use */
 #define HCI_PCM_DATA_FORMAT_1_COMP  ((UINT8) 0x01)  /* 1's complement   */
 #define HCI_PCM_DATA_FORMAT_2_COMP  ((UINT8) 0x02)  /* 2's complement   */
 #define HCI_PCM_DATA_FORMAT_SIGN    ((UINT8) 0x03)  /* Sign-magnitude   */
 #define HCI_PCM_DATA_FORMAT_UNSIGN  ((UINT8) 0x04)  /* Unsigned         */
 
-/* Data Path (BT 4.1 or later Assigned numbers) */
+/* Data Path (Bluetooth 4.1 or later Assigned numbers) */
 #define HCI_DATA_PATH_HCI           ((UINT8) 0x00)  /* HCI-0, 0x01-0xFE (PCM Chan) */
 #define HCI_DATA_PATH_TEST           ((UINT8) 0xFF)  /* 0xFF-Audio Test */
 

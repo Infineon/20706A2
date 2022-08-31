@@ -33,7 +33,7 @@
 
 /** @file
  *
- * WICED BT App Common Utilities. This file provides the interfaces to the utilities that
+ * AIROC Bluetooth App Common Utilities. This file provides the interfaces to the utilities that
  * can be used by the applications
  */
 #ifndef _WICED_BT_APP_COMMON_H_
@@ -52,7 +52,7 @@
 /* Bluetooth Device Address Length */
 #define BD_ADDR_LEN        6
 
-/* BLE Advertisement Maximum Length*/
+/* LE Advertisement Maximum Length*/
 #define ADV_LEN_MAX        31
 
 /* Flag length*/
@@ -70,7 +70,7 @@
 /* Version Length */
 #define VERSION_LEN         6
 
-/*GATT number of handles that can be handleb the wiced bt app layer */
+/* GATT number of handles that can be handled by the Bluetooth app layer */
 #define HANDLE_NUM_MAX      5
 
 #define READ_UART_LEN       15
@@ -100,16 +100,16 @@ typedef enum
     MANDATORY_DISCOVERABLE = 0xFF,
 }wiced_bt_app_dev_discover_mode_t;
 
-/*  Events Handled by the wiced bt app  */
+/*  Events Handled by the Bluetooth app  */
 typedef enum
 {
-    /* BLE Advertisement Timeout */
+    /* LE Advertisement Timeout */
     WICED_BT_APP_ADVT_TIMEOUT = 0,
 #if 0
-    /* BLE connection is established */
+    /* LE connection is established */
     WICED_BT_APP_LINK_UP,
 
-    /* BLE connection is removed */
+    /* LE connection is removed */
     WICED_BT_APP_LINK_DOWN,
 
     /* GATT server, registers the event to hanle the write request from the client */
@@ -194,7 +194,7 @@ typedef enum
 **                                                  Type Definitions
 *****************************************************************************/
 
-/*  Defines the wiced bt app configurations  */
+/*  Defines the Bluetooth app configurations  */
 typedef PACKED struct
 {
     UINT16 app_timer_interval; //App timer interval in seconds
@@ -299,7 +299,7 @@ extern const wiced_bt_app_config_t* p_wiced_bt_app_config;
 **                                                  Function Declarations
 *****************************************************************************/
 
-/**  Registers the application configurations with the wiced bt app
+/**  Registers the application configurations with the Bluetooth app
  *
  *@param[in]    p_config             :Pointer to the application configurations
  *
@@ -307,9 +307,9 @@ extern const wiced_bt_app_config_t* p_wiced_bt_app_config;
  */
 void wiced_bt_app_config( const wiced_bt_app_config_t* p_config);
 
-/** Wiced Bt App Initialization
+/** Bluetooth App Initialization
  *
- *Performs the HAL initialization, GATT Registration and also set the BLE advertisement
+ *Performs the HAL initialization, GATT Registration and also set the LE advertisement
  *data with the parameters defined by the app
  *
   * @return   wiced_result_t

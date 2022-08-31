@@ -145,7 +145,7 @@ typedef PACKED struct
     BYTE hwFifoThresholdForIdleRateReports;
 
     /// This parameter defines the rate at which a rollover report is generated when an error state (ghost or overflow) is
-    /// maintained for long periods of time. The rate is in BT clock periods. If set to 0, it disables regeneration of
+    /// maintained for long periods of time. The rate is in Bluetooth clock periods. If set to 0, it disables regeneration of
     /// the rollover report.
     WORD repeatRateInBTClocksForRolloverRpt;
 

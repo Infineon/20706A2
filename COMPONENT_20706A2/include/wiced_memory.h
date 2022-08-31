@@ -45,7 +45,7 @@
 #include "wiced_bt_types.h"
 
 #pragma pack(1)
-/** wiced bt dynamic buffer statistics */
+/** AIRCC Bluetooth dynamic buffer statistics */
 typedef PACKED struct
 {
     uint8_t     pool_id;                    /**< pool id */

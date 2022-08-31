@@ -131,7 +131,7 @@
 #define L2CAP_CONN_SECURITY_BLOCK    3
 #define L2CAP_CONN_NO_RESOURCES      4
 #define L2CAP_CONN_BAD_CTLR_ID       5              /* AMP related */
-#define L2CAP_BLE_CONN_BAD_AUTHENT   5              /* BLE L2CAP connections related */
+#define L2CAP_BLE_CONN_BAD_AUTHENT   5              /* LE L2CAP connections related */
 #define L2CAP_BLE_CONN_BAD_AUTHORIZ  6
 #define L2CAP_BLE_CONN_BAD_KEY_SIZE  7
 #define L2CAP_BLE_CONN_BAD_ENCRYPT   8
@@ -186,8 +186,8 @@
 #define L2CAP_FIXED_CHNL_CNCTLESS_BIT   (1 << L2CAP_CONNECTIONLESS_CID) /* Connectionless Reception             */
 #define L2CAP_FIXED_CHNL_AMP_BIT        (1 << L2CAP_AMP_CID)            /* AMP Manager Supported                */
 #define L2CAP_FIXED_CHNL_ATT_BIT        (1 << L2CAP_ATT_CID)            /* Attribute protocol Supported         */
-#define L2CAP_FIXED_CHNL_BLE_SIG_BIT    (1 << L2CAP_BLE_SIGNALLING_CID) /* BLE Signalling Supported             */
-#define L2CAP_FIXED_CHNL_SMP_BIT        (1 << L2CAP_SMP_CID)            /* BLE Security Manager Supported       */
+#define L2CAP_FIXED_CHNL_BLE_SIG_BIT    (1 << L2CAP_BLE_SIGNALLING_CID) /* LE Signalling Supported             */
+#define L2CAP_FIXED_CHNL_SMP_BIT        (1 << L2CAP_SMP_CID)            /* LE Security Manager Supported       */
 #define L2CAP_FIXED_CHNL_SMP_BR_BIT     (1 << L2CAP_SMP_BR_CID)         /* Security Manager over BR Supported   */
 
 

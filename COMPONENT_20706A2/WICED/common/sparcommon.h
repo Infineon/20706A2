@@ -77,7 +77,7 @@ extern UINT8 bleapp_trace_enable;
 EXTERN_C void (*hidd_app_post_stack_init)(void);
 #endif
 
-/* WICED BT Application Start Point */
+/* AIROC Bluetooth Application Start Point */
 #define APPLICATION_START() ATTRIBUTE((section(".app_init_code"))) void wiced_bt_app_start( void )
 
 #endif

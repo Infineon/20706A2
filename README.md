@@ -1,5 +1,4 @@
-------------------------------------------------------------------------------------
-# BTSDK - CYW20706
+# AIROC&#8482; BTSDK - CYW20706
 
 ## Overview
 
@@ -35,5 +34,3 @@ transceiver supporting LE/BR/EDR.
 #### CYBT-333047-EVAL:
 - The EZ-BT Module Arduino Evaluation Board (CYBT-333047-EVAL) enables you to evaluate and develop applications on the EZ-BT AIROC&#8482; Module, CYBT-333047-02. CYBT-333047-EVAL can be used as a standalone evaluation kit or can be combined with Arduino compatible shields.<br>
   Max UART baud rate is 1M. Use baud rate of 115200 for Client Control.
-
-------------------------------------------------------------------------------------

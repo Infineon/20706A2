@@ -128,10 +128,10 @@ CY_CORE_DEFINES+=\
 	-D$(subst -,_,$(TARGET))
 
 CY_CORE_EXTRA_DEFINES=\
-	-DWICED_SDK_MAJOR_VER=3 \
-	-DWICED_SDK_MINOR_VER=3 \
+	-DWICED_SDK_MAJOR_VER=4 \
+	-DWICED_SDK_MINOR_VER=0 \
 	-DWICED_SDK_REV_NUMBER=0 \
-	-DWICED_SDK_BUILD_NUMBER=23146
+	-DWICED_SDK_BUILD_NUMBER=47246
 
 #
 # Set the output file paths
@@ -237,7 +237,7 @@ ifneq ($(filter ecdsa_genkey,$(CY_BT_APP_TOOLS)),)
 CY_OPEN_ecdsa_genkey_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_genkey
 endif
 ifneq ($(filter ecdsa_sign,$(CY_BT_APP_TOOLS)),)
-CY_OPEN_ecdsa_sign_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_genkey
+CY_OPEN_ecdsa_sign_TOOL=$(CY_BT_APP_TOOLS_UTILS_DIR)/ecdsa256/bin/$(CY_OS_DIR)/ecdsa_sign
 CY_OPEN_ecdsa_sign_TOOL_ARGS=$(CY_CONFIG_DIR)/$(APPNAME)_$(TARGET).ota.bin
 endif
 ifneq ($(filter ecdsa_verify,$(CY_BT_APP_TOOLS)),)

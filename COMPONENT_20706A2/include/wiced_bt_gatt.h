@@ -64,6 +64,8 @@ enum wiced_bt_gatt_status_e
     WICED_BT_GATT_INSUF_ENCRYPTION           = 0x0f,         /**< Insufficient Encryption */
     WICED_BT_GATT_UNSUPPORT_GRP_TYPE         = 0x10,         /**< Unsupported Group Type */
     WICED_BT_GATT_INSUF_RESOURCE             = 0x11,         /**< Insufficient Resource */
+    WICED_BT_GATT_DATABASE_OUT_OF_SYNC       = 0x12,         /**< GATT Database Out of Sync */
+    WICED_BT_GATT_VALUE_NOT_ALLOWED          = 0x13,         /**< Value Not allowed */
 
     WICED_BT_GATT_ILLEGAL_PARAMETER          = 0x87,         /**< Illegal Parameter */
     WICED_BT_GATT_NO_RESOURCES               = 0x80,         /**< No Resources */

@@ -536,7 +536,7 @@ void hiddcfa_ForceActiveSniff(BOOLEAN enable);
 // Functions : void hiddcfa_enableVsSectionAccess
 //
 //  ~ This function should be called from the Application create function.
-//  ~ This function should be called before the BT Pairing list Class is initialized.
+//  ~ This function should be called before the Bluetooth Pairing list Class is initialized.
 //  ~ This function should be called if the Config and FW is downloaded directly to the Run Time RAM
 //  ~ This function should be called if Access to VS section is also desired. ( EEPROM or Serial Flash)
 //

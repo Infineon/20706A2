@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2020-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -30,36 +30,43 @@
  * of such system or application assumes all risk of such use and in doing
  * so agrees to indemnify Cypress against all liability.
  */
-
-/** @addtogroup Transport     AIROC Transport
- *  @ingroup HardwareDrivers
+/** @file
  *
- * This section describes the API's to configure and use the SPI as AIROC transport.
- *
- *   @{
+ * support memory allocation tuning
  *
  */
-
-#pragma once
-
-#include "spiffydriver.h"
-#include "wiced_hal_gpio.h"
-#include "wiced_power_save.h"
+#ifndef __WICED_MEMORY_PRE_INIT_H__
+#define __WICED_MEMORY_PRE_INIT_H__
 
 /**
- * Application can invoke this function to confgure and enable low power mode of operation. Application
- * resumes on waking from sleep. Application can also configure the BT_DEV_WAKE GPIO and the active mode
- * of the BT_DEV_WAKE GPIO using this function.
- * BT_DEV_WAKE GPIO - Host can wake the device from sleep by setting the Bluetooth device wake pin active,
- * if the device is in sleep mode
- *
- * @param[in]      bt_dev_wake_gpio  : Bluetooth Device Wake pin, Use arm gpio as the BT_DEV_WAKE pin
- * @param[in]      bt_dev_wake_mode  : Active Mode of the BT_DEV_WAKE pin
- *
- * @return           WICED_SUCCESS, if sleep is configured successfully
- *                   WICED_ERROR, if BT_DEV_WAKE is not an arm gpio
- *
+ * use this define value to indicate no change to parameter
  */
-wiced_result_t wiced_trans_spi_sleep_config(  wiced_bt_gpio_numbers_t bt_dev_wake_gpio, wiced_wake_gpio_mode_t bt_dev_wake_mode );
+#define WICED_MEM_PRE_INIT_IGNORE   (0xffff)
 
-/* @} */
+/**
+ * structure containing paramters to pass for memory pre-init
+ */
+typedef struct tag_mem_pre_init_control
+{
+    UINT16 scanRssiThresholdDeviceListSize;
+    UINT16 lm_cmdQueueAreaSize;
+
+    UINT16  aclDownBufSize;
+    UINT16  aclUpBufSize;
+    UINT8   aclDownCount;
+    UINT8   aclUpCount;
+
+    UINT8   rmulpMaxLLConnection;
+    UINT8   ulp_rl_maxSize;
+} WICED_MEM_PRE_INIT_CONTROL;
+
+#define SCAN_RSSI_THRESHOLD_DEVICE_LIST_SIZE    25
+#define LM_CMD_QUEUE_SIZE                       800
+
+
+/**
+ * set pre-init memory allocation parameters
+ * call this from spar_crt_init function to set parameters prior to allocations
+ */
+void wiced_memory_pre_init(WICED_MEM_PRE_INIT_CONTROL *mem_pre_init);
+#endif

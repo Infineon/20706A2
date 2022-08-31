@@ -186,7 +186,7 @@ typedef struct
 
 
 /* The original struct LCPLC_config structure is splitted into 2 different structure */
-/* LCPLC_config1: It contains all the run-time settings which depend on user settings and BT Link */
+/* LCPLC_config1: It contains all the run-time settings which depend on user settings and Bluetooth Link */
 /* LCPLC_config2: It contains all internal PLC parameters only depending on Frequency sampling */
 
 struct LCPLC_config1        /* Sampling frequency, codec, or customer dependent configs */

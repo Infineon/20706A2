@@ -44,6 +44,7 @@
 #include "spar_utils.h"
 #include "string.h"
 #include "types.h"
+#include "wiced_memory_pre_init.h"
 
 /*****************************************************************
 *   Definitions
@@ -129,6 +130,24 @@ void SPAR_CRT_SETUP(void)
 #pragma arm section code
 
 #else
+
+/**
+ * this weak symbol will have the default values for memory pre-init firmware allocations
+ * declare this structure again, with no attribute, in app code
+ * initialize with desired values to override
+ */
+WICED_MEM_PRE_INIT_CONTROL g_mem_pre_init __attribute__((weak)) =
+{
+    WICED_MEM_PRE_INIT_IGNORE,
+    WICED_MEM_PRE_INIT_IGNORE,
+    WICED_MEM_PRE_INIT_IGNORE,
+    WICED_MEM_PRE_INIT_IGNORE,
+    (unsigned char)WICED_MEM_PRE_INIT_IGNORE,
+    (unsigned char)WICED_MEM_PRE_INIT_IGNORE,
+    (unsigned char)WICED_MEM_PRE_INIT_IGNORE,
+    (unsigned char)WICED_MEM_PRE_INIT_IGNORE,
+};
+
 ATTRIBUTE((section(".spar_setup")))
 void SPAR_CRT_SETUP(void)
 {
@@ -147,6 +166,8 @@ void SPAR_CRT_SETUP(void)
 
     // install all patches and libs
     install_libs();
+
+    wiced_memory_pre_init(&g_mem_pre_init);
 
     idle_saveThreadxAvailMem = (char *)(((UINT32)&spar_iram_end + 1024) & 0xFFFFFFF0);
 

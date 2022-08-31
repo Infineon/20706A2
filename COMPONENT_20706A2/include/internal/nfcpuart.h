@@ -68,7 +68,7 @@ int nfcpuart_txHandler(void* unused);
 
 //#define nfcpuart_hidRxHandler       puart_hidRxHandler
 //#define nfcpuart_hidTxHandler       puart_hidTxHandler
-// Handle BLE rx
+// Handle LE rx
 #define nfcpuart_bleRxHandler       puart_bleRxHandler
 #define nfcpuart_calculateBaudrate  puart_calculateBaudrate
 

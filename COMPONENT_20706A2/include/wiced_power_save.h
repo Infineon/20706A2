@@ -117,7 +117,7 @@ typedef enum
 
 /** Sleep permission
 * Note : In WICED_SLEEP_MODE_NO_TRANSPORT case, application will be restarted on exiting out of the power shutdown sleep.
-*        Application MUST NOT allow sleep, when any BT activity is involved.
+*        Application MUST NOT allow sleep, when any Bluetooth activity is involved.
 *        If the application desires to save any state (16 bits of data) before going to power save it
 *        can do so by using wiced_power_save_store_state() and retrieve the state on coming back
 *        from power save by using wiced_power_save_retrieve_state().
@@ -277,12 +277,12 @@ wiced_result_t wiced_sleep_configure( wiced_sleep_config_t *p_sleep_config );
  *
  * Application can invoke this function to enable/disable low power mode of operation.
  * In this mode, the device achieves power savings by suspending the application and
- * allowing the device to sleep btween BLE advertising intervals.  Enabling sleep mode
+ * allowing the device to sleep btween LE advertising intervals.  Enabling sleep mode
  * with this API does not immediately put the device in low power mode, it simply
  * enables the device to transition to low power when idle.  The application is
  * suspended and resumed transparently by the device when it enters and exits sleep.
  * Device wakeup can be triggered by any ativity on an active peripheral, GPIO, the
- * BT radio, or an interrupt from a timer started by the application.
+ * Bluetooth radio, or an interrupt from a timer started by the application.
  *
  * The bt_wake and host_wake parameters are not needed for embedded SoC applications,
  * and should be set to NULL.  They are only used in external MCU scenaraios where
