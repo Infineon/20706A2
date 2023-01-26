@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -122,6 +122,23 @@ static INLINE void wiced_hal_aclk_disable(UINT32 clkSrc)
 {
     aclk_disableClock(clkSrc);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+/// Configure the GPIO pin for the desired auxilary clock source.
+/// This function is in the wiced_hal_aclk_lib.a library.
+///
+/// \param gpioPin - GPIO pin for the output of Clock source.
+///                      Only gpio pin 32, 36 are for ACLK 0
+///                      Only gpio pin 33, 37 are for ACLK 1
+/// \param clkSrc  - Clock source to disable (aclk0 or aclk1).
+///                      0 - aclk0
+///                      1 - aclk1
+///
+/// \return TRUE  - Success
+///         FALSE - Failed
+///////////////////////////////////////////////////////////////////////////////
+UINT32 wiced_hal_aclk_pads_config(UINT32 gpio, UINT32 src);
+
 
 /* @} */
 

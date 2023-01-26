@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -122,7 +122,7 @@ sub main
             $got_xip_skip_cgs = 1;
         }
         # platform cgs
-        elsif(($cgs =~ /platforms\/[^\.]+.cgs$/) || ($cgs =~ /TARGET_.*\/.*.cgs$/)) {
+        elsif(($cgs =~ /platforms\/[^\.]+.cgs$/) || ($cgs =~ /TARGET_.*\/.*.cgs$/) || ($cgs =~ /libraries\/prebuilt\/[^\.]+.cgs$/)) {
             $cgs_record->{'type'} = 'platform';
             $cgs_record->{'order'} = 3;
         }
@@ -184,7 +184,7 @@ sub post_process_cgs
     }
 
     # for now just need to split TCA records from patch.cgs to end of combined cgs
-    return if $cgs_record->{file} !~ /(20721B2|20719B2|30739B2)/;
+    return if $cgs_record->{file} !~ /(20721B2|20719B2|30739A0)/;
     @lines = ();
     push @lines, @{$cgs_record->{lines}};
     $cgs_record->{lines} = [];
@@ -494,13 +494,15 @@ sub report_resource_usage
 				$region->{end_used} = $section->{sh_addr} + $section->{sh_size};
 			}
 			$section->{'mem_type'} = $region->{type};
+			$section->{'region'} = $region->{name};
 			last;
 		}
 		next unless defined $section->{mem_type};
 		$end = $section->{sh_addr} + $section->{sh_size};
 		printf "% 16s %8s start 0x%06X, end 0x%06X, size %d\n", $section->{name}, $section->{mem_type}, $section->{sh_addr},
 					$end, $section->{sh_size};
-		if($end > $last_ram_addr) {
+		# track the top of SRAM (not aon) as location to avoid DIRECT_LOAD SS
+		if($end > $last_ram_add && $section->{region} !~ /aon/) {
 			$last_ram_addr = $end;
 		}
 	}
@@ -510,6 +512,7 @@ sub report_resource_usage
 		$total += $use;
 		next if $use == 0;
 		printf "  %s (%s): used 0x%06X - 0x%06X size (%d)\n", $region->{name}, $region->{type}, $region->{start_used}, $region->{end_used}, $use;
+		printf "  %s (%s): free 0x%06X - 0x%06X size (%d)\n", $region->{name}, $region->{type}, $region->{end_used}, $region->{end}, $region->{end} - $region->{end_used};
 		# find end of SRAM
 		if($region->{type} eq 'SRAM') {
 			$end_ram_addr = $region->{end} if $end_ram_addr < $region->{end};

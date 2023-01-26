@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2020-2023, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -37,6 +37,77 @@
  */
 #ifndef __WICED_MEMORY_PRE_INIT_H__
 #define __WICED_MEMORY_PRE_INIT_H__
+
+/* Usage:
+ * This information shows how to use this memory allocation tuning:
+ *
+ * Step 1:
+ *      In application add this head file:
+ *      #include "wiced_memory_pre_init.h"
+ *
+ * Step 2:
+ *      In application add the global variable, g_mem_pre_init:
+ *      For example:
+ *          WICED_MEM_PRE_INIT_CONTROL g_mem_pre_init =
+ *          {
+ *              .scanRssiThresholdDeviceListSize = 5,
+ *              .lm_cmdQueueAreaSize = WICED_MEM_PRE_INIT_IGNORE,
+ *              .aclDownBufSize = 264,
+ *              .aclUpBufSize = 512,
+ *              .aclDownCount = 1,
+ *              .aclUpCount = 3,
+ *              .rmulpMaxLLConnection = 2,
+ *              .ulp_rl_maxSize = 1,
+ *          };
+ *
+ * Step 3:
+ *      Modify the value of parameters in g_mem_pre_init (WICED_MEM_PRE_INIT_CONTROL structure).
+ *
+ *      Please see the following for the parameters of WICED_MEM_PRE_INIT_CONTROL structure.
+ *
+ *      scanRssiThresholdDeviceListSize:
+ *              Number of devices in the list for the RSSI Threshold
+ *              Default value is 25
+ *              Max value is 25, user is able to tuning this value form 0 to 25.
+ *
+ *      lm_cmdQueueAreaSize:
+ *              Number of link management command entries in the queue for link management protocol.
+ *              Default value is 800
+ *              Max value is 800, user is able to tuning this value from 0 to 800.
+ *
+ *      aclDownBufSize:
+ *              Max buffer size for ACL Down path.
+ *              Default value is 1092
+ *              Max value is 1092, user is able to tuning this value from 0 to 1092.
+ *
+ *      aclUpBufSiz:
+ *              Max buffer size for ACL Up patch.
+ *              Default value is 1064
+ *              Max value is 1064, user is able to tuning this value from 0 to 1064.
+ *
+ *      aclDownCount:
+ *              Max buffer count for ACL Down path.
+ *              Default value is 8
+ *              Max value is 8, user is able to tuing this value from 0 to 8.
+ *
+ *      aclUpCount:
+ *              Max buffer count for ACL Up patch.
+ *              Default value is 8
+ *              Max value is 8, user is able to tuing this value from 0 to 8.
+ *
+ *      rmulpMaxLLConnection:
+ *              Max number of Link Layer Connection.
+ *              Default value is 16
+ *              Max value is 16, user is able to tuing this value from 0 to 16.
+ *
+ *      ulp_rl_maxSize:
+ *              The Resolving List is used by the Link Layer to resolve
+ *              Resolvable Private Addresses used by advertisers, scanners or initiators.
+ *              This allows the Host to configure the Link Layer to act on a request
+ *              without awakening the Host.
+ *              Default value is 128
+ *              Max value is 128, user is able to tuing this value from 0 to 128.
+ */
 
 /**
  * use this define value to indicate no change to parameter

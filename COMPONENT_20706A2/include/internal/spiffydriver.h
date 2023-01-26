@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -52,6 +52,10 @@
 #define spiffy_TxFIFO_adr      0x00360704
 #define spiffy_RxFIFOLevel_adr 0x00360618
 #define spiffy_RxFIFO_adr      0x00360700
+#define spiffy_IntStatus_adr                           0x00360624
+#define spiffy_TransmissionLength_adr                  0x00360604
+
+
 
 /**  \addtogroup SpiffyDriver
 * \ingroup HardwareDrivers

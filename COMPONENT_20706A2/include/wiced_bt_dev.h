@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -1907,6 +1907,21 @@ wiced_result_t wiced_bt_ble_set_adv_tx_power(INT8 power);
  */
 wiced_result_t wiced_bt_dev_read_tx_power (wiced_bt_device_address_t remote_bda, wiced_bt_transport_t transport,
                                             wiced_bt_dev_cmpl_cback_t *p_cback);
+
+#define wiced_bt_dev_set_default_link_super_tout  BTM_SetDefaultLinkSuperTout
+/**
+ * Function         wiced_bt_dev_set_default_link_super_tout
+ *
+ *                  Set the default value for HCI "Write Link Supervision Timeout"
+ *                  command to use when an ACL link is created.
+ *
+ * @param[in]       timeout         : Supervision timeout (multiple of 10ms in the range of 100ms and 32.0s)
+ *
+ * @return          void
+ *
+ */
+void wiced_bt_dev_set_default_link_super_tout(uint16_t timeout);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -189,6 +189,51 @@ wiced_bool_t wiced_hal_sflash_get_4_byte_address( void );
 /// and wiced_hal_sflash_erase APIS. Otherwise write/erase fails.
 ///////////////////////////////////////////////////////////////////////////////
 void wiced_hal_sflash_set_size(uint32_t sflash_size);
+
+///////////////////////////////////////////////////////////////////////////////
+/// Force to erase len number of bytes from the serial flash. Depending on the starting
+/// address and length, it calls sector or block erase to do the work.
+///
+/// (!) Please ensure that the address and (address + length) of data to be
+/// written does not go beyond the size of the memory module. If they do,
+/// the erase operation will "wrap around" and start erasing the starting
+/// address of the memory (boot sector), rendering the device inoperable.
+///
+/// (!) Note that due to the nature of Serial Flash memory and the limitations
+/// of sector and/or block boundaries, it is possible that the number of bytes
+/// erased could be greater than len.
+///
+/// \param addr   - The starting erase address on the serial flash.
+/// \param len    - The number of bytes to erase.
+///
+/// \return none
+/// Note: Please set serial flash size using wiced_hal_sflash_set_size API before
+///       using this API.Otherwise erase fails.
+///////////////////////////////////////////////////////////////////////////////
+#define wiced_hal_sflash_force_erase(addr, len)             sfi_erase(addr, len)
+
+///////////////////////////////////////////////////////////////////////////////
+/// Force to write data from memory to a certain location on the serial flash module.
+///
+/// (!) Please ensure that the address and (address + length) of data to be
+/// written does not go beyond the size of the memory module. If they do,
+/// the write operation will "wrap around" and start corrupting the starting
+/// address of the memory (boot sector), rendering the device inoperable.
+///
+/// (!) Note that this function will not allow corruption of certain memory
+/// locations, such as currently active sections (boot sectors) and sections
+/// required for the proper function of the Bluetooth subsystem.
+///
+/// \param addr - The starting destination address on the serial flash.
+/// \param len  - The number of bytes to write.
+/// \param buf  - Pointer to source data buffer.
+///
+/// \return The number of bytes written.
+/// Note: Please set serial flash size using wiced_hal_sflash_set_size API before
+///       using this API. Otherwise write fails.
+///////////////////////////////////////////////////////////////////////////////
+#define wiced_hal_sflash_force_write(addr, len, buffer)     sfi_write(addr, len, buffer)
+
 /* @} */
 
 #endif // __WICED_SFLASH_H__
