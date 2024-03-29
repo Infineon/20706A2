@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -60,6 +60,29 @@
  *  @{
  */
 
+
+/******************************************************
+ *              Constants
+ ******************************************************/
+#define WICED_BT_SCO_CONNECTION_ACCEPT              0x00
+#define WICED_BT_SCO_CONNECTION_REJECT_RESOURCES    0x0D
+#define WICED_BT_SCO_CONNECTION_REJECT_SECURITY     0x0E
+#define WICED_BT_SCO_CONNECTION_REJECT_DEVICE       0x0F
+
+#ifndef WICED_SCO_PKT_TYPES_MASK
+#define WICED_INVALID_SCO_INDEX           0xFFFF
+#define WICED_SCO_LINK_ALL_PKT_MASK       0x003F
+#define WICED_SCO_LINK_ONLY_MASK          0x0007
+#define WICED_SCO_PKT_TYPES_MASK_HV3      0x0004
+#define WICED_SCO_PKT_TYPES_MASK_EV3      0x0008
+#define WICED_SCO_PKT_TYPES_MASK_EV4      0x0010
+#define WICED_SCO_PKT_TYPES_MASK_EV5      0x0020
+#define WICED_SCO_PKT_TYPES_MASK_NO_2_EV3 0x0040
+#define WICED_SCO_PKT_TYPES_MASK_NO_3_EV3 0x0080
+#define WICED_SCO_PKT_TYPES_MASK_NO_2_EV5 0x0100
+#define WICED_SCO_PKT_TYPES_MASK_NO_3_EV5 0x0200
+#endif
+
 typedef enum
 {
     WICED_BT_SCO_OVER_I2SPCM = 0,   /* [DEFAULT] PCM data config for routing over I2S/PCM interface */
@@ -70,6 +93,8 @@ typedef enum
  ******************************************************/
 
 #define  WICED_BT_SCO_DATA_CB_GET_LENGTH(ltch_len)   ((ltch_len>>8)&0xff)
+//Call back function for pcm data transfer, ltch_len = (length)<<8|(sco_channel)
+typedef void (wiced_bt_sco_data_cb_t) (uint32_t ltch_len, uint8_t *p_data);
 
 /* Subset for the enhanced setup/accept synchronous connection paramters
  * See BT 4.1 or later HCI spec for details */
@@ -84,6 +109,7 @@ typedef struct
 typedef struct
 {
     wiced_bt_sco_route_path_t    path;    /* sco routing path  0:uart; 1:i2s/pcm 2:app_cb */
+    wiced_bt_sco_data_cb_t       *p_sco_data_cb; /* If not NULL and route is APP_CB, callback function called for incoming pcm data */
 }wiced_bt_voice_path_setup_t;
 
 /******************************************************
@@ -212,6 +238,32 @@ uint16_t wiced_bt_sco_output_stream(uint8_t* p_pcmsrc,uint16_t len);
  */
 
 void  wiced_bt_sco_turn_off_pcm_clock( void );
+
+extern uint8_t BTM_CreateSco (BD_ADDR remote_bda, BOOLEAN is_orig, UINT16 pkt_types,
+                           UINT16 *p_sco_inx);
+
+#define wiced_bt_sco_create_as_acceptor_with_specific_ag(ag_addr, p_sco_index)      BTM_CreateSco(ag_addr, 0, 0, p_sco_index)
+
+/**
+ * Function         wiced_bt_sco_create_as_acceptor
+ *
+ *                  Creates a synchronous connection oriented connection as acceptor with specifi
+ *                  Audio Gateway.
+ *  @param[in]  ag_addr                 : Target Audio Gateway's address
+ *  @param[out] p_sco_index             : SCO index returned
+ *
+ *  @return     <b> WICED_BT_UNKNOWN_ADDR </b>      : Create connection failed, ACL connection is not up or
+ *                                                    address is invalid
+ *              <b> WICED_BT_BUSY </b>              : Create connection failed, a SCO connection is already
+ *                                                    conncted to the same BD address
+ *              <b> WICED_BT_WRONG_MODE </b>        : Create connection failed, link in park mode or
+ *                                                    automatic un-park is not supported
+ *              <b> WICED_BT_NO_RESOURCES </b>      : Create connection failed, max SCO limit has been
+ *                                                    reached
+ *              <b> BTM_CMD_STARTED </b>            : Create connection successfully, "p_sco_index" is returned
+ */
+//wiced_bt_dev_status_t wiced_bt_sco_create_as_acceptor_with_specific_ag(wiced_bt_device_address_t ag_addr,
+//                                                                       uint16_t *p_sco_index);
 
 
 #ifdef __cplusplus

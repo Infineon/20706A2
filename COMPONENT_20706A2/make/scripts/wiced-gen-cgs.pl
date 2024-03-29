@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -444,6 +444,9 @@ sub scan_ld_file
         if($line =~ /UPGRADE_STORAGE_LENGTH=0x([0-9A-F]+)/) {
 			$ld_info->{'upgrade_storage'} = hex($1);
 		}
+        if($line =~ /UPGRADE_STORAGE_LENGTH=0x([0-9A-F]+) \((\w+)\)/) {
+			$ld_info->{'upgrade_storage_location'} = $2;
+		}
 		if($line =~ /^MEMORY/) {
 			my $line2 = <$LD>;
 			next unless $line2 =~ /\{/;
@@ -467,6 +470,9 @@ sub scan_ld_file
 		}
 	}
 	close $LD;
+	if(defined $ld_info->{flash_begin} && defined $ld_info->{flash_len}) {
+		$ld_info->{flash_end} = $ld_info->{flash_begin} + $ld_info->{flash_len};
+	}
 }
 
 sub report_resource_usage
@@ -484,6 +490,7 @@ sub report_resource_usage
 
 	print  "\nApplication memory usage:\n";
 	foreach my $section (@{$sections}) {
+		next if $section->{sh_size} == 0;
 		foreach my $region (values(%{$load_regions})) {
 			next if $section->{sh_addr} < $region->{start};
 			next if ($section->{sh_addr} + $section->{sh_size}) > $region->{end};
@@ -499,7 +506,7 @@ sub report_resource_usage
 		}
 		next unless defined $section->{mem_type};
 		$end = $section->{sh_addr} + $section->{sh_size};
-		printf "% 16s %8s start 0x%06X, end 0x%06X, size %d\n", $section->{name}, $section->{mem_type}, $section->{sh_addr},
+		printf "% 20s %8s start 0x%06X, end 0x%06X, size %d\n", $section->{name}, $section->{mem_type}, $section->{sh_addr},
 					$end, $section->{sh_size};
 		# track the top of SRAM (not aon) as location to avoid DIRECT_LOAD SS
 		if($end > $last_ram_add && $section->{region} !~ /aon/) {
@@ -507,21 +514,29 @@ sub report_resource_usage
 		}
 	}
 	foreach my $region (values(%{$load_regions})) {
+		next if $region->{name} =~ /log_section/;
 		next if $region->{end_used} == 0;
 		my $use = $region->{end_used} - $region->{start_used};
 		$total += $use;
 		next if $use == 0;
 		printf "  %s (%s): used 0x%06X - 0x%06X size (%d)\n", $region->{name}, $region->{type}, $region->{start_used}, $region->{end_used}, $use;
-		printf "  %s (%s): free 0x%06X - 0x%06X size (%d)\n", $region->{name}, $region->{type}, $region->{end_used}, $region->{end}, $region->{end} - $region->{end_used};
+		printf "  %s (%s): free 0x%06X - 0x%06X size (%d)", $region->{name}, $region->{type}, $region->{end_used}, $region->{end}, $region->{end} - $region->{end_used};
+		print " (not including dynamic allocations)" if $region->{type} eq "SRAM";
+		print "\n";
 		# find end of SRAM
 		if($region->{type} eq 'SRAM') {
 			$end_ram_addr = $region->{end} if $end_ram_addr < $region->{end};
 		}
 	}
 	printf "  Total application footprint %d (0x%X)\n\n", $total, $total;
-	if(defined $ld_info->{upgrade_storage}) {
-		printf "DS available %d (0x%06X) at 0x%06X\n\n", $ld_info->{upgrade_storage}, $ld_info->{upgrade_storage}, $ld_info->{flash_ds};
+	if(!$direct_load && defined $ld_info->{flash_begin} && defined $ld_info->{flash_len} && defined $ld_info->{flash_end}) {
+		printf "Flash mapping: start 0x%X end 0x%X length %d (0x%X)\n",
+						$ld_info->{flash_begin}, $ld_info->{flash_end}, $ld_info->{flash_len}, $ld_info->{flash_len};
 	}
+	print "Upgrade storage location: $ld_info->{upgrade_storage_location}\n" if defined $ld_info->{upgrade_storage_location};
+	# 1.if direct load, DS length is end of app ram to end of ram
+	# 2, else if no OTA, DS  length is from DS offset to end of flash
+	# 3. else if OTA with external or internal storage DS length is DS2 - DS offset
 	if($direct_load && $direct_load != 1) {
 		if($last_ram_addr > $direct_load) {
 			printf "Moving DIRECT LOAD address from 0x%06X to 0x%06X\n",
@@ -532,6 +547,19 @@ sub report_resource_usage
 						$last_ram_addr, $direct_load, $end_ram_addr;
 		printf "SS+DS cannot exceed %d (0x%04X) bytes\n",
 					$end_ram_addr - $direct_load, $end_ram_addr - $direct_load;
+	}
+	elsif(defined $ld_info->{upgrade_storage}) {
+		printf "DS available %d (0x%06X) start 0x%08X end 0x%08X\n\n",
+			$ld_info->{upgrade_storage},
+			$ld_info->{upgrade_storage},
+			($ld_info->{flash_ds} < $ld_info->{flash_begin}) ? $ld_info->{flash_ds} + $ld_info->{flash_begin} : $ld_info->{flash_ds},
+			($ld_info->{flash_ds} < $ld_info->{flash_begin}) ? $ld_info->{flash_ds} + $ld_info->{flash_begin} + $ld_info->{upgrade_storage} : $ld_info->{flash_ds} + $ld_info->{upgrade_storage};
+	}
+	else {
+		my $ds_begin = ($ld_info->{flash_ds} < $ld_info->{flash_begin}) ? $ld_info->{flash_ds} + $ld_info->{flash_begin} : $ld_info->{flash_ds};
+		my $ds_end = ($ld_info->{flash_end} < $ld_info->{flash_begin}) ? $ld_info->{flash_begin} + $ld_info->{flash_end} : $ld_info->{flash_end};
+		my $ds_len = $ds_end - $ds_begin;
+		printf "DS available %d (0x%06X) start 0x%08X end 0x%08X\n\n", $ds_len, $ds_len, $ds_begin,	$ds_end;
 	}
 }
 

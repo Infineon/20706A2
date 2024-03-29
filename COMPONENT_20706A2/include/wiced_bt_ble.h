@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -887,6 +887,16 @@ wiced_bool_t wiced_bt_notify_multi_advertisement_packet_transmissions( uint8_t a
  */
 wiced_result_t wiced_bt_ble_get_connection_parameters(wiced_bt_device_address_t bda, wiced_bt_ble_conn_params_t *p_conn_parameters);
 
+/**
+ * Function         wiced_btm_get_private_bda
+ *
+ *                  Acquire current LE Resolvable Private Address
+ *
+ * @param[in]       None
+ *
+ * @return          uint8_t * - current rpa's pointer
+ */
+uint8_t *wiced_btm_get_private_bda(void);
 
 /**
  * Function         wiced_bt_dev_add_device_to_address_resolution_db
@@ -913,6 +923,21 @@ wiced_result_t wiced_bt_dev_add_device_to_address_resolution_db(wiced_bt_device_
  *
  */
 wiced_result_t wiced_bt_dev_remove_device_from_address_resolution_db(wiced_bt_device_link_keys_t *p_link_keys);
+
+
+/**
+ * Function         wiced_ble_private_device_address_resolution
+ *
+ *                  Private Device Address Resolution
+ *
+ * @param rpa       LE Resolvable Private Address
+ * @param irk       LE IRK
+ * @return          wiced_result_t
+ *                  WICED_BT_SUCCESS the identity of device address has been resolved.
+ *                  WICED_BT_ERROR   otherwise.
+ */
+wiced_result_t wiced_ble_private_device_address_resolution(wiced_bt_device_address_t rpa, BT_OCTET16 irk);
+
 
 /**
  * Function         wiced_bt_dev_get_ble_keys

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -52,7 +52,7 @@
 #define UNUSED_VARIABLE(x) /*@-noeffect@*/ ( (void)(x) ) /*@+noeffect@*/
 #endif
 
-typedef int wiced_thread_t;
+//typedef int wiced_thread_t;
 #if 0
 typedef unsigned int    uint32_t;
 typedef signed char     int8_t;

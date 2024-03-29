@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -1020,6 +1020,15 @@ typedef void (wiced_bt_dev_vendor_specific_command_complete_cback_t) (
  */
 typedef void (wiced_bt_remote_name_cback_t) (wiced_bt_dev_remote_name_result_t *p_remote_name_result);
 
+/**
+ * Vendor event handler callback
+ *
+ * @param len               : input data length
+ * @param p                 : input data
+ */
+typedef void (wiced_bt_dev_vse_callback_t)(uint8_t len, uint8_t *p);
+
+
 /******************************************************
  *               Function Declarations
  ******************************************************/
@@ -1887,6 +1896,19 @@ wiced_result_t wiced_bt_set_tx_power ( wiced_bt_device_address_t bd_addr , INT8 
 **/
 wiced_result_t wiced_bt_ble_set_adv_tx_power(INT8 power);
 
+/**
+ * Function         wiced_bt_dev_configure_secure_connections_only_mode
+ *
+ *                  Configure device to allow connections only with
+ *                  secure connections supported devices
+ *
+ * @note            API must be called only once after BTM_ENABLED_EVT event
+ *                  received, before starting bluetooth activity
+ *
+ * @return          void
+ **/
+void wiced_bt_dev_configure_secure_connections_only_mode (void);
+
 #define wiced_bt_dev_read_tx_power BTM_ReadTxPower
 /**
  * Function         wiced_bt_dev_read_tx_power
@@ -1921,6 +1943,24 @@ wiced_result_t wiced_bt_dev_read_tx_power (wiced_bt_device_address_t remote_bda,
  *
  */
 void wiced_bt_dev_set_default_link_super_tout(uint16_t timeout);
+
+extern uint8_t BTM_RegisterForVSEvents (wiced_bt_dev_vse_callback_t *p_cb,
+                                                    BOOLEAN is_register);
+
+#define wiced_bt_dev_register_vse_callback(cb)  BTM_RegisterForVSEvents(cb, 1)
+
+/**
+ * Function        wiced_bt_dev_register_vse_callback
+ *
+ * Description     Application can register Vendor-Specific HCI event callback
+ *
+ * @param[in]      cb       : callback function to register
+ *
+ * @return         WICED_SUCCESS
+ *                 WICED_ERROR if out of usage
+ */
+// wiced_result_t wiced_bt_dev_register_vse_callback(wiced_bt_dev_vse_callback_t cb);
+
 
 #ifdef __cplusplus
 }

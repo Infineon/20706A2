@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -271,6 +271,9 @@ sub main
 		elsif($arg =~ /^OTA_UPGRADE_STORE=(\w+)/) {
 			$param->{'OTA_UPGRADE_STORE'} = $1;
 		}
+		elsif($arg =~ /^DS_UPGRADE=(\d)/) {
+			$param->{'DS_UPGRADE'} = $1;
+		}
 		elsif($arg =~ /^overlay=(.*)$/) {
 			$param->{'overlay'} = $1;
 			warn "overlay is $1\n";
@@ -415,17 +418,19 @@ sub output_ld
 	if(defined $param->{ConfigDSLocation}) {
 		print $OUT sprintf "/* FLASH0_DS=0x%06X */\n", $param->{ConfigDSLocation};
 	}
-	if(defined $param->{ConfigDS2Location}) {
-        if(defined $param->{APP_DS2_LEN}) {
-            $param->{ConfigDS2Location} = $param->{FLASH0_BEGIN_ADDR} + $param->{FLASH0_LENGTH} - $param->{APP_DS2_LEN};
+    if(defined $param->{DS_UPGRADE} && $param->{DS_UPGRADE} == 1) {
+        die "Cannot support upgrade without DS_LOCATION defined\n" if !defined $param->{ConfigDSLocation};
+        $param->{APP_DS2_LEN} = 0 if !defined $param->{APP_DS2_LEN};
+        print $OUT sprintf "/* FLASH0_DS2=0x%06X */\n", $param->{ConfigDS2Location};
+        my $ds_begin = ($param->{ConfigDSLocation} < $param->{FLASH0_BEGIN_ADDR}) ?
+                                $param->{ConfigDSLocation} + $param->{FLASH0_BEGIN_ADDR} : $param->{ConfigDSLocation};
+        my $ds_end = $param->{FLASH0_BEGIN_ADDR} + $param->{FLASH0_LENGTH} - $param->{APP_DS2_LEN};
+        my $ds_len = $ds_end - $ds_begin;
+        if(!defined $param->{OTA_UPGRADE_STORE} || $param->{OTA_UPGRADE_STORE} eq 'on_chip_flash') {
+            $ds_len /=2;
         }
-		print $OUT sprintf "/* FLASH0_DS2=0x%06X */\n", $param->{ConfigDS2Location};
-	}
-    if(defined $param->{ConfigDSLocation}) {
-        my $store = $param->{ConfigDS2Location} - $param->{ConfigDSLocation};
         $param->{'OTA_UPGRADE_STORE'} = 'off_chip_sflash' if !defined $param->{OTA_UPGRADE_STORE};
-        $store /=2 if $param->{OTA_UPGRADE_STORE} eq 'on_chip_flash';
-        print $OUT sprintf "/* UPGRADE_STORAGE_LENGTH=0x%06X (%s) */\n", $store, $param->{OTA_UPGRADE_STORE};
+        print $OUT sprintf "/* UPGRADE_STORAGE_LENGTH=0x%06X (%s) */\n", $ds_len, $param->{OTA_UPGRADE_STORE};
     }
 
 	print $OUT "MEMORY\n";
@@ -441,9 +446,15 @@ sub output_ld
 		print $OUT sprintf "\tstatic_section (r) : ORIGIN = 0x%X, LENGTH = 0x%X\n", $param->{ISTATIC_BEGIN}, $param->{ISTATIC_LEN};
 	}
 	if(defined $param->{xip}) {
-		$xip_start = $param->{ConfigDSLocation} + $param->{XIP_DS_OFFSET};
 		$xip_len = $param->{XIP_LEN};
-		$xip_len = $param->{FLASH0_LENGTH} - ($xip_start - $param->{ConfigDSLocation}) if !defined $xip_len;
+		$xip_start = $param->{ConfigDSLocation} + $param->{XIP_DS_OFFSET};
+		if(!defined $xip_len) {
+			$xip_len = $param->{FLASH0_LENGTH};
+			$xip_len -= $param->{APP_DS2_LEN} if defined $param->{APP_DS2_LEN};
+			$xip_len -= $param->{ConfigDSLocation} - $param->{FLASH0_BEGIN_ADDR};
+			$xip_len /= 2 if $param->{OTA_UPGRADE_STORE} eq 'on_chip_flash' && $param->{DS_UPGRADE} == 1;
+			$xip_len -= $param->{XIP_DS_OFFSET};
+		}
         print $OUT sprintf "\txip_section (rx) : ORIGIN = 0x%X, LENGTH = 0x%X\n", $xip_start, $xip_len;
 	}
     if(defined $param->{PATCH_RAM_OBJ}) {

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -362,19 +362,35 @@ if [[ ! -e $CY_APP_HEX ]]; then
     exit 1
 fi
 
-# check that there is room to load DIRECT_LOAD
-if [[ $CY_APP_BUILD_EXTRAS = *"DIRECT"* ]]; then
+# check that there is room to load DIRECT_LOAD or flash
 if [[ -e $CY_APP_CGS_MAP ]]; then
-# get last RAM addr for DIRECT_LOAD
-CY_APP_CGS_MAP_LAST_LINE=$($CY_TOOL_TAIL -1 "$CY_APP_CGS_MAP")
-CY_APP_END_DS=$(echo $CY_APP_CGS_MAP_LAST_LINE | "$CY_TOOL_PERL" -ple 's/[^0]+(0x[0-9A-Fa-f]+)/$1/')
-# get last SRAM addr
-CY_APP_END_SRAM=$("$CY_TOOL_PERL" -ne 'print "$1" if /end SRAM (0x[0-9A-F]+)/' "$CY_RESOURCE_REPORT")
-if [[ "$CY_APP_END_DS" -gt "$CY_APP_END_SRAM" ]]; then
-    echo "!! Error: DIRECT_LOAD SS/DS end ($CY_APP_END_DS) would exceed SRAM end ($CY_APP_END_SRAM)"
-    exit 1
-fi
-fi
+    CY_APP_CGS_MAP_LAST_LINE=$($CY_TOOL_TAIL -1 "$CY_APP_CGS_MAP")
+    CY_APP_END_DS=$(echo $CY_APP_CGS_MAP_LAST_LINE | "$CY_TOOL_PERL" -ple 's/[^0]+(0x[0-9A-Fa-f]+)/$1/')
+    if [[ $CY_APP_BUILD_EXTRAS = *"DIRECT"* ]]; then
+        # get last RAM addr for DIRECT_LOAD
+        CY_APP_END_SRAM=$("$CY_TOOL_PERL" -ne 'print "$1" if /end SRAM (0x[0-9A-F]+)/' "$CY_RESOURCE_REPORT")
+        if [[ "$CY_APP_END_DS" -gt "$CY_APP_END_SRAM" ]]; then
+            echo "!! Error: DIRECT_LOAD SS/DS end ($CY_APP_END_DS) would exceed SRAM end ($CY_APP_END_SRAM)"
+            exit 1
+        else
+            printf -v CY_APP_DS_AVAILABLE "0x%X" "$(($CY_APP_END_SRAM-$CY_APP_END_DS))"
+            echo
+            echo "DS end at $CY_APP_END_DS, DS limit $CY_APP_END_SRAM, $CY_APP_DS_AVAILABLE SRAM available for app image"
+            echo
+        fi
+    else
+        # get last flash addr
+        CY_APP_END_DS_FLASH=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available \d+ \(0x[0-9A-F]+\) start 0x[0-9A-F]+ end (0x[0-9A-F]+)/' "$CY_RESOURCE_REPORT")
+        if [[ "$CY_APP_END_DS" -gt "$CY_APP_END_DS_FLASH" ]]; then
+            echo "!! Error: Application SS/DS end ($CY_APP_END_DS) would exceed FLASH DS end ($CY_APP_END_DS_FLASH)"
+            exit 1
+        else
+            printf -v CY_APP_DS_AVAILABLE "0x%X" "$(($CY_APP_END_DS_FLASH-$CY_APP_END_DS))"
+            echo
+            echo "DS end at $CY_APP_END_DS, DS limit $CY_APP_END_DS_FLASH, $CY_APP_DS_AVAILABLE flash available for app image"
+            echo
+        fi
+    fi
 fi
 
 if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
@@ -487,9 +503,9 @@ if [[ $CY_APP_BUILD_EXTRAS = *"_APPDS2_"* ]]; then
     CY_APP_HEX="$CY_APP_HEX.ds1"
 fi
 # convert hex to bin
-DS_ADDR=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available \d+ \(0x[0-9A-Fa-f]+\) at (0x[0-9A-Fa-f]+)/' "$CY_RESOURCE_REPORT")
-if [[ $CY_APP_CGS_ARGS_ORIG = *"-A 0xFF000000"* ]]; then
-    DS_ADDR=$(printf "0x%08X" $((${DS_ADDR}+0xFF000000)))
+DS_ADDR=$("$CY_TOOL_PERL" -ne 'print "$1" if /DS available \d+ \(0x[0-9A-Fa-f]+\) start (0x[0-9A-Fa-f]+)/' "$CY_RESOURCE_REPORT")
+if [ "$VERBOSE" != "" ]; then
+    echo "Trimming SS from upgrade image: IntelHexToBin -l $DS_ADDR -f 00 $CY_APP_HEX $CY_APP_OTA_BIN"
 fi
 "$CYWICEDTOOLS/IntelHexToBin/IntelHexToBin" -l $DS_ADDR -f 00 "$CY_APP_HEX" "$CY_APP_OTA_BIN"
 # print size

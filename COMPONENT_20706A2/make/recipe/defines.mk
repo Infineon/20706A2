@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -95,6 +95,9 @@ endif
 # use btp file to determine flash layout
 CY_CORE_LD_DEFS+=BTP=$(CY_CORE_BTP)
 
+# indicate DS upgrade support to determine flash layout
+CY_CORE_LD_DEFS+=DS_UPGRADE=$(OTA_FW_UPGRADE)
+
 #
 # Core flags and defines
 #
@@ -129,9 +132,9 @@ CY_CORE_DEFINES+=\
 
 CY_CORE_EXTRA_DEFINES=\
 	-DWICED_SDK_MAJOR_VER=4 \
-	-DWICED_SDK_MINOR_VER=1 \
+	-DWICED_SDK_MINOR_VER=6 \
 	-DWICED_SDK_REV_NUMBER=3 \
-	-DWICED_SDK_BUILD_NUMBER=59500
+	-DWICED_SDK_BUILD_NUMBER=10701
 
 #
 # Set the output file paths

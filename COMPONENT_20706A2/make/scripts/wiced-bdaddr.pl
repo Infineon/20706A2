@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -65,7 +65,7 @@ foreach my $arg (@ARGV) {
     elsif($arg =~ /\.btp$/) {
         $btp_file = $arg;
     }
-    elsif($arg =~ /[0-9]{5}[A-F][0-9]/) {
+    elsif($arg =~ /^[0-9]{5}[A-F][0-9]/) {
         $device = $arg;
     }
     else {

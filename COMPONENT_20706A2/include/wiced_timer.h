@@ -1,5 +1,5 @@
-/*
- * Copyright 2016-2023, Cypress Semiconductor Corporation (an Infineon company) or
+    /*
+ * Copyright 2016-2024, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -133,7 +133,7 @@ wiced_result_t wiced_stop_timer( wiced_timer_t* p_timer );
 *
 * * @param[in]    p_timer             :Pointer to the timer structure
 *
-* @return   TRUE if the timer is in use and FALSE if the timer is not in use
+* @return   0 if the timer is not in use and non-zero value if the timer is in use
 */
 BOOL wiced_is_timer_in_use(wiced_timer_t* p_timer);
 
