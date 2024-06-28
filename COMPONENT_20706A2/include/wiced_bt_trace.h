@@ -111,6 +111,19 @@ typedef enum
  */
 void wiced_set_debug_uart_patch ( wiced_debug_uart_types_t uart );
 
+/**
+ * Function         wiced_set_debug_uart_baudrate
+ *
+ * It configures the value for wiced_set_debug_uart.
+ *
+ * @param[in]      baudrate        : baudrate to be used
+ *
+ * @return          void
+ *
+ * @note To reflect the configured baudrate, wiced_set_debug_uart API should be invoked
+ */
+void wiced_set_debug_uart_baudrate ( uint32_t baudrate );
+
 /* @} */
 
 // deprecated/internal

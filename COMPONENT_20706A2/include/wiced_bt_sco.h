@@ -86,6 +86,7 @@
 typedef enum
 {
     WICED_BT_SCO_OVER_I2SPCM = 0,   /* [DEFAULT] PCM data config for routing over I2S/PCM interface */
+    WICED_BT_SCO_OVER_APP_CB = 1,   /**< PCM data config for routing over APP */
 }wiced_bt_sco_route_path_t;
 
 /******************************************************
